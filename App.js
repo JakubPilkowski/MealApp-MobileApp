@@ -1,20 +1,20 @@
 import React from 'react';
 import { StyleSheet, Text, View, StatusBar } from 'react-native';
+import Toolbar from "./components/Toolbar";
+import { Ionicons } from '@expo/vector-icons';
 
 export default function App() {
   return (
     <View style={styles.container}>
       <StatusBar/>
-      <Text>Open up App.js to start working on your app!</Text>
+      <Toolbar title="Jadłodajnie" 
+      homeButton={require("./src/images/burger_bialy_m.png")} 
+      rightCornerButton={require('./src/images/wyszukaj_m.png')}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+
 });
