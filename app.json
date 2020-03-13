@@ -4,6 +4,9 @@
     "slug": "MealApp",
     "privacy": "public",
     "sdkVersion": "36.0.0",
+    "androidStatusBar": {
+      "backgroundColor": "#6495ED"
+    },
     "platforms": [
       "ios",
       "android",
