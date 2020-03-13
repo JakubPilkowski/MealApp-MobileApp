@@ -2,16 +2,28 @@ import React from 'react';
 import { StyleSheet, Text, View, StatusBar } from 'react-native';
 import Toolbar from "./components/Toolbar";
 import { Ionicons } from '@expo/vector-icons';
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import Jadlodajnie from "./screens/Jadlodajnie";
+import { NavigationContainer } from '@react-navigation/native';
+import {CustomDrawer} from './components/CustomDrawer';
+
+
+const Drawer = createDrawerNavigator();
+
+function JadlodajnieView ({navigation}){
+  return (
+    <Jadlodajnie nav={navigation}/>
+  );
+}
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <StatusBar/>
-      <Toolbar title="Jadłodajnie" 
-      homeButton={require("./src/images/burger_bialy_m.png")} 
-      rightCornerButton={require('./src/images/wyszukaj_m.png')}
-      />
-    </View>
+    <NavigationContainer>
+      <Drawer.Navigator initialRouteName="Jadlodajnie">
+        <Drawer.Screen name="Jadlodajnie" component={Jadlodajnie} />
+      </Drawer.Navigator>
+    </NavigationContainer>
+
   );
 }
 
