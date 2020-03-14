@@ -9,8 +9,6 @@ const Jadlodajnie = props => {
     const HomeButtonHandler = () =>{
                 props.navigation.openDrawer();
     }
-
-
     return (
         <View style={styles.container}>
             <StatusBar />

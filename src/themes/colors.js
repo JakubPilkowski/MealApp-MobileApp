@@ -3,5 +3,5 @@ export default {
     accent : "#F3969A",
     backgroundColor : "#F7F7F7",
     colorTextDark : "#000000",
-    colorTextWhite : "#ffffff"
+    colorTextWhite : "#FFFFFF"
 };
