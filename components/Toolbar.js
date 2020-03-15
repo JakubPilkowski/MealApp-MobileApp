@@ -7,7 +7,8 @@ const Toolbar = props => {
     let homeButton = <TouchableOpacity onPress={props.onHomeClick}>
         <Image style={styles.button} source={props.homeButton}></Image>
     </TouchableOpacity>;
-    let rightCornerButton = <TouchableOpacity onPress={props.onRightCornerClick}>
+    let rightCornerButton = 
+    <TouchableOpacity onPress={props.onRightCornerClick}>
         <Image style={styles.button} source={props.rightCornerButton}></Image>
     </TouchableOpacity>;
     if (props.homeButton == null) {
