@@ -6,30 +6,25 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Toolbar from "../components/Toolbar";
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import Colors from "../src/themes/colors";
-import Dimensions from  "../src/themes/dimensions";
+import Dimensions from "../src/themes/dimensions";
+import IconWithAction from "../components/IconWithAction";
 
-
-function JadlodajnieScreen({navigation}){
+function JadlodajnieScreen({ navigation }) {
     const HomeButtonHandler = () => {
-        props.navigation.openDrawer();
+        navigation.openDrawer();
     }
     navigation.setOptions({
-        headerRight: () =>(
-        <TouchableOpacity onPress={()=>{}}>
-        <Image style={styles.button} source={require('../src/images/wyszukaj_m.png')}></Image>
-    </TouchableOpacity>
-    )
+        headerRight: () => (
+            <IconWithAction src={require('../src/images/wyszukaj_m.png')} />
+            )
+        , 
+       headerLeft: () => (
+            <IconWithAction src={require('../src/images/burger_bialy_m.png')} onClick={HomeButtonHandler}/>
+        ) 
     });
     return (
         <View style={styles.container}>
-            <Text >Jadłodajnie</Text>
-            <Button onPress={() =>navigation.navigate('JadlodajnieWiecej')} title="Więcej"/>
-            {/* <StatusBar />
-            <Toolbar title={Strings.jadlodajnie}
-                homeButton={require("../src/images/burger_bialy_m.png")}
-                rightCornerButton={require('../src/images/wyszukaj_m.png')}
-                onHomeClick={HomeButtonHandler} */}
-            
+            <Button onPress={() => navigation.navigate('JadlodajnieWiecej')} title="Więcej" />
         </View>
     );
 }
@@ -39,17 +34,17 @@ const Jadlodajnie = props => {
     return (
         <Stack.Navigator initialRouteName="Jadlodajnie" screenOptions={{
             headerStyle: {
-              backgroundColor: Colors.primary,
+                backgroundColor: Colors.primary,
             },
             headerTintColor: Colors.colorTextWhite,
             headerTitleStyle: {
-              fontWeight: 'bold',
+                fontWeight: 'bold',
             },
-            headerTitleAlign:"center"
+            headerTitleAlign: "center"
         }}>
             <Stack.Screen name="Jadlodajnie" component={JadlodajnieScreen} options={{
-            headerTitle: Strings.jadlodajnie,
-         }}/>
+                headerTitle: Strings.jadlodajnie,
+            }} />
             <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej} />
         </Stack.Navigator>
     );
@@ -57,11 +52,11 @@ const Jadlodajnie = props => {
 const styles = StyleSheet.create({
     container: {
         flex: 1
-    },    
+    },
     buttonContainer: {
         width: 48,
         height: 48,
-        alignItems:"center",
+        alignItems: "center",
         justifyContent: 'center',
     },
     button: {
