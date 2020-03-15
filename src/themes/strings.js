@@ -7,5 +7,7 @@ export default{
     rejestracja: "Rejestracja",
     mapa:"Mapa",
     mealapp: "MealApp",
-    placeholder:"Coś tu pusto"
+    placeholder:"Coś tu pusto",
+    menu:"Menu",
+    more:"Więcej"
 };

@@ -1,12 +1,90 @@
 import React from 'react';
-import { View, Text, StyleSheet, StatusBar, Button, TouchableOpacity, Image } from "react-native";
+import { View, StyleSheet, StatusBar, Button, SafeAreaView, FlatList} from "react-native";
 import Strings from "../src/themes/strings";
 import { createStackNavigator } from '@react-navigation/stack';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import Colors from "../src/themes/colors";
 import IconWithAction from "../components/IconWithAction";
 import ScreenStyle from "../src/themes/screenStyle";
+import Jadlodajnia from "../components/Jadlodajnia";
 
+
+const jadlodajnie = [
+    {
+        id: 1,
+        title: "Pełny Gar",
+        iconUri: 5,
+        dania: [
+            {
+                danie_id: 1,
+                danie: "Zupa ogórkowa",
+                cena: 5
+            },
+            {
+                danie_id: 1,
+                danie: "Kotlet schabowy",
+                cena: 10
+            }
+        ]
+
+    },
+    {
+        id: 2,
+        title: "Pełny Garek",
+        iconUri: 5,
+        dania: [
+            {
+                danie_id: 1,
+                danie: "Zupa pomidorowa",
+                cena: 5
+            },
+            {
+                danie_id: 1,
+                danie: "Kotlet mielony",
+                cena: 10
+            }
+        ]
+
+    },
+    {
+        id: 3,
+        title: "Super Pełny Gar",
+        iconUri: 5,
+        dania: [
+            {
+                danie_id: 1,
+                danie: "Zupa jarzynowa",
+                cena: 5
+            },
+            {
+                danie_id: 1,
+                danie: "Pierś z kurczaka",
+                cena: 10
+            }
+        ]
+
+    },
+    {
+        id: 4,
+        title: "Super pełny garek, bardzo długi tytuł",
+        iconUri: 5,
+        dania: [
+            {
+                danie_id: 1,
+                danie: "Bardzo długie danieeeeeeeeeeeeeeeee",
+                cena: 5
+            },
+            {
+                danie_id: 1,
+                danie: "Bardzo długie drugie danieeeeeeeeeeeeeeeeeee",
+                cena: 10
+            }
+        ]
+
+    },
+
+
+];
 function JadlodajnieScreen({ navigation }) {
     const HomeButtonHandler = () => {
         navigation.openDrawer();
@@ -14,15 +92,24 @@ function JadlodajnieScreen({ navigation }) {
     navigation.setOptions({
         headerRight: () => (
             <IconWithAction src={require('../src/images/wyszukaj_m.png')} />
-            )
-        , 
-       headerLeft: () => (
-            <IconWithAction src={require('../src/images/burger_bialy_m.png')} onClick={HomeButtonHandler}/>
-        ) 
+        )
+        ,
+        headerLeft: () => (
+            <IconWithAction src={require('../src/images/burger_bialy_m.png')} onClick={HomeButtonHandler} />
+        )
     });
+    const MoreButtonHandler = () =>{
+        navigation.navigate('JadlodajnieWiecej');
+    }
     return (
         <View style={styles.container}>
-            <Button onPress={() => navigation.navigate('JadlodajnieWiecej')} title="Więcej" />
+            <SafeAreaView>
+                <FlatList
+                    data={jadlodajnie} renderItem={itemData =>
+                        <Jadlodajnia title={itemData.item.title} jadlodajnia={itemData.item} onMoreClick={MoreButtonHandler}></Jadlodajnia>}
+                    keyExtractor={itemData => itemData.id}
+                />
+            </SafeAreaView>
         </View>
     );
 }

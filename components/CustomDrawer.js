@@ -64,9 +64,8 @@ const styles = StyleSheet.create({
         marginHorizontal: Dimensions.defaultHugeMargin
       },
       drawerAvatar: {
-        borderWidth: 2,
+        borderWidth: Dimensions.defaultBorderWidth,
         borderColor: Colors.colorTextWhite,
-    
       },
       drawerUserInfo: {
         color: Colors.colorTextWhite,

@@ -8,7 +8,13 @@ export default {
     defaultHugeMargin:18,
     defaultBorderRadius:6,
     defaultSmallBorderRadius:3,
-    defaultHugeBorderRadius:24,
-    defaultBorderWidth:1,
+    defaultHugeBorderRadius:18,
+    defaultSmallBorderWidth:1,
+    defaultBorderWidth:2,
+    defaultHugeBorderWidth:4,
+    defaultMarginBetweenItems:30,
     toolbarFontSize:24,
+    hugeFontSize:18,
+    defaultFontSize:14,
+    smallFontSize:10
 };
