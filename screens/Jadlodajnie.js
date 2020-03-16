@@ -13,16 +13,16 @@ const jadlodajnie = [
     {
         id: 1,
         title: "Pełny Gar",
-        iconUri: 5,
+        iconUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQTxJ_tgrb0UyGblnFNJubsfpaLuoMk30FA-EZobz8T_lwQAyV3",
         dania: [
             {
                 danie_id: 1,
-                danie: "Zupa ogórkowa",
+                nazwa: "Zupa ogórkowa",
                 cena: 5
             },
             {
                 danie_id: 1,
-                danie: "Kotlet schabowy",
+                nazwa: "Kotlet schabowy",
                 cena: 10
             }
         ]
@@ -31,16 +31,16 @@ const jadlodajnie = [
     {
         id: 2,
         title: "Pełny Garek",
-        iconUri: 5,
+        iconUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTIM1PLDtksZCtTupjqdaIWDKOOq1D3zChJUWU3Wf3xz8V8j2Ev",
         dania: [
             {
                 danie_id: 1,
-                danie: "Zupa pomidorowa",
+                nazwa: "Zupa pomidorowa",
                 cena: 5
             },
             {
                 danie_id: 1,
-                danie: "Kotlet mielony",
+                nazwa: "Kotlet mielony",
                 cena: 10
             }
         ]
@@ -49,16 +49,16 @@ const jadlodajnie = [
     {
         id: 3,
         title: "Super Pełny Gar",
-        iconUri: 5,
+        iconUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQTxJ_tgrb0UyGblnFNJubsfpaLuoMk30FA-EZobz8T_lwQAyV3",
         dania: [
             {
                 danie_id: 1,
-                danie: "Zupa jarzynowa",
+                nazwa: "Zupa jarzynowa",
                 cena: 5
             },
             {
                 danie_id: 1,
-                danie: "Pierś z kurczaka",
+                nazwa: "Pierś z kurczaka",
                 cena: 10
             }
         ]
@@ -67,16 +67,16 @@ const jadlodajnie = [
     {
         id: 4,
         title: "Super pełny garek, bardzo długi tytuł",
-        iconUri: 5,
+        iconUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQTxJ_tgrb0UyGblnFNJubsfpaLuoMk30FA-EZobz8T_lwQAyV3",
         dania: [
             {
                 danie_id: 1,
-                danie: "Bardzo długie danieeeeeeeeeeeeeeeee",
+                nazwa: "Bardzo długie danieeeeeeeeeeeeeeeee",
                 cena: 5
             },
             {
                 danie_id: 1,
-                danie: "Bardzo długie drugie danieeeeeeeeeeeeeeeeeee",
+                nazwa: "Bardzo długie drugie danieeeeeeeeeeeeeeeeeee",
                 cena: 10
             }
         ]
@@ -86,6 +86,7 @@ const jadlodajnie = [
 
 ];
 function JadlodajnieScreen({ navigation }) {
+
     const HomeButtonHandler = () => {
         navigation.openDrawer();
     }

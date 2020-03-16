@@ -4,22 +4,25 @@ import { Divider, Avatar } from 'react-native-elements';
 import Strings from '../src/themes/strings';
 import Colors from '../src/themes/colors';
 import Dimensions from '../src/themes/dimensions';
-import SampleItem from './SampleItem';
 import { FlatList, TouchableOpacity, TouchableNativeFeedback } from 'react-native-gesture-handler';
-
+import Danie from './Danie';
 
 const Jadlodajnia = props => {
     const jadlodajnia = props.jadlodajnia;
+    const dania = jadlodajnia.dania;
     let moreButton;
     if (Platform.OS === 'ios') {
-        moreButton = <TouchableOpacity style={styles.moreButton} onPress={props.onMoreClick}>
-            <Text style={styles.moreButtonText}>{Strings.more}</Text>
-        </TouchableOpacity>;
+    moreButton =
+        <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.iosButtonView} onPress={props.onMoreClick}>
+                <Text style={styles.moreButtonText}>{Strings.more}</Text>
+            </TouchableOpacity>
+        </View>
     }
     if (Platform.OS === 'android') {
         moreButton = 
-        <View style={styles.drawerLoginContainer} >
-            <View style={styles.drawerLoginView}>
+        <View style={styles.buttonContainer} >
+            <View style={styles.androidButtonView}>
                 <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(Colors.accent, true)}
                     onPress={props.onMoreClick}
                     useForeground={false} >
@@ -28,11 +31,10 @@ const Jadlodajnia = props => {
             </View>
         </View>;
     }
-
     return (
         <View style={styles.container}>
             <View style={styles.avatarContainer}>
-                <Image style={styles.avatar} ></Image>
+                <Image style={styles.image} source={{uri:jadlodajnia.iconUrl}} ></Image>
                 <View style={{ flexDirection: 'column', flex: 1, justifyContent: "center" }}>
                     <Text style={styles.avatarName}>{jadlodajnia.title}</Text>
                     <Divider style={styles.divider}></Divider>
@@ -40,30 +42,30 @@ const Jadlodajnia = props => {
                 </View>
             </View>
             <View style={{ marginBottom: 20 }}>
-                <Text style={styles.menu}>{Strings.menu}</Text>
+                <Text style={styles.menu}>{Strings.todays_set}</Text>
                 <Divider style={styles.divider}></Divider>
-                <FlatList />
+                {dania.map(danie => renderDania(danie))}       
             </View>
             {moreButton}
-
-            {/* <Button style={styles.moreButton} title={Strings.more} onPress={props.onMoreClick} /> */}
-
         </View>
     );
 }
 
-
+function renderDania(danie){
+    return (
+        <Danie id={danie.id} nazwa={danie.nazwa} cena={danie.cena}></Danie>
+    );
+}
 const styles = StyleSheet.create({
     container: {
-        // backgroundColor:props.color,
         flex: 1,
         justifyContent: "center",
         backgroundColor: Colors.colorTextWhite,
         borderColor: Colors.accent,
         borderWidth: Dimensions.defaultBorderWidth,
-        borderRadius:Dimensions.defaultSmallBorderRadius,
+        borderRadius: Dimensions.defaultSmallBorderRadius,
         padding: Dimensions.defaultPadding,
-        marginVertical: Dimensions.defaultMarginBetweenItems,
+        marginTop: Dimensions.defaultMarginBetweenItems,
         marginHorizontal: Dimensions.defaultSmallMargin
     },
     avatarContainer: {
@@ -80,7 +82,7 @@ const styles = StyleSheet.create({
         fontSize: Dimensions.hugeFontSize,
         textAlign: "center"
     },
-    avatar: {
+    image: {
         width: 90,
         height: 90,
         borderWidth: Dimensions.defaultBorderWidth,
@@ -91,34 +93,29 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.accent,
         height: Dimensions.defaultBorderWidth,
     },
-    // moreButton: {
-    //     paddingVertical: Dimensions.defaultSmallPadding,
-    //     paddingHorizontal: Dimensions.defaultHugePadding,
-    //     backgroundColor: Colors.primary,
-    //     fontSize: Dimensions.defaultFontSize,
-    //     borderColor: Colors.accent,
-    //     borderWidth: Dimensions.defaultHugeBorderWidth,
-    //     borderRadius: Dimensions.defaultBorderRadius
-    // },
+    iosButtonView: {
+        backgroundColor: Colors.colorTextWhite,
+        fontSize: Dimensions.hugeFontSize,
+        borderColor: Colors.primary,
+    },
     moreButtonText: {
         paddingVertical: 9,
         paddingHorizontal: 50,
         textAlign: "center",
-        color: Colors.colorTextWhite,
+        color: Colors.primary,
         fontSize: Dimensions.hugeFontSize,
-        fontWeight: "bold"
+        fontWeight: "bold",
+        borderRadius: Dimensions.defaultBorderRadius,
+        borderColor: Colors.primary,
+        borderWidth: Dimensions.defaultBorderWidth,
     },
-
-
-    drawerLoginContainer: {
+    buttonContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: "center"
     },
-    drawerLoginView: {
-        backgroundColor: Colors.primary,
-        // borderColor: Colors.accent,
-        // borderWidth: Dimensions.defaultHugeBorderWidth,
+    androidButtonView: {
+        backgroundColor: Colors.colorTextWhite,
         borderRadius: Dimensions.defaultBorderRadius
     },
 });

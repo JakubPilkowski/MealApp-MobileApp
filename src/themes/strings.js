@@ -9,5 +9,6 @@ export default{
     mealapp: "MealApp",
     placeholder:"Coś tu pusto",
     menu:"Menu",
-    more:"Więcej"
+    more:"Więcej",
+    todays_set:"Dzisiejszy Zestaw"
 };
