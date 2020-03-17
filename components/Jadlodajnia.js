@@ -53,7 +53,7 @@ const Jadlodajnia = props => {
 
 function renderDania(danie){
     return (
-        <Danie id={danie.id} nazwa={danie.nazwa} cena={danie.cena}></Danie>
+        <Danie id={danie.danie_id} nazwa={danie.nazwa} cena={danie.cena}></Danie>
     );
 }
 const styles = StyleSheet.create({
