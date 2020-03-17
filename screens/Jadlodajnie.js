@@ -1,91 +1,15 @@
 import React from 'react';
-import { View, StyleSheet, StatusBar, Button, SafeAreaView, FlatList} from "react-native";
+import { View, StyleSheet, SafeAreaView, FlatList, ActivityIndicator} from "react-native";
 import Strings from "../src/themes/strings";
 import { createStackNavigator } from '@react-navigation/stack';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
-import Colors from "../src/themes/colors";
 import IconWithAction from "../components/IconWithAction";
 import ScreenStyle from "../src/themes/screenStyle";
 import Jadlodajnia from "../components/Jadlodajnia";
+import Connection from '../api/Connection';
 
-
-const jadlodajnie = [
-    {
-        id: 1,
-        title: "Pełny Gar",
-        iconUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQTxJ_tgrb0UyGblnFNJubsfpaLuoMk30FA-EZobz8T_lwQAyV3",
-        dania: [
-            {
-                danie_id: 1,
-                nazwa: "Zupa ogórkowa",
-                cena: 5
-            },
-            {
-                danie_id: 1,
-                nazwa: "Kotlet schabowy",
-                cena: 10
-            }
-        ]
-
-    },
-    {
-        id: 2,
-        title: "Pełny Garek",
-        iconUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTIM1PLDtksZCtTupjqdaIWDKOOq1D3zChJUWU3Wf3xz8V8j2Ev",
-        dania: [
-            {
-                danie_id: 1,
-                nazwa: "Zupa pomidorowa",
-                cena: 5
-            },
-            {
-                danie_id: 1,
-                nazwa: "Kotlet mielony",
-                cena: 10
-            }
-        ]
-
-    },
-    {
-        id: 3,
-        title: "Super Pełny Gar",
-        iconUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQTxJ_tgrb0UyGblnFNJubsfpaLuoMk30FA-EZobz8T_lwQAyV3",
-        dania: [
-            {
-                danie_id: 1,
-                nazwa: "Zupa jarzynowa",
-                cena: 5
-            },
-            {
-                danie_id: 1,
-                nazwa: "Pierś z kurczaka",
-                cena: 10
-            }
-        ]
-
-    },
-    {
-        id: 4,
-        title: "Super pełny garek, bardzo długi tytuł",
-        iconUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQTxJ_tgrb0UyGblnFNJubsfpaLuoMk30FA-EZobz8T_lwQAyV3",
-        dania: [
-            {
-                danie_id: 1,
-                nazwa: "Bardzo długie danieeeeeeeeeeeeeeeee",
-                cena: 5
-            },
-            {
-                danie_id: 1,
-                nazwa: "Bardzo długie drugie danieeeeeeeeeeeeeeeeeee",
-                cena: 10
-            }
-        ]
-
-    },
-
-
-];
-function JadlodajnieScreen({ navigation }) {
+function JadlodajnieScreen({ navigation, route}) {
+    const {jadlodajnie} = route.params;
 
     const HomeButtonHandler = () => {
         navigation.openDrawer();
@@ -99,32 +23,64 @@ function JadlodajnieScreen({ navigation }) {
             <IconWithAction src={require('../src/images/burger_bialy_m.png')} onClick={HomeButtonHandler} />
         )
     });
-    const MoreButtonHandler = () =>{
+
+
+    const MoreButtonHandler = () => {
         navigation.navigate('JadlodajnieWiecej');
     }
-    return (
-        <View style={styles.container}>
-            <SafeAreaView>
-                <FlatList
-                    data={jadlodajnie} renderItem={itemData =>
-                        <Jadlodajnia title={itemData.item.title} jadlodajnia={itemData.item} onMoreClick={MoreButtonHandler}></Jadlodajnia>}
-                    keyExtractor={itemData => itemData.id}
-                />
-            </SafeAreaView>
-        </View>
-    );
+
+        return (
+            <View style={styles.container}>
+                <SafeAreaView>
+                    <FlatList
+                        data={jadlodajnie} renderItem={itemData =>
+                            <Jadlodajnia title={itemData.title} jadlodajnia={itemData.item} onMoreClick={MoreButtonHandler}></Jadlodajnia>}
+                        keyExtractor={itemData => itemData.id}
+                    />
+                </SafeAreaView>
+            </View>
+        );
+
 }
 
-const Jadlodajnie = props => {
-    const Stack = createStackNavigator();
-    return (
-        <Stack.Navigator initialRouteName="Jadlodajnie" screenOptions={ScreenStyle}>
-            <Stack.Screen name="Jadlodajnie" component={JadlodajnieScreen} options={{
-                headerTitle: Strings.jadlodajnie,
-            }} />
-            <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej} />
-        </Stack.Navigator>
-    );
+export default class Jadlodajnie extends React.Component {
+    constructor(props){
+        super(props);
+        this.state ={ isLoading: true}
+      }
+      
+    componentDidMount() {
+       return Connection.getJadlodajnie()
+            .then((response) => response.json()).
+            then((responseJson) => {
+                this.setState({
+                    isLoading: false,
+                    dataSource: responseJson.jadlodajnie
+                })
+            })
+            .catch((error) => {
+                console.log('blad '+error);
+            });
+    }
+
+
+    render(){
+        const Stack = createStackNavigator();
+        if(this.state.isLoading){
+            return <View style={{flex:1}}>
+                <ActivityIndicator></ActivityIndicator>
+            </View>
+        }
+        
+        return (
+            <Stack.Navigator initialRouteName="Jadlodajnie" screenOptions={ScreenStyle}>
+                <Stack.Screen name="Jadlodajnie" component={JadlodajnieScreen} initialParams={{jadlodajnie:this.state.dataSource}} options={{
+                    headerTitle: Strings.jadlodajnie,
+                }} />
+                <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej} />
+            </Stack.Navigator>
+        );
+    }
 }
 const styles = StyleSheet.create({
     container: {
@@ -134,4 +90,3 @@ const styles = StyleSheet.create({
 
 
 
-export default Jadlodajnie;
