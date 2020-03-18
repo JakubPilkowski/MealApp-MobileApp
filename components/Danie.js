@@ -10,9 +10,7 @@ const Danie = props => {
         <View key={props.id} style={styles.container}>
             <View style={styles.information}>
                 <Text style={styles.danie}>{props.nazwa}</Text>
-                <View style={{flex:1, justifyContent: 'center',}}>
                 <Text style={styles.cena}>{props.cena} zł</Text>
-                </View>
             </View>
             <Divider style={styles.divider}></Divider>
         </View>
