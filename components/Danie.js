@@ -33,9 +33,9 @@ const styles = StyleSheet.create({
         textAlign: "left"
     },
     cena: {
-        flex: 1,
+        // flex: 1,
         fontSize: Dimensions.defaultFontSize,
-        textAlign: "right",
+        // textAlign: "right",
         textAlignVertical:'center'
     },
     divider: {

@@ -24,17 +24,12 @@ function JadlodajnieScreen({ navigation, route }) {
         )
     });
 
-
-    const MoreButtonHandler = () => {
-        navigation.navigate('JadlodajnieWiecej');
-    }
-
     return (
         <View style={styles.container}>
             <SafeAreaView>
                 <FlatList
                     data={jadlodajnie} renderItem={itemData =>
-                        <Jadlodajnia title={itemData.title} jadlodajnia={itemData.item} onMoreClick={MoreButtonHandler}></Jadlodajnia>}
+                        <Jadlodajnia title={itemData.title} navigation={navigation} jadlodajnia={itemData.item} ></Jadlodajnia>}
                     keyExtractor={itemData => itemData.id}
                 />
             </SafeAreaView>

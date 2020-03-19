@@ -24,7 +24,9 @@ const Jadlodajnia = props => {
         <View style={styles.buttonContainer} >
             <View style={styles.androidButtonView}>
                 <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(Colors.accent, true)}
-                    onPress={props.onMoreClick}
+                    onPress={()=>{
+                        props.navigation.navigate('JadlodajnieWiecej', {jadlodajniaId:jadlodajnia.id})
+                    }}
                     useForeground={false} >
                     <Text style={styles.moreButtonText}>{Strings.more}</Text>
                 </TouchableNativeFeedback>
