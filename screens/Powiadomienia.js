@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, StyleSheet, Button} from 'react-native';
+import {View, Text, StyleSheet, Button, ImageBackground} from 'react-native';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import { createStackNavigator } from '@react-navigation/stack';
 import Colors from "../src/themes/colors";
@@ -17,33 +17,33 @@ function PowiadomieniaScreen({navigation}){
     });
     return (
         <View style={styles.container}>
-            <Button onPress={() => navigation.navigate('JadlodajnieWiecej')} title="Więcej" />
+            <ImageBackground source={require('../src/images/sosy.jpg')} style={{flex:1}} imageStyle={{opacity:0.3}}>
+            {/* <Button onPress={() => navigation.navigate('JadlodajnieWiecej')} title="Więcej" /> */}
+            </ImageBackground>
         </View>
     );
 }
 
 
-const Powiadomienia = props => {
-    const Stack = createStackNavigator();
-    return (
-        <Stack.Navigator initialRouteName="Powiadomienia" screenOptions={screenStyle}>
-            <Stack.Screen name="Powiadomienia" component={PowiadomieniaScreen} options={{
-                headerTitle: Strings.powiadomienia,
-            }} />
-            <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej} />
-        </Stack.Navigator>
-    );
+export default class Powiadomienia extends React.Component {
+
+    render(){
+        const Stack = createStackNavigator();
+        return (
+            <Stack.Navigator initialRouteName="Powiadomienia" screenOptions={screenStyle}>
+                <Stack.Screen name="Powiadomienia" component={PowiadomieniaScreen} options={{
+                    headerTitle: Strings.powiadomienia,
+                }} />
+                <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej} />
+            </Stack.Navigator>
+        );
+    }
 }
 
 
 const styles = StyleSheet.create({
     container:{
         flex:1,
-        alignItems:"center",
-        justifyContent: 'center',
+
     }
 })
-
-
-
-export default Powiadomienia;
