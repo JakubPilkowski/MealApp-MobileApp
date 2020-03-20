@@ -11,7 +11,7 @@ const LogoWithTexts = props => {
             <View style={{ flexDirection: 'column', flex: 1, justifyContent: "center" }}>
                 <Text style={styles.logoTitle}>{props.title}</Text>
                 <Divider style={styles.divider}></Divider>
-                <View  >
+                <View>
                     {props.subTitleContent}
                 </View>
             </View>
@@ -28,14 +28,14 @@ const styles = StyleSheet.create({
         marginBottom: Dimensions.defaultSmallMargin
     },
     logo: {
-        width: 90,
-        height: 90,
+        width: 55,
+        height: 55,
         borderWidth: Dimensions.defaultBorderWidth,
         borderColor: Colors.accent,
         borderRadius: Dimensions.defaultHugeBorderRadius
     },
     logoTitle: {
-        fontSize: Dimensions.toolbarFontSize,
+        fontSize: Dimensions.hugeFontSize,
         marginLeft: 10,
     },
     divider:{

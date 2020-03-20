@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from "react-native";
 import Dimensions from '../src/themes/dimensions';
 import Colors from '../src/themes/colors';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 
 
 
@@ -10,9 +11,14 @@ import Colors from '../src/themes/colors';
 const Card = props => {
 
     return (
-        <View style={styles.container}>
-            {props.content}
-        </View>
+        <Swipeable 
+            renderRightActions={props.onSwipeRight}
+            containerStyle={[props.cardStyle,styles.container]}
+            >
+            <View style={styles.cardContainer}>
+                {props.content}
+            </View>
+        </Swipeable>
     );
 }
 
@@ -20,13 +26,14 @@ const Card = props => {
 const styles = StyleSheet.create({
     container: {
         justifyContent: "center",
+        marginHorizontal: Dimensions.defaultSmallMargin,
+        borderRadius: Dimensions.defaultSmallBorderRadius,
+    },
+    cardContainer:{
         backgroundColor: Colors.colorTextWhite,
         borderColor: Colors.accent,
         borderWidth: Dimensions.defaultBorderWidth,
-        borderRadius: Dimensions.defaultSmallBorderRadius,
         padding: Dimensions.defaultPadding,
-        marginTop: Dimensions.defaultMarginBetweenItems,
-        marginHorizontal: Dimensions.defaultSmallMargin
     }
 });
 
