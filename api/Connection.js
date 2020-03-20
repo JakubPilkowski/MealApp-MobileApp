@@ -11,7 +11,7 @@ export default class Connection {
         return fetch('http://www.mocky.io/v2/5e73641c300000d5512e64d0');
     }
     static getUlubione(){
-        return fetch(`${API_URL}`);
+        return fetch('http://www.mocky.io/v2/5e749894300000d431a5f4d3');
     }
 
     static logIn(){
