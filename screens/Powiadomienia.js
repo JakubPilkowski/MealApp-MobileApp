@@ -17,7 +17,7 @@ function PowiadomieniaScreen({navigation}){
     });
     return (
         <View style={styles.container}>
-            <ImageBackground source={require('../src/images/sosy.jpg')} style={{flex:1}} imageStyle={{opacity:0.3}}>
+            <ImageBackground source={require('../src/images/sosy.jpg')} style={{flex:1, backgroundColor:Colors.backgroundColor}} imageStyle={{opacity:0.3}}>
             {/* <Button onPress={() => navigation.navigate('JadlodajnieWiecej')} title="Więcej" /> */}
             </ImageBackground>
         </View>

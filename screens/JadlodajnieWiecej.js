@@ -2,14 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, ActivityIndicator, TouchableOpacity, Dimensions, ImageBackground } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
-import { Divider } from 'react-native-elements';
-import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import Strings from "../src/themes/strings";
 const HEADER_EXPANDED_HEIGHT = 225;
 const HEADER_COLLAPSED_HEIGHT = 56;
 import { Ionicons, FontAwesome, Feather } from '@expo/vector-icons';
-import Danie from '../components/Danie';
-import JadlodajniaNoteWithIcon from '../components/JadlodajniaNoteWithIcon';
 import Connection from '../api/Connection';
 import { FlatList } from 'react-native-gesture-handler';
 import Zestaw from '../components/Zestaw';
@@ -70,7 +66,7 @@ export default class JadlodajnieWiecej extends React.Component {
             });
             return (
                 <View style={styles.container}>
-                    <ImageBackground source={require('../src/images/zupka.jpg')} imageStyle={{opacity:0.3}} style={{flex:1}}>
+                    <ImageBackground source={require('../src/images/zupka.jpg')} imageStyle={{opacity:0.3}} style={{flex:1, backgroundColor:Colors.backgroundColor}}>
                         <Animated.View style={[styles.header, { height: headerHeight }]} >
                             <Animated.View style={styles.headerImageContainer}>
                                 <Animated.Image source={{ uri: szczegoly.imageUrl }}

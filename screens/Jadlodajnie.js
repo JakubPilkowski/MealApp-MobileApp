@@ -26,7 +26,7 @@ function JadlodajnieScreen({ navigation, route }) {
 
     return (
         <View style={styles.container}>
-            <ImageBackground source={require('../src/images/pancakes.jpg')} imageStyle={{opacity:0.3}} style={{flex:1}}>
+            <ImageBackground source={require('../src/images/pancakes.jpg')} imageStyle={{opacity:0.3}} style={{flex:1, backgroundColor: Colors.backgroundColor}}>
                 <SafeAreaView>
                     <FlatList
                         data={jadlodajnie} renderItem={itemData =>
