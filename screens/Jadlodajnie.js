@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, SafeAreaView, FlatList, ActivityIndicator } from "react-native";
+import { View, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, ImageBackground } from "react-native";
 import Strings from "../src/themes/strings";
 import Colors from "../src/themes/colors";
 import { createStackNavigator } from '@react-navigation/stack';
@@ -26,13 +26,15 @@ function JadlodajnieScreen({ navigation, route }) {
 
     return (
         <View style={styles.container}>
-            <SafeAreaView>
-                <FlatList
-                    data={jadlodajnie} renderItem={itemData =>
-                        <Jadlodajnia title={itemData.title} navigation={navigation} jadlodajnia={itemData.item} ></Jadlodajnia>}
-                    keyExtractor={itemData => itemData.id}
-                />
-            </SafeAreaView>
+            <ImageBackground source={require('../src/images/pancakes.jpg')} imageStyle={{opacity:0.3}} style={{flex:1, backgroundColor: Colors.backgroundColor}}>
+                <SafeAreaView>
+                    <FlatList
+                        data={jadlodajnie} renderItem={itemData =>
+                            <Jadlodajnia title={itemData.title} navigation={navigation} jadlodajnia={itemData.item} ></Jadlodajnia>}
+                        keyExtractor={itemData => itemData.id}
+                    />
+                </SafeAreaView>
+            </ImageBackground>
         </View>
     );
 
