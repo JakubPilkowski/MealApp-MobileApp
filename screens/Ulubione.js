@@ -1,5 +1,8 @@
-import React from "react";
-import { View, StyleSheet, Button, Text, ImageBackground, ActivityIndicator, FlatList } from 'react-native';
+import React, { useState } from "react";
+import {
+    View, StyleSheet, Button, Text, ImageBackground, ActivityIndicator, FlatList, Animated
+    , TouchableNativeFeedback, TouchableOpacity
+} from 'react-native';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import { createStackNavigator } from '@react-navigation/stack';
 import Colors from "../src/themes/colors";
@@ -10,12 +13,26 @@ import Card from '../components/Card';
 import Connection from "../api/Connection";
 import LogoWithTexts from '../components/LogoWithTexts';
 import colors from "../src/themes/colors";
-import {MaterialIcons} from "react-native-vector-icons";
+import { MaterialIcons } from "react-native-vector-icons";
 import dimensions from "../src/themes/dimensions";
-import Animated from "react-native-reanimated";
+
+const AnimatedIcon = Animated.createAnimatedComponent(MaterialIcons);
 
 function UlubioneScreen({ navigation, route }) {
     const { ulubione } = route.params;
+    const favourites = [];
+    ulubione.map((ulubiona) => {
+        favourites.push(ulubiona);
+    })
+    const [ulubioneJadlodajnie, setUlubioneJadlodajnie] = useState(favourites);
+
+    const onUlubioneDeleteHandler = item => {
+        setUlubioneJadlodajnie(currentUlubione => {
+            return currentUlubione.filter((ulubiona) => ulubiona.id !== item);
+        }
+        )
+    }
+
     const HomeButtonHandler = () => {
         navigation.openDrawer();
     }
@@ -27,8 +44,21 @@ function UlubioneScreen({ navigation, route }) {
     return (
         <View style={styles.container}>
             <ImageBackground source={require('../src/images/jedzonko.jpg')} style={{ flex: 1, backgroundColor: Colors.backgroundColor }} imageStyle={{ opacity: 0.3 }}>
-                <FlatList data={ulubione}
-                    renderItem={itemData => renderUlubione(itemData.item)}
+                <FlatList data={ulubioneJadlodajnie}
+                    renderItem={itemData =>
+                        <Card
+                            onSwipeRight={(progress, dragX) => <RightActions progress={progress} dragX={dragX} onPress={() => { onUlubioneDeleteHandler(itemData.item.id) }}></RightActions>}
+                            cardStyle={{ marginTop: dimensions.defaultHugeMargin }}
+                            onCardPress={() => {
+                                navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: itemData.jadlodajnia_id });
+                            }}
+                            content={
+                                <LogoWithTexts title={itemData.item.title} logo={{ uri: itemData.item.iconUrl }}
+                                    subTitleContent={
+                                        <Text>Ocena: {itemData.item.ocena}</Text>
+                                    } />
+                            } />
+                    }
                     keyExtractor={item => item.id}
                 />
             </ImageBackground>
@@ -36,31 +66,22 @@ function UlubioneScreen({ navigation, route }) {
     );
 }
 
-const RightActions = (progress, dragX) =>{
+const RightActions = ({ progress, dragX, onPress }) => {
     const scale = dragX.interpolate({
-        inputRange: [0,100],
-        outputRange: [0,1],
+        inputRange: [-100, 0],
+        outputRange: [1, 0],
         extrapolate: 'clamp'
     })
     return (
-        <View style={styles.rightActionContainer}>
-            <Animated.Text style={[styles.rightActionText, {transform: [{scale}]}]}>USUŃ</Animated.Text>
-            {/* <MaterialIcons name="delete" size={36} color={colors.colorTextWhite}></MaterialIcons> */}
-        </View>
+        <TouchableOpacity onPress={onPress} style={{height:"100%"}}>
+            <View style={styles.rightActionContainer}>
+                <Animated.Text style={[styles.rightActionText, { transform: [{ scale }] }]}>USUŃ</Animated.Text>
+                {/* dodac kiedys zdjecie */}
+                {/* <AnimatedIcon name="delete" size={36} color={Colors.colorTextWhite} containerStyle={{transform:[{scale}]}}></AnimatedIcon> */}
+
+            </View>
+        </TouchableOpacity>
     )
-}
-function renderUlubione(item) {
-    return (
-            <Card 
-            onSwipeRight={RightActions}
-            cardStyle={{marginTop:dimensions.defaultHugeMargin}}
-            content={
-                <LogoWithTexts title={item.title} logo={{ uri: item.iconUrl }}
-                    subTitleContent={
-                        <Text>Ocena: {item.ocena}</Text>
-                    } />
-            } />
-    );
 }
 export default class Ulubione extends React.Component {
     constructor(props) {
@@ -95,7 +116,13 @@ export default class Ulubione extends React.Component {
                 <Stack.Screen name="Ulubione" component={UlubioneScreen} options={{
                     headerTitle: Strings.ulubione,
                 }} initialParams={{ ulubione: this.state.dataSource }} />
-                <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej} />
+                <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
+                    options={{
+                        headerStyle: {
+                            opacity: 0, height: 0
+                        }
+                    }}
+                />
             </Stack.Navigator>
         );
     }
@@ -106,18 +133,18 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    rightActionContainer:{
+    rightActionContainer: {
         flex:1,
-        backgroundColor:'red',
+        backgroundColor: 'red',
         justifyContent: 'flex-end',
-        alignItems:'center',
-        flexDirection:'row',
+        alignItems: 'center',
+        flexDirection: 'row',
         padding: 20,
     },
-    rightActionText:{
-        fontSize:16,
-        color:colors.colorTextWhite,
-        fontWeight:'bold',
-        margin:dimensions.defaultSmallMargin
-    }   
+    rightActionText: {
+        fontSize: 16,
+        color: colors.colorTextWhite,
+        fontWeight: 'bold',
+        margin: dimensions.defaultSmallMargin
+    }
 })

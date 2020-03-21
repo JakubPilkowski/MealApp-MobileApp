@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Platform, TouchableOpacity, TouchableNativeFeedback } from "react-native";
 import Dimensions from '../src/themes/dimensions';
 import Colors from '../src/themes/colors';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
@@ -9,27 +9,45 @@ import Swipeable from 'react-native-gesture-handler/Swipeable';
 
 
 const Card = props => {
-
+    const cardView =
+        <View style={styles.cardContainer}>
+            {props.content}
+        </View>;
+    let touchableView;
+    if (Platform.OS === "ios") {
+        touchableView =
+            <TouchableOpacity onPress={props.onCardPress}>
+                {cardView}
+            </TouchableOpacity>
+    }
+    if (Platform.OS === "android") {
+        touchableView =
+            <TouchableNativeFeedback onPress={props.onCardPress} background={TouchableNativeFeedback.Ripple(Colors.primary, false)}
+            useForeground={false}>
+                {cardView}
+            </TouchableNativeFeedback>
+    }
     return (
-        <Swipeable 
-            renderRightActions={props.onSwipeRight}
-            containerStyle={[props.cardStyle,styles.container]}
+        <View>
+            <Swipeable
+                renderRightActions={props.onSwipeRight}
+                containerStyle={[props.cardStyle, styles.container]}
             >
-            <View style={styles.cardContainer}>
-                {props.content}
-            </View>
-        </Swipeable>
+                {touchableView}
+            </Swipeable>
+        </View>
     );
 }
 
 
 const styles = StyleSheet.create({
     container: {
+ 
         justifyContent: "center",
         marginHorizontal: Dimensions.defaultSmallMargin,
         borderRadius: Dimensions.defaultSmallBorderRadius,
     },
-    cardContainer:{
+    cardContainer: {
         backgroundColor: Colors.colorTextWhite,
         borderColor: Colors.accent,
         borderWidth: Dimensions.defaultBorderWidth,
