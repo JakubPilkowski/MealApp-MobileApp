@@ -47,6 +47,7 @@ function UlubioneScreen({ navigation, route }) {
                 <FlatList data={ulubioneJadlodajnie}
                     renderItem={itemData =>
                         <Card
+                            pressEnabled={true}
                             onSwipeRight={(progress, dragX) => <RightActions progress={progress} dragX={dragX} onPress={() => { onUlubioneDeleteHandler(itemData.item.id) }}></RightActions>}
                             cardStyle={{ marginTop: dimensions.defaultHugeMargin }}
                             onCardPress={() => {
