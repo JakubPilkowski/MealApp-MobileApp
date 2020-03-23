@@ -10,23 +10,22 @@ import Card from '../components/Card';
 import Switch from 'react-native-customisable-switch';
 import dimensions from '../src/themes/dimensions';
 import CustomAlert from '../components/CustomAlert';
-
+import SimpleAlert from '../components/SimpleAlert';
+let id = 0;
 
 function PowiadomieniaScreen({ navigation }) {
 
     const [powiadomienia, setPowiadomienia] = useState([]);
-    const [enabled, setEnabled] = useState([]);
-    const [alertVisibility, setAlertVisibility] = useState(false);
-    let id = 0;
-    let addPowiadomienieButton;
+    const [addAlertVisibility, setAddAlertVisibility] = useState(false);
 
+    let addPowiadomienieButton;
     if (Platform.OS === 'ios') {
         addPowiadomienieButton =
             <View style={styles.buttonContainer} >
                 <View style={styles.androidButtonView}>
                     <TouchableOpacity
                         onPress={() => {
-                            setAlertVisibility(true);
+                            setAddAlertVisibility(true);
                         }}
                     >
                         <Text style={styles.moreButtonText}>DodajAlert</Text>
@@ -40,7 +39,7 @@ function PowiadomieniaScreen({ navigation }) {
                 <View style={styles.androidButtonView}>
                     <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(Colors.accent, true)}
                         onPress={() => {
-                            setAlertVisibility(true);
+                            setAddAlertVisibility(true);
                         }}
                         useForeground={false}>
                         <View style={{ backgroundColor: Colors.backgroundColor, flexDirection: 'column', width: "100%" }}>
@@ -52,8 +51,9 @@ function PowiadomieniaScreen({ navigation }) {
     }
     const AddPowiadomienieHandler = powiadomienie => {
         id = id + 1;
+        console.log(id);
         setPowiadomienia(currentPowiadomienia => [...currentPowiadomienia, { id: id, nazwa: powiadomienie }]);
-        setAlertVisibility(false);
+        setAddAlertVisibility(false);
     }
     const RemovePowiadomieniaHandler = item => {
         setPowiadomienia(currentPowiadomienia => {
@@ -62,7 +62,7 @@ function PowiadomieniaScreen({ navigation }) {
     }
 
     const CancelAlert = () => {
-        setAlertVisibility(false);
+        setAddAlertVisibility(false);
     }
 
     const HomeButtonHandler = () => {
@@ -78,13 +78,12 @@ function PowiadomieniaScreen({ navigation }) {
             <ImageBackground source={require('../src/images/sosy.jpg')} style={{ flex: 1, backgroundColor: Colors.backgroundColor }} imageStyle={{ opacity: 0.3 }}>
                 <FlatList
                     data={powiadomienia}
-                    extraData={enabled}
                     renderItem={itemData =>
-                        <Powiadomienie item={itemData.item}/>
+                        <Powiadomienie item={itemData.item} />
                     }
                 />
-                <CustomAlert visibility={alertVisibility} onPositiveClick={AddPowiadomienieHandler} onCancel={CancelAlert} />
-                {addPowiadomienieButton}
+                <CustomAlert visibility={addAlertVisibility} onPositiveClick={AddPowiadomienieHandler} onCancel={CancelAlert} />
+                 {addPowiadomienieButton}
             </ImageBackground>
         </View>
     );
@@ -92,37 +91,47 @@ function PowiadomieniaScreen({ navigation }) {
 
 function Powiadomienie({ item }) {
     const [enabled, setEnabled] = useState(false);
+    const [removeAlertVisibility, setRemoveAlertVisibility] = useState(false);
+    const [currentItemId, setCurrentItemId] = useState();
     return (
-    <Card
-        pressEnabled={false}
-        cardStyle={{ marginTop: dimensions.defaultHugeMargin }}
-        content={
-            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: "center" }}>
-                <Text style={{ textAlign: 'left', flex: 1 }}>{item.nazwa}</Text>
-                <Switch value={enabled}
-                    activeBackgroundColor={Colors.primary}
-                    inactiveBackgroundColor={Colors.colorTextWhite}
-                    activeButtonBackgroundColor={Colors.primary}
-                    inactiveButtonBackgroundColor={Colors.primary}
-                    switchWidth={60}
-                    switchHeight={30}
-                    switchBorderRadius={12}
-                    switchBorderWidth={1}
-                    switchBorderColor={Colors.primary}
-                    buttonWidth={24}
-                    buttonHeight={24}
-                    buttonBorderRadius={12}
-                    buttonBorderWidth={4}
-                    buttonBorderColor={Colors.accent}
-                    padding={true}
-                    animationTime={150}
-                    onChangeValue={() => {
-                        console.log('zmieniam wartosc');
-                      setEnabled(!enabled);
-                    }} />
-            </View>
-        }
-    />);
+        <Card
+            pressEnabled={true}
+            onLongCardPress={() => {
+                setCurrentItemId(item.id);
+                setRemoveAlertVisibility(true);
+            }
+            }
+            cardStyle={{ marginTop: dimensions.defaultMargin }}
+            content={
+                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: "center" }}>
+                    <Text style={{ textAlign: 'left', flex: 1 }}>{item.nazwa}</Text>
+                    <Switch value={enabled}
+                        activeBackgroundColor={Colors.primary}
+                        inactiveBackgroundColor={Colors.colorTextWhite}
+                        activeButtonBackgroundColor={Colors.primary}
+                        inactiveButtonBackgroundColor={Colors.primary}
+                        switchWidth={60}
+                        switchHeight={30}
+                        switchBorderRadius={12}
+                        switchBorderWidth={1}
+                        switchBorderColor={Colors.primary}
+                        buttonWidth={24}
+                        buttonHeight={24}
+                        buttonBorderRadius={12}
+                        buttonBorderWidth={4}
+                        buttonBorderColor={Colors.accent}
+                        padding={true}
+                        animationTime={150}
+                        onChangeValue={() => {
+                            setEnabled(!enabled);
+                        }} />
+                        <SimpleAlert visibility={removeAlertVisibility} onPositiveClick={()=>{RemovePowiadomieniaHandler(currentItemId);}} 
+                    onNegativeClick={()=>{setRemoveAlertVisibility(false);}} title="Usuwanie" message="Czy na pewno chcesz usunąć powiadomienie?"/>
+               
+                </View>
+                
+            }
+        />);
 }
 
 export default class Powiadomienia extends React.Component {
