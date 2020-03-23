@@ -25,7 +25,7 @@ function PowiadomieniaScreen({ navigation }) {
             <View style={styles.buttonContainer} >
                 <View style={styles.androidButtonView}>
                     <TouchableOpacity
-                        onPress={()=>{
+                        onPress={() => {
                             setAlertVisibility(true);
                         }}
                     >
@@ -52,7 +52,7 @@ function PowiadomieniaScreen({ navigation }) {
     }
     const AddPowiadomienieHandler = powiadomienie => {
         id = id + 1;
-        setPowiadomienia(currentPowiadomienia => [...currentPowiadomienia, { id: id, nazwa: powiadomienie}]);
+        setPowiadomienia(currentPowiadomienia => [...currentPowiadomienia, { id: id, nazwa: powiadomienie }]);
         setAlertVisibility(false);
     }
     const RemovePowiadomieniaHandler = item => {
@@ -80,41 +80,7 @@ function PowiadomieniaScreen({ navigation }) {
                     data={powiadomienia}
                     extraData={enabled}
                     renderItem={itemData =>
-                        <Card
-                            pressEnabled={false}
-                            cardStyle={{ marginTop: dimensions.defaultMarginBetweenItems }}
-                            content={
-                                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: "center" }}>
-                                    <Text style={{ textAlign: 'left', flex: 1 }}>{itemData.item.nazwa}</Text>
-                                    <Switch value={enabled.includes(itemData)}
-                                        activeBackgroundColor={Colors.primary}
-                                        inactiveBackgroundColor={Colors.colorTextWhite}
-                                        activeButtonBackgroundColor={Colors.primary}
-                                        inactiveButtonBackgroundColor={Colors.primary}
-                                        switchWidth={60}
-                                        switchHeight={30}
-                                        switchBorderRadius={12}
-                                        switchBorderWidth={1}
-                                        switchBorderColor={Colors.primary}
-                                        buttonWidth={24}
-                                        buttonHeight={24}
-                                        buttonBorderRadius={12}
-                                        buttonBorderWidth={4}
-                                        buttonBorderColor={Colors.accent}
-                                        padding={true}
-                                        animationTime={150}
-                                        onChangeValue={() => {
-                                            setEnabled(items => {
-                                                let isEnabled = items.includes(itemData);
-                                                if (isEnabled) {
-                                                    return items.filter((title) => title !== itemData)
-                                                }
-                                                return [itemData, ...items];
-                                            })
-                                        }} />
-                                </View>
-                            }
-                        />
+                        <Powiadomienie item={itemData.item}/>
                     }
                 />
                 <CustomAlert visibility={alertVisibility} onPositiveClick={AddPowiadomienieHandler} onCancel={CancelAlert} />
@@ -124,6 +90,40 @@ function PowiadomieniaScreen({ navigation }) {
     );
 }
 
+function Powiadomienie({ item }) {
+    const [enabled, setEnabled] = useState(false);
+    return (
+    <Card
+        pressEnabled={false}
+        cardStyle={{ marginTop: dimensions.defaultHugeMargin }}
+        content={
+            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: "center" }}>
+                <Text style={{ textAlign: 'left', flex: 1 }}>{item.nazwa}</Text>
+                <Switch value={enabled}
+                    activeBackgroundColor={Colors.primary}
+                    inactiveBackgroundColor={Colors.colorTextWhite}
+                    activeButtonBackgroundColor={Colors.primary}
+                    inactiveButtonBackgroundColor={Colors.primary}
+                    switchWidth={60}
+                    switchHeight={30}
+                    switchBorderRadius={12}
+                    switchBorderWidth={1}
+                    switchBorderColor={Colors.primary}
+                    buttonWidth={24}
+                    buttonHeight={24}
+                    buttonBorderRadius={12}
+                    buttonBorderWidth={4}
+                    buttonBorderColor={Colors.accent}
+                    padding={true}
+                    animationTime={150}
+                    onChangeValue={() => {
+                        console.log('zmieniam wartosc');
+                      setEnabled(!enabled);
+                    }} />
+            </View>
+        }
+    />);
+}
 
 export default class Powiadomienia extends React.Component {
 

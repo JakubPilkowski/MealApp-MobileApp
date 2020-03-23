@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.backgroundColor,
         borderWidth: 2,
         borderColor: colors.accent,
+        borderRadius: dimensions.defaultBorderRadius,
         padding: dimensions.defaultPadding
     },
     title: {
