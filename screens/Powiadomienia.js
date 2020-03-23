@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button, ImageBackground, FlatList, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Button, ImageBackground, FlatList, Platform, TouchableOpacity, TouchableNativeFeedback } from 'react-native';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import { createStackNavigator } from '@react-navigation/stack';
 import Colors from "../src/themes/colors";
@@ -9,28 +9,30 @@ import screenStyle from '../src/themes/screenStyle';
 import Card from '../components/Card';
 import Switch from 'react-native-customisable-switch';
 import dimensions from '../src/themes/dimensions';
-import { TouchableNativeFeedback } from 'react-native-gesture-handler';
+import CustomAlert from '../components/CustomAlert';
+
 
 function PowiadomieniaScreen({ navigation }) {
 
     const [powiadomienia, setPowiadomienia] = useState([]);
     const [enabled, setEnabled] = useState([]);
+    const [alertVisibility, setAlertVisibility] = useState(false);
     let id = 0;
     let addPowiadomienieButton;
 
     if (Platform.OS === 'ios') {
-    addPowiadomienieButton =
-        <View style={styles.buttonContainer} >
-            <View style={styles.androidButtonView}>
-                <TouchableOpacity 
-                    onPress={() => {
-                        // props.navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: jadlodajnia.id })
-                    }}
+        addPowiadomienieButton =
+            <View style={styles.buttonContainer} >
+                <View style={styles.androidButtonView}>
+                    <TouchableOpacity
+                        onPress={()=>{
+                            setAlertVisibility(true);
+                        }}
                     >
-                    <Text style={styles.moreButtonText}>DodajAlert</Text>
-                </TouchableOpacity>
-            </View>
-        </View>;
+                        <Text style={styles.moreButtonText}>DodajAlert</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>;
     }
     if (Platform.OS === "android") {
         addPowiadomienieButton =
@@ -38,21 +40,29 @@ function PowiadomieniaScreen({ navigation }) {
                 <View style={styles.androidButtonView}>
                     <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(Colors.accent, true)}
                         onPress={() => {
+                            setAlertVisibility(true);
                         }}
                         useForeground={false}>
-                        <Text style={styles.moreButtonText}>Dodaj alert</Text>
+                        <View style={{ backgroundColor: Colors.backgroundColor, flexDirection: 'column', width: "100%" }}>
+                            <Text style={styles.moreButtonText}>Dodaj alert</Text>
+                        </View>
                     </TouchableNativeFeedback>
                 </View>
             </View>;
     }
     const AddPowiadomienieHandler = powiadomienie => {
         id = id + 1;
-        setPowiadomienia(currentPowiadomienia => [...currentPowiadomienia, { id: id, nazwa: powiadomienie, wlaczone: true }]);
+        setPowiadomienia(currentPowiadomienia => [...currentPowiadomienia, { id: id, nazwa: powiadomienie}]);
+        setAlertVisibility(false);
     }
     const RemovePowiadomieniaHandler = item => {
         setPowiadomienia(currentPowiadomienia => {
             return currentPowiadomienia.filter((powiadomienie) => { powiadomienie.id !== item });
         })
+    }
+
+    const CancelAlert = () => {
+        setAlertVisibility(false);
     }
 
     const HomeButtonHandler = () => {
@@ -66,7 +76,6 @@ function PowiadomieniaScreen({ navigation }) {
     return (
         <View style={styles.container}>
             <ImageBackground source={require('../src/images/sosy.jpg')} style={{ flex: 1, backgroundColor: Colors.backgroundColor }} imageStyle={{ opacity: 0.3 }}>
-
                 <FlatList
                     data={powiadomienia}
                     extraData={enabled}
@@ -76,7 +85,7 @@ function PowiadomieniaScreen({ navigation }) {
                             cardStyle={{ marginTop: dimensions.defaultMarginBetweenItems }}
                             content={
                                 <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: "center" }}>
-                                    <Text style={{ textAlign: 'left', flex: 1 }}>{itemData.item.text}</Text>
+                                    <Text style={{ textAlign: 'left', flex: 1 }}>{itemData.item.nazwa}</Text>
                                     <Switch value={enabled.includes(itemData)}
                                         activeBackgroundColor={Colors.primary}
                                         inactiveBackgroundColor={Colors.colorTextWhite}
@@ -108,6 +117,7 @@ function PowiadomieniaScreen({ navigation }) {
                         />
                     }
                 />
+                <CustomAlert visibility={alertVisibility} onPositiveClick={AddPowiadomienieHandler} onCancel={CancelAlert} />
                 {addPowiadomienieButton}
             </ImageBackground>
         </View>
