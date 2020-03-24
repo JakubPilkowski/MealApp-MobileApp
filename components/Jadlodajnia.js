@@ -6,6 +6,8 @@ import Colors from '../src/themes/colors';
 import Dimensions from '../src/themes/dimensions';
 import { FlatList, TouchableOpacity, TouchableNativeFeedback } from 'react-native-gesture-handler';
 import Danie from './Danie';
+import IosButton from './IosButton';
+import AndroidButton from './AndroidButton';
 
 const Jadlodajnia = props => {
     const jadlodajnia = props.jadlodajnia;
@@ -13,25 +15,15 @@ const Jadlodajnia = props => {
     let moreButton;
     if (Platform.OS === 'ios') {
     moreButton =
-        <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.iosButtonView} onPress={props.onMoreClick}>
-                <Text style={styles.moreButtonText}>{Strings.more}</Text>
-            </TouchableOpacity>
-        </View>
+        <IosButton onClick={()=>{
+            props.navigation.navigate('JadlodajnieWiecej', {jadlodajniaId:jadlodajnia.id});
+        }} text={Strings.more}/>
     }
     if (Platform.OS === 'android') {
         moreButton = 
-        <View style={styles.buttonContainer} >
-            <View style={styles.androidButtonView}>
-                <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(Colors.accent, true)}
-                    onPress={()=>{
-                        props.navigation.navigate('JadlodajnieWiecej', {jadlodajniaId:jadlodajnia.id})
-                    }}
-                    useForeground={false} >
-                    <Text style={styles.moreButtonText}>{Strings.more}</Text>
-                </TouchableNativeFeedback>
-            </View>
-        </View>;
+        <AndroidButton onClick={()=>{
+            props.navigation.navigate('JadlodajnieWiecej', {jadlodajniaId:jadlodajnia.id});
+        }} text={Strings.more} containerStyle={styles.androidButtonView} buttonStyle={styles.buttonStyle}/>
     }
     return (
         <View style={styles.container}>
@@ -95,30 +87,14 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.accent,
         height: Dimensions.defaultBorderWidth,
     },
-    iosButtonView: {
-        backgroundColor: Colors.colorTextWhite,
-        fontSize: Dimensions.hugeFontSize,
-        borderColor: Colors.primary,
-    },
-    moreButtonText: {
-        paddingVertical: 9,
-        paddingHorizontal: 50,
-        textAlign: "center",
-        color: Colors.primary,
-        fontSize: Dimensions.hugeFontSize,
-        fontWeight: "bold",
-        borderRadius: Dimensions.defaultBorderRadius,
-        borderColor: Colors.primary,
-        borderWidth: Dimensions.defaultBorderWidth,
-    },
-    buttonContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: "center"
+    buttonStyle:{
+        paddingVertical:9,
+        paddingHorizontal:50
     },
     androidButtonView: {
         backgroundColor: Colors.colorTextWhite,
-        borderRadius: Dimensions.defaultBorderRadius
+        borderRadius: Dimensions.defaultBorderRadius,
+        alignSelf:'center'
     },
 });
 

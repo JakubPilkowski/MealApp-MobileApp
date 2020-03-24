@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Modal, TouchableNativeFeedback } from 'react-native';
 import colors from '../src/themes/colors';
 import dimensions from '../src/themes/dimensions';
+import IosButton from './IosButton';
+import AndroidButton from './AndroidButton';
 
 
 
@@ -10,47 +12,15 @@ const CustomAlert = props => {
     let okButton;
     if (Platform.OS === 'ios') {
         cancelButton =
-            <View style={styles.buttonContainer} >
-                <TouchableOpacity
-                    onPress={onCancelHandler}
-                >
-                    <Text style={styles.moreButtonText}>Anuluj</Text>
-                </TouchableOpacity>
-            </View>;
+            <IosButton containerStyle={{flex:1}} onClick={props.onNegativeClick} text="Nie"/>
         okButton =
-            <View style={styles.buttonContainer} >
-                <TouchableOpacity
-                    onPress={addGoalHandler}
-                >
-                    <Text style={styles.moreButtonText}>Ok</Text>
-                </TouchableOpacity>
-            </View>;
+            <IosButton containerStyle={{flex:1}} onClick={props.onPositiveClick} text="Tak"/>
     }
     if (Platform.OS === "android") {
         cancelButton =
-            <View style={styles.buttonContainer} >
-                <View style={styles.androidButtonView}>
-                    <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(colors.accent, true)}
-                        onPress={props.onNegativeClick}
-                        useForeground={false}>
-                        <View style={{ backgroundColor: colors.backgroundColor, flexDirection: 'column', width: "100%" }}>
-                            <Text style={styles.moreButtonText}>Nie</Text>
-                        </View>
-                    </TouchableNativeFeedback>
-                </View>
-            </View>;
+            <AndroidButton onClick={props.onNegativeClick} text="Nie"/>
         okButton =
-            <View style={styles.buttonContainer} >
-                <View style={styles.androidButtonView}>
-                    <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(colors.accent, true)}
-                        onPress={props.onPositiveClick}
-                        useForeground={false}>
-                        <View style={{ backgroundColor: colors.backgroundColor, flexDirection: 'column', width: "100%" }}>
-                            <Text style={styles.moreButtonText}>Tak</Text>
-                        </View>
-                    </TouchableNativeFeedback>
-                </View>
-            </View>;
+            <AndroidButton onClick={props.onPositiveClick} text="Tak" />
     }
     return (
         <Modal
@@ -80,7 +50,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#00000088'
     },
     container: {
-        minHeight: 150,
+        minHeight: 125,
         width: '80%',
         justifyContent: 'center',
         alignItems: 'center',
@@ -93,39 +63,21 @@ const styles = StyleSheet.create({
     },
     title: {
         textAlign: "center",
-        marginBottom: dimensions.defaultMargin,
+        marginBottom: dimensions.defaultSmallMargin,
         fontSize: 16,
         fontWeight: 'bold'
     },
     message: {
         width: '80%',
         alignSelf: 'center',
-        textAlign: 'center'
+        textAlign: 'center',
+        marginBottom: dimensions.defaultSmallMargin
     },
     buttonsContainer: {
         flexDirection: "row",
         justifyContent: 'space-between',
-        width: '100%',
+        width: '75%',
     },
-    buttonContainer: {
-        marginHorizontal: dimensions.defaultMargin,
-    },
-    androidButtonView: {
-        backgroundColor: colors.colorTextWhite,
-        borderRadius: dimensions.defaultBorderRadius
-    },
-    moreButtonText: {
-        paddingVertical: dimensions.defaultSmallPadding,
-        paddingHorizontal: dimensions.defaultPadding,
-        textAlign: "center",
-        color: colors.primary,
-        fontSize: dimensions.hugeFontSize,
-        fontWeight: "bold",
-        borderColor: colors.primary,
-        borderRadius: dimensions.defaultBorderRadius,
-        borderWidth: dimensions.defaultBorderWidth
-    },
-
 });
 
 

@@ -7,7 +7,7 @@ const IconWithAction = props => {
     return (
         <View style={styles.buttonContainer}>
             <TouchableOpacity onPress={props.onClick}>
-                <Image style={styles.button} source={props.src}></Image>
+                <Image style={[styles.button, props.imageStyle]} source={props.src}></Image>
             </TouchableOpacity>
         </View>
     );

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Modal, TouchableNativeFeedback } from 'react-native';
 import colors from '../src/themes/colors';
 import dimensions from '../src/themes/dimensions';
+import IosButton from './IosButton';
+import AndroidButton from './AndroidButton';
 
 
 
@@ -23,47 +25,15 @@ const CustomAlert = props => {
     let okButton;
     if (Platform.OS === 'ios') {
         cancelButton =
-            <View style={styles.buttonContainer} >
-                <TouchableOpacity
-                    onPress={onCancelHandler}
-                >
-                    <Text style={styles.moreButtonText}>Anuluj</Text>
-                </TouchableOpacity>
-            </View>;
+            <IosButton onClick={onCancelHandler} text="Anuluj"/>;
         okButton =
-            <View style={styles.buttonContainer} >
-                <TouchableOpacity
-                    onPress={addGoalHandler}
-                >
-                    <Text style={styles.moreButtonText}>Ok</Text>
-                </TouchableOpacity>
-            </View>;
+            <IosButton onClick={addGoalHandler} text="Ok"/>;
     }
     if (Platform.OS === "android") {
         cancelButton =
-            <View style={styles.buttonContainer} >
-                <View style={styles.androidButtonView}>
-                    <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(colors.accent, true)}
-                        onPress={onCancelHandler}
-                        useForeground={false}>
-                        <View style={{ backgroundColor: colors.backgroundColor, flexDirection: 'column', width: "100%" }}>
-                            <Text style={styles.moreButtonText}>Anuluj</Text>
-                        </View>
-                    </TouchableNativeFeedback>
-                </View>
-            </View>;
+            <AndroidButton onClick={onCancelHandler} text="Anuluj" containerStyle={{marginHorizontal:dimensions.defaultHugeMargin}}/>
         okButton =
-            <View style={styles.buttonContainer} >
-                <View style={styles.androidButtonView}>
-                    <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(colors.accent, true)}
-                        onPress={addGoalHandler}
-                        useForeground={false}>
-                        <View style={{ backgroundColor: colors.backgroundColor, flexDirection: 'column', width: "100%" }}>
-                            <Text style={styles.moreButtonText}>Ok</Text>
-                        </View>
-                    </TouchableNativeFeedback>
-                </View>
-            </View>;
+            <AndroidButton onClick={addGoalHandler} text="Ok" />
     }
     return (
         <Modal
