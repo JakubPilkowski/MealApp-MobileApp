@@ -13,7 +13,9 @@ export default class Connection {
     static getUlubione(){
         return fetch('http://www.mocky.io/v2/5e749894300000d431a5f4d3');
     }
-
+    static getMapy(){
+        return fetch('http://www.mocky.io/v2/5e7a4d4730000078009309fa');
+    }
     static logIn(){
 
     }

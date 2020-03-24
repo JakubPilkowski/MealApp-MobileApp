@@ -1,12 +1,24 @@
-import React from 'react';
-import {View, Text, StyleSheet, Button} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Button, ActivityIndicator, FlatList } from 'react-native';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import { createStackNavigator } from '@react-navigation/stack';
 import Colors from "../src/themes/colors";
 import Strings from "../src/themes/strings";
 import IconWithAction from "../components/IconWithAction";
 import ScreenStyle from "../src/themes/screenStyle";
-function MapaScreen({navigation}){
+import Connection from "../api/Connection";
+import dimensions from '../src/themes/dimensions';
+import { FontAwesome, Feather } from 'react-native-vector-icons';
+import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+
+
+function MapaScreen({ navigation, route }) {
+    const { punkty } = route.params;
+    const points = [];
+    punkty.map((punkt) => {
+        points.push(punkt);
+    });
+    console.log(points);
     const HomeButtonHandler = () => {
         navigation.openDrawer();
     }
@@ -17,28 +29,83 @@ function MapaScreen({navigation}){
     });
     return (
         <View style={styles.container}>
-            <Button onPress={() => navigation.navigate('JadlodajnieWiecej')} title="Więcej" />
+            <MapView provider={PROVIDER_GOOGLE} style={{ flex: 1 }} initialRegion={{
+                latitude: 53.77020960646819,
+                longitude: 20.4703061185026,
+                longitudeDelta: 0.3,
+                latitudeDelta: 0.3
+            }}  >
+                <FlatList
+                    data={points}
+                    renderItem={(itemData) =>
+                        <Marker coordinate={{
+                            latitude: itemData.szerokoscGeo,
+                            longitude: itemData.dlugoscGeo
+                        }} title={itemData.item.title} description={itemData.item.szczegóły}>
+                            <FontAwesome size={36} color={Colors.primary} name="map-marker"></FontAwesome>
+                        </Marker>
+                    }
+                />
+            </MapView>
         </View>
     );
 }
 
 const Mapa = props => {
+
+    const [isLoading, setIsLoading] = useState(true);
+    const [dataSource, setDataSource] = useState([]);
+
+    async function fetchData() {
+        const res = await fetch("http://www.mocky.io/v2/5e7a4d4730000078009309fa");
+        res
+            .json()
+            .then(res => {
+                setDataSource(res.punkty);
+                setIsLoading(false);
+            })
+            .catch(err => console.log(err + 'blad'));
+    }
+
+    useEffect(() => {
+        fetchData();
+    });
+
+    // useEffect(() => {
+    //     Connection.getMapy().
+    //         then((response) => response.json()).
+    //         then((responseJson) => {
+    //             setIsLoading(false);
+    //             setDataSource(responseJson.punkty);
+    //         })
+    //         .catch((error) => {
+    //             console.log('blad ' + error);
+    //         });
+    // }, isLoading);
+
     const Stack = createStackNavigator();
+    if (isLoading) {
+        return (
+            <View style={{ flex: 1 }}>
+                <ActivityIndicator></ActivityIndicator>
+            </View>
+        );
+    }
     return (
         <Stack.Navigator initialRouteName="Mapa" screenOptions={ScreenStyle}>
             <Stack.Screen name="Mapa" component={MapaScreen} options={{
                 headerTitle: Strings.mapa,
-            }} />
-            <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej} />
+            }} initialParams={{ punkty: dataSource }} />
+            <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
+            />
         </Stack.Navigator>
     );
 }
 
 const styles = StyleSheet.create({
-    container:{
-        flex:1,
-        alignItems:"center",
-        justifyContent: 'center',
+    container: {
+        flex: 1,
+
     }
 })
 
