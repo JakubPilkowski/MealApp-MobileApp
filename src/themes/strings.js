@@ -10,5 +10,6 @@ export default{
     placeholder:"Coś tu pusto",
     menu:"Menu",
     more:"Więcej",
-    todays_set:"Dzisiejszy Zestaw"
+    todays_set:"Dzisiejszy Zestaw",
+    add_alert:"Dodaj Alert"
 };

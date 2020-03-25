@@ -14,18 +14,23 @@ const Card = props => {
             {props.content}
         </View>;
     let touchableView;
-    if (Platform.OS === "ios") {
-        touchableView =
-            <TouchableOpacity onPress={props.onCardPress}>
-                {cardView}
-            </TouchableOpacity>
+    if (props.pressEnabled) {
+        if (Platform.OS === "ios") {
+            touchableView =
+                <TouchableOpacity onPress={props.onCardPress} onLongPress={props.onLongCardPress}>
+                    {cardView}
+                </TouchableOpacity>
+        }
+        if (Platform.OS === "android") {
+            touchableView =
+                <TouchableNativeFeedback onPress={props.onCardPress} onLongPress={props.onLongCardPress} background={TouchableNativeFeedback.Ripple(Colors.primary, false)}
+                    useForeground={false}>
+                    {cardView}
+                </TouchableNativeFeedback>
+        }
     }
-    if (Platform.OS === "android") {
-        touchableView =
-            <TouchableNativeFeedback onPress={props.onCardPress} background={TouchableNativeFeedback.Ripple(Colors.primary, false)}
-            useForeground={false}>
-                {cardView}
-            </TouchableNativeFeedback>
+    else{
+        touchableView=cardView;
     }
     return (
         <View>
@@ -42,7 +47,7 @@ const Card = props => {
 
 const styles = StyleSheet.create({
     container: {
- 
+
         justifyContent: "center",
         marginHorizontal: Dimensions.defaultSmallMargin,
         borderRadius: Dimensions.defaultSmallBorderRadius,

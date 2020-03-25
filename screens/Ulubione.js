@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
     View, StyleSheet, Button, Text, ImageBackground, ActivityIndicator, FlatList, Animated
-    , TouchableNativeFeedback, TouchableOpacity
+    , TouchableNativeFeedback, TouchableOpacity, TouchableHighlight
 } from 'react-native';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -47,6 +47,7 @@ function UlubioneScreen({ navigation, route }) {
                 <FlatList data={ulubioneJadlodajnie}
                     renderItem={itemData =>
                         <Card
+                            pressEnabled={true}
                             onSwipeRight={(progress, dragX) => <RightActions progress={progress} dragX={dragX} onPress={() => { onUlubioneDeleteHandler(itemData.item.id) }}></RightActions>}
                             cardStyle={{ marginTop: dimensions.defaultHugeMargin }}
                             onCardPress={() => {
@@ -73,14 +74,14 @@ const RightActions = ({ progress, dragX, onPress }) => {
         extrapolate: 'clamp'
     })
     return (
-        <TouchableOpacity onPress={onPress} style={{height:"100%"}}>
+        <TouchableHighlight onPress={onPress} style={{height:"100%"}} >
             <View style={styles.rightActionContainer}>
                 <Animated.Text style={[styles.rightActionText, { transform: [{ scale }] }]}>USUŃ</Animated.Text>
                 {/* dodac kiedys zdjecie */}
                 {/* <AnimatedIcon name="delete" size={36} color={Colors.colorTextWhite} containerStyle={{transform:[{scale}]}}></AnimatedIcon> */}
 
             </View>
-        </TouchableOpacity>
+        </TouchableHighlight>
     )
 }
 export default class Ulubione extends React.Component {
