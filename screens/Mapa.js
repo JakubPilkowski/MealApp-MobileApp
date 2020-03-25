@@ -9,7 +9,8 @@ import ScreenStyle from "../src/themes/screenStyle";
 import Connection from "../api/Connection";
 import dimensions from '../src/themes/dimensions';
 import { FontAwesome, Feather } from 'react-native-vector-icons';
-import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+import IosButton from "../components/IosButton";
+import MapView, { PROVIDER_GOOGLE, Marker, Callout } from 'react-native-maps';
 
 
 function MapaScreen({ navigation, route }) {
@@ -35,22 +36,33 @@ function MapaScreen({ navigation, route }) {
                 longitudeDelta: 0.3,
                 latitudeDelta: 0.3
             }}  >
-                <FlatList
-                    data={points}
-                    renderItem={(itemData) =>
-                        <Marker coordinate={{
-                            latitude: itemData.szerokoscGeo,
-                            longitude: itemData.dlugoscGeo
-                        }} title={itemData.item.title} description={itemData.item.szczegóły}>
-                            <FontAwesome size={36} color={Colors.primary} name="map-marker"></FontAwesome>
-                        </Marker>
-                    }
-                />
+                {points.map(point => renderMarker(point, navigation))}
             </MapView>
         </View>
     );
 }
-
+function renderMarker(point, navigation) {
+    const contentText = "Kliknij by przejsc" + '\n' + "do jadłodajni";
+    return (
+        <Marker coordinate={{
+            latitude: point.szerokoscGeo,
+            longitude: point.dlugoscGeo
+        }}
+            key={point.id}
+            onCalloutPress={() => {
+                navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: point.jadlodajnia_id });
+            }}
+        >
+            <Callout>
+                <View style={{ alignItems: 'center' }}>
+                    <Text>{point.title}</Text>
+                    <Text>{point.szczegóły}</Text>
+                    <IosButton text={contentText} />
+                </View>
+            </Callout>
+        </Marker>
+    )
+}
 const Mapa = props => {
 
     const [isLoading, setIsLoading] = useState(true);
