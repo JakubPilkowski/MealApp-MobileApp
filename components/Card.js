@@ -36,7 +36,7 @@ const Card = props => {
         <View>
             <Swipeable
                 renderRightActions={props.onSwipeRight}
-                containerStyle={[props.cardStyle, styles.container]}
+                containerStyle={[styles.container, props.cardStyle]}
             >
                 {touchableView}
             </Swipeable>
@@ -47,15 +47,14 @@ const Card = props => {
 
 const styles = StyleSheet.create({
     container: {
-
         justifyContent: "center",
         marginHorizontal: Dimensions.defaultSmallMargin,
         borderRadius: Dimensions.defaultSmallBorderRadius,
+        borderColor: Colors.accent,
+        borderWidth: Dimensions.defaultBorderWidth,
     },
     cardContainer: {
         backgroundColor: Colors.colorTextWhite,
-        borderColor: Colors.accent,
-        borderWidth: Dimensions.defaultBorderWidth,
         padding: Dimensions.defaultPadding,
     }
 });

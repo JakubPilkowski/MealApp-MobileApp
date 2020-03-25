@@ -8,6 +8,7 @@ import IconWithAction from "../components/IconWithAction";
 import ScreenStyle from "../src/themes/screenStyle";
 import Connection from "../api/Connection";
 import dimensions from '../src/themes/dimensions';
+import Card from "../components/Card";
 import { FontAwesome, Feather } from 'react-native-vector-icons';
 import IosButton from "../components/IosButton";
 import MapView, { PROVIDER_GOOGLE, Marker, Callout } from 'react-native-maps';
@@ -42,7 +43,7 @@ function MapaScreen({ navigation, route }) {
     );
 }
 function renderMarker(point, navigation) {
-    const contentText = "Kliknij by przejsc" + '\n' + "do jadłodajni";
+    const contentText = "Kliknij by przejść" + '\n' + "do jadłodajni";
     return (
         <Marker coordinate={{
             latitude: point.szerokoscGeo,
@@ -53,12 +54,18 @@ function renderMarker(point, navigation) {
                 navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: point.jadlodajnia_id });
             }}
         >
-            <Callout>
-                <View style={{ alignItems: 'center' }}>
-                    <Text>{point.title}</Text>
-                    <Text>{point.szczegóły}</Text>
-                    <IosButton text={contentText} />
-                </View>
+            <Callout tooltip={true} >
+                <Card
+                    pressEnabled={false}
+                    cardStyle={{ borderRadius: dimensions.defaultHugeBorderRadius }}
+                    content={
+                        <View style={{ alignItems: 'center' }}>
+                            <Text style={{ fontSize: 12 }}>{point.title}</Text>
+                            <Text style={{ fontSize: 12 }}>{point.szczegóły}</Text>
+                            <IosButton text={contentText} buttonStyle={{ fontSize: 14 }} />
+                        </View>
+                    }
+                />
             </Callout>
         </Marker>
     )
@@ -69,7 +76,7 @@ const Mapa = props => {
     const [dataSource, setDataSource] = useState([]);
 
     async function fetchData() {
-        const res = await fetch("http://www.mocky.io/v2/5e7a4d4730000078009309fa");
+        const res = await Connection.getMapy();
         res
             .json()
             .then(res => {
@@ -82,18 +89,6 @@ const Mapa = props => {
     useEffect(() => {
         fetchData();
     });
-
-    // useEffect(() => {
-    //     Connection.getMapy().
-    //         then((response) => response.json()).
-    //         then((responseJson) => {
-    //             setIsLoading(false);
-    //             setDataSource(responseJson.punkty);
-    //         })
-    //         .catch((error) => {
-    //             console.log('blad ' + error);
-    //         });
-    // }, isLoading);
 
     const Stack = createStackNavigator();
     if (isLoading) {
