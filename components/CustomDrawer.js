@@ -1,27 +1,34 @@
 import React from "react";
-import { View, StyleSheet, Text, SafeAreaView, Platform} from 'react-native';
+import { View, StyleSheet, Text, Platform} from 'react-native';
 import { Divider, Avatar } from 'react-native-elements';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
   DrawerContentScrollView,
   DrawerItemList,
+  DrawerItem
 } from '@react-navigation/drawer';
 import Colors from '../src/themes/colors';
 import Dimensions from '../src/themes/dimensions';
 import AndroidButton from './AndroidButton';
 import IosButton from './IosButton';
-import { TouchableNativeFeedback } from 'react-native-gesture-handler';
+import { createStackNavigator } from '@react-navigation/stack';
 import dimensions from "../src/themes/dimensions";
+import Logowanie from "../screens/Logowanie";
 
 const CustomDrawer = props => {
   let loginButton;
   if (Platform.OS === "android") {
-    loginButton = <AndroidButton text="Zaloguj się" containerStyle={{borderRadius:dimensions.defaultHugeBorderRadius}} buttonStyle={{ color: Colors.accent, borderWidth:0 }} />
+    loginButton = <AndroidButton text="Zaloguj się" containerStyle={{borderRadius:dimensions.defaultHugeBorderRadius}} 
+    buttonStyle={{ color: Colors.accent, borderWidth:0 }} onClick={()=>{
+      props.navigation.navigate("Logowanie");
+    }}/>
   }
   if (Platform.OS === "ios") {
     loginButton = <IosButton text="Zaloguj się" buttonStyle={{ color: Colors.colorTextWhite }} />
   }
   return (
+
+
     <LinearGradient
       style={styles.container}
       colors={[Colors.primary, Colors.accent]}
@@ -41,7 +48,10 @@ const CustomDrawer = props => {
           {loginButton}
         </View>
         <Divider style={styles.divider}></Divider>
-        <DrawerItemList {...props} />
+        <AndroidButton text="Ulubione" onClick={()=>{props.navigation.navigate("Ulubione");}}/>
+        {/* <DrawerItemList {...props}  */}
+        {/* // items={items.filter(item => item !== 'Logowanie')}  */}
+        {/* // /> */}
       </DrawerContentScrollView>
     </LinearGradient>
   );

@@ -4,17 +4,13 @@ import colors from '../src/themes/colors';
 
 
 
-export default class Logowanie extends React.Component{
-
-    render(){
+const Logowanie = props => {
         return( 
-            <View style={container}>
-                <ImageBackground source={require(cutlery.jpg)} style={imageBackground} imageStyle={imageStyle}>
+            <View style={styles.container}>
+                <ImageBackground source={require('../src/images/cutlery.jpg')} style={styles.imageBackground} imageStyle={styles.imageStyle}>
                     </ImageBackground>  
             </View>
         );
-    }
-
 }
 
 
@@ -29,4 +25,7 @@ const styles=StyleSheet.create({
         flex:1,
         color: colors.backgroundColor
     }
-})
+});
+
+
+export default Logowanie;
