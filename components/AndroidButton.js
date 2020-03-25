@@ -11,7 +11,7 @@ const AndroidButton = props => {
             <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(colors.accent, true)}
                 onPress={props.onClick}
                 useForeground={false}>
-                <View style={{ backgroundColor: colors.backgroundColor, flexDirection: 'column', width: "100%" }}>
+                <View style={{ flexDirection: 'column', width: "100%" }}>
                     <Text style={[styles.moreButtonText, props.buttonStyle]}>{props.text}</Text>
                 </View>
             </TouchableNativeFeedback>

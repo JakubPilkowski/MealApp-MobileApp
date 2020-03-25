@@ -9,7 +9,7 @@ const IosButton = props => {
     return (
         <View style={props.containerStyle}>
             <TouchableOpacity onPress={props.onClick}>
-                <Text style={styles.moreButtonText}>{props.text}</Text>
+                <Text style={[styles.moreButtonText, props.buttonStyle]}>{props.text}</Text>
             </TouchableOpacity>
         </View>
     );
@@ -18,7 +18,6 @@ const IosButton = props => {
 const styles = StyleSheet.create({
 
     moreButtonText: {
-
         paddingVertical: dimensions.defaultSmallPadding,
         paddingHorizontal: dimensions.defaultPadding,
         textAlign: "center",
