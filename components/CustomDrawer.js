@@ -1,5 +1,5 @@
-import React from "react";
-import { View, StyleSheet, Text, Platform} from 'react-native';
+import React, { useState } from "react";
+import { View, StyleSheet, Text, Platform } from 'react-native';
 import { Divider, Avatar } from 'react-native-elements';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -7,21 +7,27 @@ import {
   DrawerItemList,
   DrawerItem
 } from '@react-navigation/drawer';
+import {
+  CommonActions,
+  DrawerActions,
+} from '@react-navigation/native';
 import Colors from '../src/themes/colors';
 import Dimensions from '../src/themes/dimensions';
 import AndroidButton from './AndroidButton';
 import IosButton from './IosButton';
 import { createStackNavigator } from '@react-navigation/stack';
 import dimensions from "../src/themes/dimensions";
+
+import { Ionicons, Foundation, MaterialCommunityIcons } from '@expo/vector-icons';
 import Logowanie from "../screens/Logowanie";
 
 const CustomDrawer = props => {
   let loginButton;
   if (Platform.OS === "android") {
-    loginButton = <AndroidButton text="Zaloguj się" containerStyle={{borderRadius:dimensions.defaultHugeBorderRadius}} 
-    buttonStyle={{ color: Colors.accent, borderWidth:0 }} onClick={()=>{
-      props.navigation.navigate("Logowanie");
-    }}/>
+    loginButton = <AndroidButton text="Zaloguj się" containerStyle={{ borderRadius: dimensions.defaultHugeBorderRadius }}
+      buttonStyle={{ color: Colors.accent, borderWidth: 0 }} onClick={() => {
+        props.navigation.navigate("Logowanie");
+      }} />
   }
   if (Platform.OS === "ios") {
     loginButton = <IosButton text="Zaloguj się" buttonStyle={{ color: Colors.colorTextWhite }} />
@@ -48,10 +54,44 @@ const CustomDrawer = props => {
           {loginButton}
         </View>
         <Divider style={styles.divider}></Divider>
-        <AndroidButton text="Ulubione" onClick={()=>{props.navigation.navigate("Ulubione");}}/>
-        {/* <DrawerItemList {...props}  */}
-        {/* // items={items.filter(item => item !== 'Logowanie')}  */}
-        {/* // /> */}
+        {
+          props.state.routes.map((route, i) => {
+            const focused = i === props.state.index;
+            const { title, drawerLabel, drawerIcon } = props.descriptors[route.key].options;
+            if (title !== "Logowanie") {
+              return (
+                <DrawerItem
+                  key={route.key}
+                  label={
+                    drawerLabel !== undefined
+                      ? drawerLabel
+                      : title !== undefined
+                        ? title
+                        : route.name
+                  }
+                  icon={drawerIcon}
+                  focused={focused}
+                  activeTintColor={props.activeTintColor}
+                  inactiveTintColor={props.inactiveTintColor}
+                  activeBackgroundColor={props.activeBackgroundColor}
+                  inactiveBackgroundColor={props.inactiveBackgroundColor}
+                  labelStyle={props.labelStyle}
+                  style={props.itemStyle}
+                  onPress={() => {
+                    props.navigation.dispatch({
+                      ...(focused
+                        ? DrawerActions.closeDrawer()
+                        : CommonActions.navigate(route.name)),
+                      target: props.state.key,
+                    });
+                  }}
+                />
+              );
+            }
+          })
+
+        }
+
       </DrawerContentScrollView>
     </LinearGradient>
   );

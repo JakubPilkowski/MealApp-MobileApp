@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, StyleSheet, ImageBackground} from 'react-native';
+import {View, StyleSheet, ImageBackground, Text} from 'react-native';
 import colors from '../src/themes/colors';
 
 
@@ -8,8 +8,9 @@ export default class Rejestracja extends React.Component{
 
     render(){
         return( 
-            <View style={container}>
-                <ImageBackground source={require(cutlery.jpg)} style={imageBackground} imageStyle={imageStyle}>
+            <View style={styles.container}>
+                <ImageBackground source={require('../src/images/cutlery.jpg')} style={styles.imageBackground} imageStyle={styles.imageStyle}>
+                    <Text>Rejestracja</Text>
                     </ImageBackground>  
             </View>
         );

@@ -54,7 +54,7 @@ export default function App() {
         } />
         <Drawer.Screen name="Logowanie" component={Logowanie} options={
           {
-          
+            title: "Logowanie"
           }
         }/>
       </Drawer.Navigator>

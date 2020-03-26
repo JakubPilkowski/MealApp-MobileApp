@@ -104,6 +104,11 @@ const Mapa = props => {
                 headerTitle: Strings.mapa,
             }} initialParams={{ punkty: dataSource }} />
             <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
+            options={{
+                headerStyle: {
+                    opacity: 0, height: 0
+                }
+            }}
             />
         </Stack.Navigator>
     );
