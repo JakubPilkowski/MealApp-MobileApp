@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
-    View, StyleSheet, Button, Text, ImageBackground, ActivityIndicator, FlatList, Animated
-    , TouchableNativeFeedback, TouchableOpacity, TouchableHighlight
+    View, StyleSheet, Text, ImageBackground, ActivityIndicator, FlatList, Animated
+    , TouchableHighlight
 } from 'react-native';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -13,10 +13,8 @@ import Card from '../components/Card';
 import Connection from "../api/Connection";
 import LogoWithTexts from '../components/LogoWithTexts';
 import colors from "../src/themes/colors";
-import { MaterialIcons } from "react-native-vector-icons";
 import dimensions from "../src/themes/dimensions";
 
-const AnimatedIcon = Animated.createAnimatedComponent(MaterialIcons);
 
 function UlubioneScreen({ navigation, route }) {
     const { ulubione } = route.params;
