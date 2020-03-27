@@ -83,7 +83,7 @@ function LogowanieScreen({ navigation }) {
                 {registerButton}
                 <View style={{ flexDirection: 'row', marginVertical: dimensions.defaultSmallMargin }}>
                     <Text style={{ textAlign: 'center', color: colors.colorTextDark, fontSize: 16 }}>Zapomniałeś hasła?</Text>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={()=>{navigation.navigate("ZapomnialemHasla")}}>
                         <Text style={{ textAlign: 'center', color: colors.colorTextDark, fontSize: 16, textDecorationLine: 'underline' }}>Kliknij tutaj</Text>
                     </TouchableOpacity>
                 </View>
