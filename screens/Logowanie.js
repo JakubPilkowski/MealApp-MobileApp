@@ -12,6 +12,7 @@ import {
 import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
+import ZapomnialemHasla from './ZapomnialemHasla';
 
 const { width, height } = Dimensions.get("screen");
 function LogowanieScreen({ navigation }) {
@@ -33,7 +34,8 @@ function LogowanieScreen({ navigation }) {
 
     if (Platform.OS === "android") {
         loginButton =
-            <AndroidButton text="Zaloguj się" containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9 }} />
+            <AndroidButton text="Zaloguj się" containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9 }} 
+            onClick={()=>{navigation.navigate("Jadlodajnie");}}/>
         registerButton =
             <AndroidButton text="Zarejestruj się" containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9 }}
                 onClick={() => navigation.navigate("Rejestracja")}
@@ -41,9 +43,16 @@ function LogowanieScreen({ navigation }) {
     }
     if (Platform.OS === "ios") {
         loginButton =
-            <IosButton text="Zaloguj się" />
+            <IosButton text="Zaloguj się" containerStyle={{width:"60%", borderColor:colors.primary, 
+            borderWidth:2, borderRadius:6, backgroundColor:colors.colorTextWhite}} 
+            buttonStyle={{paddingVertical:9}}
+            onClick={()=>{navigation.navigate("Jadlodajnie");}}
+            />
         registerButton =
-            <IosButton text="Zarejestruj się"
+            <IosButton text="Zarejestruj się" 
+            containerStyle={{width:"60%", borderColor:colors.primary, borderWidth:2, 
+            borderRadius:6, backgroundColor:colors.colorTextWhite}} 
+            buttonStyle={{paddingVertical:9}}
                 onClick={() => navigation.navigate("Rejestracja")}
             />
     }
@@ -90,8 +99,8 @@ const Logowanie = props => {
     return (
         <Stack.Navigator initialRouteName="Logowanie" screenOptions={ScreenStyle}>
             <Stack.Screen name="Logowanie" component={LogowanieScreen}  />
-            <Stack.Screen name="Rejestracja" component={Rejestracja}
-            />
+            <Stack.Screen name="Rejestracja" component={Rejestracja}/>
+            <Stack.Screen name="ZapomnialemHasla" component={ZapomnialemHasla} />
         </Stack.Navigator>
     );
 }
