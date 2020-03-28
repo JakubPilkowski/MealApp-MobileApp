@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { View, Text, StyleSheet, ImageBackground, Platform, TextInput, Image, TouchableOpacity, Dimensions } from 'react-native';
 import { Divider } from 'react-native-elements';
 import AndroidButton from '../components/AndroidButton';
@@ -11,10 +11,31 @@ import { Ionicons } from "react-native-vector-icons";
 import IosButton from '../components/IosButton';
 import GradientDivider from '../components/GradientDivider';
 const { width, height } = Dimensions.get("screen");
+import * as ImagePicker from 'expo-image-picker';
 function EdytujScreen({ navigation }) {
-
-
-
+    const [selectedImage, setSelectedImage] = useState(null);
+    let image;
+    let openImagePickerAsync = async () => {
+        let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+    
+        if (permissionResult.granted === false) {
+          alert("Permission to access camera roll is required!");
+          return;
+        }
+    
+        let pickerResult = await ImagePicker.launchImageLibraryAsync();
+        if (pickerResult.cancelled === true) {
+            return;
+          }
+      
+          setSelectedImage(pickerResult.uri);
+      }
+    if(selectedImage===null){
+        image=<Image style={[styles.logo,{backgroundColor: colors.backgroundColor,}]}></Image>
+    }
+    else{
+        image=<Image style={[styles.logo]} source={{uri:selectedImage}} cover></Image>
+    }
     navigation.setOptions({
         headerLeft: () => (
             <View style={styles.backButtonContainer}>
@@ -34,7 +55,9 @@ function EdytujScreen({ navigation }) {
     let addImageButton;
     let saveSettingsButton;
     if (Platform.OS === "android") {
-        addImageButton = <AndroidButton text="Zmień avatar" buttonStyle={{paddingVertical: 9, paddingHorizontal: 25 }} />
+        addImageButton = <AndroidButton text="Zmień avatar" buttonStyle={{paddingVertical: 9, paddingHorizontal: 25 }} 
+            onClick={openImagePickerAsync}
+        />
         saveSettingsButton = <AndroidButton text="Zapisz zmiany"
             containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9}} />
     }
@@ -57,7 +80,7 @@ function EdytujScreen({ navigation }) {
                     flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginHorizontal: dimensions.defaultHugeMargin
                     , marginVertical: dimensions.defaultMarginBetweenItems
                 }}>
-                    <Image style={styles.logo}  ></Image>
+                    {image}
                     <GradientDivider startColor={colors.primary} endColor={colors.accent}
                         from="left" />
                     {addImageButton}
@@ -84,6 +107,10 @@ function EdytujScreen({ navigation }) {
 
 
 const EdytujProfil = props => {
+
+
+
+
     const Stack = createStackNavigator();
     return (
         <Stack.Navigator initialRouteName="EdytujProfil" screenOptions={ScreenStyle}>
@@ -110,6 +137,7 @@ const styles = StyleSheet.create({
         width: 56,
         alignItems: "center",
         justifyContent: 'center',
+        padding:12,
         opacity: 1,
         zIndex: 9999
     },
@@ -126,11 +154,11 @@ const styles = StyleSheet.create({
         height: 100,
         borderWidth: dimensions.defaultBorderWidth,
         borderColor: colors.accent,
-        borderRadius: dimensions.defaultHugeBorderRadius
+        borderRadius: dimensions.defaultHugeBorderRadius,
+        resizeMode: "cover"
     },
     divider: {
         flex: 1,
-        // backgroundColor: colors.accent,
         height: dimensions.defaultBorderWidth,
     },
     input: {
