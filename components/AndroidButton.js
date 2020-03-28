@@ -24,7 +24,8 @@ const AndroidButton = props => {
 const styles = StyleSheet.create({
     androidButtonView: {
         backgroundColor: colors.colorTextWhite,
-        borderRadius: dimensions.defaultBorderRadius
+        borderRadius: dimensions.defaultBorderRadius,
+        justifyContent: 'center',
     },
     moreButtonText: {
         paddingVertical: dimensions.defaultSmallPadding,
