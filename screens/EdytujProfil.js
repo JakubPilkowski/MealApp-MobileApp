@@ -1,6 +1,7 @@
-import React, {useState} from 'react';
-import { View, Text, StyleSheet, ImageBackground, Platform, TextInput, Image, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ImageBackground, Platform, TextInput, Image, TouchableOpacity, Dimensions, KeyboardAvoidingView, SafeAreaView } from 'react-native';
 import { Divider } from 'react-native-elements';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import AndroidButton from '../components/AndroidButton';
 import colors from "../src/themes/colors";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -17,24 +18,24 @@ function EdytujScreen({ navigation }) {
     let image;
     let openImagePickerAsync = async () => {
         let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
-    
+
         if (permissionResult.granted === false) {
-          alert("Permission to access camera roll is required!");
-          return;
+            alert("Permission to access camera roll is required!");
+            return;
         }
-    
+
         let pickerResult = await ImagePicker.launchImageLibraryAsync();
         if (pickerResult.cancelled === true) {
             return;
-          }
-      
-          setSelectedImage(pickerResult.uri);
-      }
-    if(selectedImage===null){
-        image=<Image style={[styles.logo,{backgroundColor: colors.backgroundColor,}]}></Image>
+        }
+
+        setSelectedImage(pickerResult.uri);
     }
-    else{
-        image=<Image style={[styles.logo]} source={{uri:selectedImage}} cover></Image>
+    if (selectedImage === null) {
+        image = <Image style={[styles.logo, { backgroundColor: colors.backgroundColor, }]}></Image>
+    }
+    else {
+        image = <Image style={[styles.logo]} source={{ uri: selectedImage }} cover></Image>
     }
     navigation.setOptions({
         headerLeft: () => (
@@ -55,11 +56,11 @@ function EdytujScreen({ navigation }) {
     let addImageButton;
     let saveSettingsButton;
     if (Platform.OS === "android") {
-        addImageButton = <AndroidButton text="Zmień avatar" buttonStyle={{paddingVertical: 9, paddingHorizontal: 25 }} 
+        addImageButton = <AndroidButton text="Zmień avatar" buttonStyle={{ paddingVertical: 9, paddingHorizontal: 25 }}
             onClick={openImagePickerAsync}
         />
         saveSettingsButton = <AndroidButton text="Zapisz zmiany"
-            containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9}} />
+            containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9 }} />
     }
     if (Platform.OS === 'ios') {
         addImageButton = <IosButton text="Zmień Avatar"
@@ -74,33 +75,44 @@ function EdytujScreen({ navigation }) {
             }} buttonStyle={{ paddingVertical: 9 }} />
     }
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={{ flex: 1 }}>
             <ImageBackground source={require('../src/images/sniadanko.jpg')} style={styles.imageBackground} imageStyle={styles.imageStyle}>
-                <View style={{
-                    flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginHorizontal: dimensions.defaultHugeMargin
-                    , marginVertical: dimensions.defaultMarginBetweenItems
-                }}>
-                    {image}
+                <KeyboardAwareScrollView
+                style={{width:'100%'}}
+                contentContainerStyle={{   alignItems:'center'}}
+                >
+                    <View style={{
+                        alignItems: 'center',
+                        marginVertical: dimensions.defaultHugeMargin
+                    }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems:'center' }}>
+                        <GradientDivider startColor={colors.accent} endColor={colors.primary}
+                            from="left" locationEnd={1} />
+                               {image}
+                        <GradientDivider startColor={colors.accent} endColor={colors.primary}
+                            from="right" locationEnd={1} />
+                    </View> 
+                        
                     <GradientDivider startColor={colors.primary} endColor={colors.accent}
-                        from="left" />
+                        from="up" dividerStyle={{ flex: 0, height: 50, width: 2 }} />
                     {addImageButton}
-                </View>
-                <Text style={styles.title}>Login</Text>
-                <TextInput style={styles.input}
-                    returnKeyType="next" />
-                <Text style={styles.title}>Email</Text>
-                <TextInput style={styles.input}
-                    returnKeyType="next" />
-                <View style={{ flexDirection: "row", alignItems: 'center', marginTop: 100 }}>   
-                    <GradientDivider startColor={colors.primary} endColor={colors.accent}
-                        from="left" locationEnd={0.7}/>
-                    {saveSettingsButton}
-                    <GradientDivider startColor={colors.primary} endColor={colors.accent}
-                        from="right" locationEnd={0.7}/>
-                </View>
-
+                    </View>
+                    <Text style={styles.title}>Login</Text>
+                    <TextInput style={styles.input}
+                        returnKeyType="next" />
+                    <Text style={styles.title}>Email</Text>
+                    <TextInput style={styles.input}
+                        returnKeyType="next" />
+                    <View style={{ flexDirection: "row", alignItems: 'center', marginTop:50}}>
+                        <GradientDivider startColor={colors.primary} endColor={colors.accent}
+                            from="left" locationEnd={0.7} />
+                        {saveSettingsButton}
+                        <GradientDivider startColor={colors.primary} endColor={colors.accent}
+                            from="right" locationEnd={0.7} />
+                    </View>
+                </KeyboardAwareScrollView>
             </ImageBackground>
-        </View>
+        </SafeAreaView>
     );
 
 }
@@ -127,7 +139,6 @@ const styles = StyleSheet.create({
 
     container: {
         flex: 1,
-        minHeight: height
     },
     backButtonContainer: {
         left: 0,
@@ -137,7 +148,7 @@ const styles = StyleSheet.create({
         width: 56,
         alignItems: "center",
         justifyContent: 'center',
-        padding:12,
+        padding: 12,
         opacity: 1,
         zIndex: 9999
     },
@@ -148,13 +159,14 @@ const styles = StyleSheet.create({
         flex: 1,
         color: colors.backgroundColor,
         alignItems: 'center',
+        justifyContent: 'flex-end'
     },
     logo: {
-        width: 100,
-        height: 100,
+        width: 200,
+        height: 200,
         borderWidth: dimensions.defaultBorderWidth,
         borderColor: colors.accent,
-        borderRadius: dimensions.defaultHugeBorderRadius,
+        borderRadius: 100,
         resizeMode: "cover"
     },
     divider: {
