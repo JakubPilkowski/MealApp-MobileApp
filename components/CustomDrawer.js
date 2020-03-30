@@ -26,7 +26,7 @@ import Logowanie from "../screens/Logowanie";
 const CustomDrawer = props => {
   let loginButton;
   let editButton;
-
+  // console.log(props.dataSource);
   if (Platform.OS === "android") {
     loginButton = <AndroidButton text="Zaloguj się" containerStyle={{ borderRadius: dimensions.defaultHugeBorderRadius }}
       buttonStyle={{ color: Colors.accent, borderWidth: 0 }} onClick={() => {
