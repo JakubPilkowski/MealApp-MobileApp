@@ -24,22 +24,34 @@ const Drawer = createDrawerNavigator();
 export default function App() {
 
   const [isLoading, setIsLoading] = useState(true);
-  const [dataSource, setDataSource] = useState();
+  const [dataSource, setDataSource] = useState([]);
 
+  let uzytkownicy = [];
+  let pobranyUzytkownik;
   async function fetchData() {
-    const res = await Connection.getUserOptions();
-    res
-      .json()
-      .then(res => {
-        setDataSource(res.uzytkownicy);
-        setIsLoading(false);
-      })
-      .catch(err => console.log(err + 'blad'));
+    if (isLoading) {
+      const res = await Connection.getUserOptions();
+      res
+        .json()
+        .then(res => {
+          res.uzytkownicy.map((uzytkownik) => {
+            uzytkownicy.push(uzytkownik);
+          });
+          uzytkownicy.map((uzytkownik, index) => {
+            if (index === 0) {
+              pobranyUzytkownik = uzytkownik;
+            }
+          });
+          setDataSource(pobranyUzytkownik);
+          setIsLoading(false);
+        })
+        .catch(err => console.log(err));
+    }
   }
 
   useEffect(() => {
     fetchData();
-  });
+  }, isLoading);
   if (isLoading) {
     return (
       <View style={{ flex: 1 }}>
@@ -52,7 +64,11 @@ export default function App() {
 
 
       <NavigationContainer>
-        <Drawer.Navigator initialRouteName="Jadlodajnie" drawerContent={(dataSource, props) => <CustomDrawer {...props} />}
+        <Drawer.Navigator initialRouteName="Jadlodajnie" drawerContent={(props) => {
+          return (
+            <CustomDrawer {...props} dataSource={dataSource} />
+          )
+        }}
           drawerContentOptions={{
             activeTintColor: Colors.accent,
             activeBackgroundColor: Colors.colorTextWhite,

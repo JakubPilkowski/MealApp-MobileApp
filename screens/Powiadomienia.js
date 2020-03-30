@@ -29,22 +29,22 @@ function PowiadomieniaScreen({ navigation }) {
         navigation.setOptions({
             headerRight: () => (
                 <IconWithAction src={require('../src/images/dodaj_bialy_m.png')} onClick={() => {
-                    setAddAlertVisibility(true); 
-                }} imageStyle={{width:24, height:24}}/>
+                    setAddAlertVisibility(true);
+                }} imageStyle={{ width: 24, height: 24 }} />
             )
         })
-        addPowiadomienieButton=null;
+        addPowiadomienieButton = null;
     }
     if (Platform.OS === "android") {
         addPowiadomienieButton =
-            <AndroidButton onClick={()=> {setAddAlertVisibility(true);}} text={strings.add_alert} buttonStyle={styles.buttonStyle} containerStyle={styles.androidButtonView}/>
+            <AndroidButton onClick={() => { setAddAlertVisibility(true); }} text={strings.add_alert} buttonStyle={styles.buttonStyle} containerStyle={styles.androidButtonView} />
     }
     const AddPowiadomienieHandler = powiadomienie => {
         id = id + 1;
         setPowiadomienia(currentPowiadomienia => [...currentPowiadomienia, { id: id, nazwa: powiadomienie }]);
         setAddAlertVisibility(false);
     }
-    const RemovePowiadomieniaHandler= () => {
+    const RemovePowiadomieniaHandler = () => {
         setPowiadomienia(currentPowiadomienia => {
             return currentPowiadomienia.filter((powiadomienie) => powiadomienie.id !== currentItemId);
         });
@@ -79,7 +79,7 @@ function PowiadomieniaScreen({ navigation }) {
                             content={
                                 <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: "center" }}>
                                     <Text style={{ textAlign: 'left', flex: 1 }}>{itemData.item.nazwa}</Text>
-                                    <Switcher  />
+                                    <Switcher />
                                 </View>
                             }
                         />} />
@@ -115,23 +115,21 @@ function Switcher() {
             animationTime={150}
             onChangeValue={() => {
                 setEnabled(!enabled);
-            }} />            
+            }} />
     );
 }
 
-export default class Powiadomienia extends React.Component {
+const Powiadomienia = props => {
 
-    render() {
-        const Stack = createStackNavigator();
-        return (
-            <Stack.Navigator initialRouteName="Powiadomienia" screenOptions={screenStyle}>
-                <Stack.Screen name="Powiadomienia" component={PowiadomieniaScreen} options={{
-                    headerTitle: Strings.powiadomienia,
-                }} />
-                <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej} />
-            </Stack.Navigator>
-        );
-    }
+    const Stack = createStackNavigator();
+    return (
+        <Stack.Navigator initialRouteName="Powiadomienia" screenOptions={screenStyle}>
+            <Stack.Screen name="Powiadomienia" component={PowiadomieniaScreen} options={{
+                headerTitle: Strings.powiadomienia,
+            }} />
+            <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej} />
+        </Stack.Navigator>
+    );
 }
 
 
@@ -140,13 +138,16 @@ const styles = StyleSheet.create({
         flex: 1,
 
     },
-    buttonStyle:{
+    buttonStyle: {
         paddingVertical: 9,
         paddingHorizontal: 50,
     },
     androidButtonView: {
         position: "absolute",
         bottom: 16,
-        alignSelf:'center',
+        alignSelf: 'center',
     },
-})
+});
+
+
+export default Powiadomienia;

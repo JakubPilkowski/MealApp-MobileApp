@@ -20,7 +20,7 @@ function MapaScreen({ navigation, route }) {
     punkty.map((punkt) => {
         points.push(punkt);
     });
-    console.log(points);
+
     const HomeButtonHandler = () => {
         navigation.openDrawer();
     }
@@ -76,19 +76,21 @@ const Mapa = props => {
     const [dataSource, setDataSource] = useState([]);
 
     async function fetchData() {
-        const res = await Connection.getMapy();
-        res
-            .json()
-            .then(res => {
-                setDataSource(res.punkty);
-                setIsLoading(false);
-            })
-            .catch(err => console.log(err + 'blad'));
+        if (isLoading) {
+            const res = await Connection.getMapy();
+            res
+                .json()
+                .then(res => {
+                    setDataSource(res.punkty);
+                    setIsLoading(false);
+                })
+                .catch(err => console.log(err + 'blad'));
+        }
     }
 
     useEffect(() => {
         fetchData();
-    });
+    }, isLoading);
 
     const Stack = createStackNavigator();
     if (isLoading) {
@@ -104,11 +106,11 @@ const Mapa = props => {
                 headerTitle: Strings.mapa,
             }} initialParams={{ punkty: dataSource }} />
             <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
-            options={{
-                headerStyle: {
-                    opacity: 0, height: 0
-                }
-            }}
+                options={{
+                    headerStyle: {
+                        opacity: 0, height: 0
+                    }
+                }}
             />
         </Stack.Navigator>
     );

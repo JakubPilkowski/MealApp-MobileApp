@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     View, StyleSheet, Text, ImageBackground, ActivityIndicator, FlatList, Animated
     , TouchableHighlight
@@ -82,28 +82,29 @@ const RightActions = ({ progress, dragX, onPress }) => {
         </TouchableHighlight>
     )
 }
-export default class Ulubione extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = { isLoading: true }
-    }
-    componentDidMount() {
-        return Connection.getUlubione().
-            then((response) => response.json()).
-            then((responseJson) => {
-                this.setState({
-                    isLoading: false,
-                    dataSource: responseJson.ulubione
-                })
+const Ulubione = props => {
+    const [isLoading, setIsLoading] = useState(true);
+    const [dataSource, setDataSource] = useState([]);
+    async function fetchData() {
+        if (isLoading) {
+        const res = await Connection.getUlubione();
+        res
+            .json()
+            .then(res => {
+                setDataSource(res.ulubione);
+                setIsLoading(false);
             })
-            .catch((error) => {
-                console.log('blad ' + error);
-            });
+            .catch(err => console.log(err + 'blad'));
+        }
     }
-    render() {
+
+    useEffect(() => {
+        fetchData();
+    }, isLoading);
+
         const Stack = createStackNavigator();
 
-        if (this.state.isLoading) {
+        if (isLoading) {
             return (
                 <View style={{ flex: 1 }}>
                     <ActivityIndicator></ActivityIndicator>
@@ -114,7 +115,7 @@ export default class Ulubione extends React.Component {
             <Stack.Navigator initialRouteName="Ulubione" screenOptions={ScreenStyle}>
                 <Stack.Screen name="Ulubione" component={UlubioneScreen} options={{
                     headerTitle: Strings.ulubione,
-                }} initialParams={{ ulubione: this.state.dataSource }} />
+                }} initialParams={{ ulubione: dataSource }} />
                 <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
                     options={{
                         headerStyle: {
@@ -124,7 +125,7 @@ export default class Ulubione extends React.Component {
                 />
             </Stack.Navigator>
         );
-    }
+    
 }
 
 
@@ -146,4 +147,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         margin: dimensions.defaultSmallMargin
     }
-})
+});
+
+
+export default Ulubione;

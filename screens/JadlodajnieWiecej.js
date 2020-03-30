@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef} from 'react';
 import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, ActivityIndicator, TouchableOpacity, Dimensions, ImageBackground } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
@@ -12,54 +12,86 @@ import Zestaw from '../components/Zestaw';
 import InformacjeOgolneJadlodajnia from '../components/InformacjeOgolneJadlodajnia';
 const { width, height } = Dimensions.get('window');
 
-export default class JadlodajnieWiecej extends React.Component {
+const JadlodajnieWiecej = props => {
 
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            scrollY: new Animated.Value(0),
-            isLoading: true,
-            dataSource: null
+    // constructor(props) {
+    //     super(props);
+    //     this.state = {
+    //         scrollY: new Animated.Value(0),
+    //         isLoading: true,
+    //         dataSource: null
+    //     }
+    // }
+    // componentDidMount() {
+    //     return Connection.getSzczegolyJadlodajnia()
+    //         .then((response) => response.json()).
+    //         then((responseJson) => {
+    //             this.setState({
+    //                 isLoading: false,
+    //                 dataSource: responseJson.szczegoly
+    //             })
+    //         })
+    //         .catch((error) => {
+    //             console.log('blad ' + error);
+    //         });
+    // }
+    const szczegoly = [];
+    // const pobranySzczegol;
+    const [isLoading, setIsLoading] = useState(true);
+    const [dataSource, setDataSource] = useState([]);
+    const [scrollY, setScrollY] = useState(new Animated.Value(0));
+    const scrollRef = useRef(null);
+
+    async function fetchData() {
+        if (isLoading) {
+            const res = await Connection.getSzczegolyJadlodajnia();
+            res
+                .json()
+                .then(res => {
+                    // res.szczegoly.map((szczegol) => {
+                    //     szczegoly.push(szczegol);
+                    //   });
+                    //   szczegoly.map((szczegol, index) => {
+                    //     if (index === 0) {
+                    //     //   pobranySzczegol = szczegol;
+                    //     }
+                    //   });
+
+                    setDataSource(res.szczegoly);
+                    setIsLoading(false);
+                })
+                .catch(err => console.log(err + 'blad'));
         }
     }
-    componentDidMount() {
-        return Connection.getSzczegolyJadlodajnia()
-            .then((response) => response.json()).
-            then((responseJson) => {
-                this.setState({
-                    isLoading: false,
-                    dataSource: responseJson.szczegoly
-                })
-            })
-            .catch((error) => {
-                console.log('blad ' + error);
-            });
-    }
 
-    render() {
-        if (this.state.isLoading) {
+    useEffect(() => {
+        fetchData();
+    }, isLoading);
+
+
+        if (isLoading) {
             return <View style={{ flex: 1 }}>
                 <ActivityIndicator></ActivityIndicator>
             </View>
         }
         else {
             let currentWidth = 0;
-            const szczegoly = this.state.dataSource;
+            const szczegoly = dataSource;
             const zestawRange = szczegoly.zestawy.length;
-            const { jadlodajniaId } = this.props.route.params;
-            const headerHeight = this.state.scrollY.interpolate(
+            const { jadlodajniaId } = props.route.params;
+            const headerHeight = scrollY.interpolate(
                 {
                     inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
                     outputRange: [HEADER_EXPANDED_HEIGHT, HEADER_COLLAPSED_HEIGHT],
                     extrapolate: 'clamp'
                 })
-            const headerTitleOpacity = this.state.scrollY.interpolate({
+            const headerTitleOpacity = scrollY.interpolate({
                 inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
                 outputRange: [0, 1],
                 extrapolate: 'clamp'
             });
-            const heroTitleOpacity = this.state.scrollY.interpolate({
+            const heroTitleOpacity = scrollY.interpolate({
                 inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
                 outputRange: [1, 0],
                 extrapolate: 'clamp'
@@ -81,7 +113,7 @@ export default class JadlodajnieWiecej extends React.Component {
                         <View style={styles.backButtonContainer}>
                             <TouchableOpacity
                                 onPress={() => {
-                                    this.props.navigation.goBack();
+                                    props.navigation.goBack();
                                 }}>
                                 <Ionicons name="ios-arrow-round-back" size={36} color={Colors.colorTextWhite}></Ionicons>
                             </TouchableOpacity>
@@ -92,7 +124,7 @@ export default class JadlodajnieWiecej extends React.Component {
                                 [{
                                     nativeEvent: {
                                         contentOffset: {
-                                            y: this.state.scrollY
+                                            y: scrollY
                                         }
                                     }
                                 }])}
@@ -119,7 +151,7 @@ export default class JadlodajnieWiecej extends React.Component {
                                         }
                                         else {
                                             currentWidth = currentWidth - (width - 100);
-                                            this.refs.scroll.scrollTo({ x: currentWidth });
+                                            scrollRef.current.scrollTo({ x: currentWidth });
                                         }
                                     }}>
                                         <Feather name="arrow-left-circle" color={Colors.primary} size={36}></Feather>
@@ -129,7 +161,8 @@ export default class JadlodajnieWiecej extends React.Component {
                                     horizontal={true}
                                     scrollEnabled={false}
                                     showsHorizontalScrollIndicator={false}
-                                    ref={'scroll'}>
+                                    ref={scrollRef}
+                                    >
                                     <FlatList data={szczegoly.zestawy}
                                         horizontal={true}
                                         renderItem={itemData =>
@@ -140,7 +173,7 @@ export default class JadlodajnieWiecej extends React.Component {
                                 <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: "center", width: 50 }}>
                                     <TouchableOpacity onPress={() => {
                                         currentWidth = currentWidth + width - 100;
-                                        this.refs.scroll.scrollTo({ x: currentWidth });
+                                        scrollRef.current.scrollTo({ x: currentWidth });
                                     }}>
                                         <Feather name="arrow-right-circle" color={Colors.primary} size={36}></Feather>
                                     </TouchableOpacity>
@@ -157,7 +190,7 @@ export default class JadlodajnieWiecej extends React.Component {
             )
         }
     }
-}
+
 
 function renderInformacje(szczegoly, lokalizacja) {
     return (
@@ -233,4 +266,7 @@ const styles = StyleSheet.create({
         fontSize: dimensions.defaultFontSize,
         marginRight: dimensions.defaultSmallMargin
     }
-})
+});
+
+
+export default JadlodajnieWiecej;

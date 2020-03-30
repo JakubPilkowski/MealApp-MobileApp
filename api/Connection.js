@@ -14,7 +14,7 @@ export default class Connection {
         return fetch('http://www.mocky.io/v2/5e7a4d4730000078009309fa');
     }
     static getUserOptions(){
-        return fetch('http://www.mocky.io/v2/5e81e7132f00000d002fb6b4');
+        return fetch('http://www.mocky.io/v2/5e820a472f00000d002fb833');
     }
 
     static logIn(){

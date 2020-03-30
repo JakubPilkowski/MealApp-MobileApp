@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, ImageBackground } from "react-native";
 import Strings from "../src/themes/strings";
 import Colors from "../src/themes/colors";
@@ -26,7 +26,7 @@ function JadlodajnieScreen({ navigation, route }) {
 
     return (
         <View style={styles.container}>
-            <ImageBackground source={require('../src/images/pancakes.jpg')} imageStyle={{opacity:0.3}} style={{flex:1, backgroundColor: Colors.backgroundColor}}>
+            <ImageBackground source={require('../src/images/pancakes.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>
                 <SafeAreaView>
                     <FlatList
                         data={jadlodajnie} renderItem={itemData =>
@@ -40,56 +40,58 @@ function JadlodajnieScreen({ navigation, route }) {
 
 }
 
-export default class Jadlodajnie extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = { isLoading: true }
-    }
+const Jadlodajnie = props => {
 
-    componentDidMount() {
-        return Connection.getJadlodajnie()
-            .then((response) => response.json()).
-            then((responseJson) => {
-                this.setState({
-                    isLoading: false,
-                    dataSource: responseJson.jadlodajnie
+    const [isLoading, setIsLoading] = useState(true);
+    const [dataSource, setDataSource] = useState([]);
+    async function fetchData() {
+        if (isLoading) {
+            const res = await Connection.getJadlodajnie();
+            res
+                .json()
+                .then(res => {
+                    setDataSource(res.jadlodajnie);
+                    setIsLoading(false);
                 })
-            })
-            .catch((error) => {
-                console.log('blad ' + error);
-            });
-    }
-
-
-    render() {
-        const Stack = createStackNavigator();
-        if (this.state.isLoading) {
-            return <View style={{ flex: 1 }}>
-                <ActivityIndicator></ActivityIndicator>
-            </View>
+                .catch(err => console.log(err + 'blad'));
         }
-
-        return (
-            <Stack.Navigator initialRouteName="Jadlodajnie" screenOptions={ScreenStyle}>
-                <Stack.Screen name="Jadlodajnie" component={JadlodajnieScreen} initialParams={{ jadlodajnie: this.state.dataSource }} options={{
-                    headerTitle: Strings.jadlodajnie,
-                }} />
-                <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
-                    options={{
-                        headerStyle: {
-                            opacity: 0, height: 0
-                        }
-                    }}
-                />
-            </Stack.Navigator>
-        );
     }
+
+    useEffect(() => {
+        fetchData();
+    }, isLoading);
+
+    const Stack = createStackNavigator();
+    if (isLoading) {
+        return <View style={{ flex: 1 }}>
+            <ActivityIndicator></ActivityIndicator>
+        </View>
+    }
+
+    return (
+        <Stack.Navigator initialRouteName="Jadlodajnie" screenOptions={ScreenStyle}>
+            <Stack.Screen name="Jadlodajnie" component={JadlodajnieScreen} initialParams={{ jadlodajnie: dataSource }} options={{
+                headerTitle: Strings.jadlodajnie,
+            }} />
+            <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
+                options={{
+                    headerStyle: {
+                        opacity: 0, height: 0
+                    }
+                }}
+            />
+        </Stack.Navigator>
+    );
+
 }
 const styles = StyleSheet.create({
     container: {
         flex: 1
     },
 });
+
+
+export default Jadlodajnie;
 
 
 

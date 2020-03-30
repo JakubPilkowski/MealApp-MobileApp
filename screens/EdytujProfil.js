@@ -13,8 +13,9 @@ import IosButton from '../components/IosButton';
 import GradientDivider from '../components/GradientDivider';
 const { width, height } = Dimensions.get("screen");
 import * as ImagePicker from 'expo-image-picker';
-function EdytujScreen({ navigation }) {
-    const [selectedImage, setSelectedImage] = useState(null);
+function EdytujScreen({ navigation, route }) {
+    const { uzytkownik } = route.params;
+    const [selectedImage, setSelectedImage] = useState(uzytkownik.avatar);
     let image;
     let openImagePickerAsync = async () => {
         let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
@@ -31,7 +32,7 @@ function EdytujScreen({ navigation }) {
 
         setSelectedImage(pickerResult.uri);
     }
-    if (selectedImage === null) {
+    if (selectedImage === "") {
         image = <Image style={[styles.logo, { backgroundColor: colors.backgroundColor, }]}></Image>
     }
     else {
@@ -99,10 +100,14 @@ function EdytujScreen({ navigation }) {
                     </View>
                     <Text style={styles.title}>Login</Text>
                     <TextInput style={styles.input}
-                        returnKeyType="next" />
+                        returnKeyType="next" 
+                        value={uzytkownik.login}
+                        />
                     <Text style={styles.title}>Email</Text>
                     <TextInput style={styles.input}
-                        returnKeyType="next" />
+                        returnKeyType="next" 
+                        value = {uzytkownik.email}
+                        />
                     <View style={{ flexDirection: "row", alignItems: 'center', marginTop:50}}>
                         <GradientDivider startColor={colors.primary} endColor={colors.accent}
                             from="left" locationEnd={0.7} />
@@ -120,7 +125,7 @@ function EdytujScreen({ navigation }) {
 
 const EdytujProfil = props => {
 
-
+    const { uzytkownik } = props.route.params;
 
 
     const Stack = createStackNavigator();
@@ -130,7 +135,7 @@ const EdytujProfil = props => {
                 {
                     title: "Edytuj profil"
                 }
-            } />
+            } initialParams={{uzytkownik : uzytkownik}}/>
 
         </Stack.Navigator>
     );
