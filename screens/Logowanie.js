@@ -98,8 +98,8 @@ const Logowanie = props => {
     const Stack = createStackNavigator();
     return (
         <Stack.Navigator initialRouteName="Logowanie" screenOptions={ScreenStyle}>
-            <Stack.Screen name="Logowanie" component={LogowanieScreen}  />
-            <Stack.Screen name="Rejestracja" component={Rejestracja}/>
+            <Stack.Screen name="Logowanie" component={LogowanieScreen} />
+            <Stack.Screen name="Rejestracja" component={Rejestracja} />
             <Stack.Screen name="ZapomnialemHasla" component={ZapomnialemHasla} />
         </Stack.Navigator>
     );

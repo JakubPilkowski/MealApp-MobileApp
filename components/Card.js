@@ -10,7 +10,7 @@ import Swipeable from 'react-native-gesture-handler/Swipeable';
 
 const Card = props => {
     const cardView =
-        <View style={styles.cardContainer}>
+        <View style={[styles.container, props.containerStyle]}>
             {props.content}
         </View>;
     let touchableView;
@@ -36,7 +36,7 @@ const Card = props => {
         <View>
             <Swipeable
                 renderRightActions={props.onSwipeRight}
-                containerStyle={[styles.container, props.cardStyle]}
+                containerStyle={[styles.cardContainer, props.cardStyle]}
             >
                 {touchableView}
             </Swipeable>
@@ -46,16 +46,16 @@ const Card = props => {
 
 
 const styles = StyleSheet.create({
-    container: {
+    cardContainer: {
         justifyContent: "center",
         marginHorizontal: Dimensions.defaultSmallMargin,
+    },
+    container: {
+        backgroundColor: Colors.colorTextWhite,
+        padding: Dimensions.defaultPadding,
         borderRadius: Dimensions.defaultSmallBorderRadius,
         borderColor: Colors.accent,
         borderWidth: Dimensions.defaultBorderWidth,
-    },
-    cardContainer: {
-        backgroundColor: Colors.colorTextWhite,
-        padding: Dimensions.defaultPadding,
     }
 });
 

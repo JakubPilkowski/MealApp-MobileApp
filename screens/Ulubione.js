@@ -7,6 +7,7 @@ import JadlodajnieWiecej from './JadlodajnieWiecej';
 import { createStackNavigator } from '@react-navigation/stack';
 import Colors from "../src/themes/colors";
 import Strings from "../src/themes/strings";
+import { Rating } from 'react-native-elements';
 import IconWithAction from "../components/IconWithAction";
 import ScreenStyle from "../src/themes/screenStyle";
 import Card from '../components/Card';
@@ -54,7 +55,13 @@ function UlubioneScreen({ navigation, route }) {
                             content={
                                 <LogoWithTexts title={itemData.item.title} logo={{ uri: itemData.item.iconUrl }}
                                     subTitleContent={
-                                        <Text>Ocena: {itemData.item.ocena}</Text>
+                                        <View style={{flexDirection:'row', marginLeft:10, marginTop:3}}>
+                                            <Text>Ocena: </Text>
+                                            <Rating ratingCount={5} ratingColor={colors.primary} 
+                                            
+                                            type="custom" startingValue={itemData.item.ocena} 
+                                            imageSize={20}/>
+                                        </View>
                                     } />
                             } />
                     }
