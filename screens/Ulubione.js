@@ -14,7 +14,7 @@ import Connection from "../api/Connection";
 import LogoWithTexts from '../components/LogoWithTexts';
 import colors from "../src/themes/colors";
 import dimensions from "../src/themes/dimensions";
-
+import {Feather} from 'react-native-vector-icons';
 
 function UlubioneScreen({ navigation, route }) {
     const { ulubione } = route.params;
@@ -36,7 +36,7 @@ function UlubioneScreen({ navigation, route }) {
     }
     navigation.setOptions({
         headerLeft: () => (
-            <IconWithAction src={require('../src/images/burger_bialy_m.png')} onClick={HomeButtonHandler} />
+            <IconWithAction content={<Feather name="menu" size={26} color={Colors.colorTextWhite} />} onClick={HomeButtonHandler} />
         )
     });
     return (

@@ -77,9 +77,12 @@ export default function App() {
             labelStyle: { fontSize: 18, fontWeight: 'bold' },
           }}
         >
-          <Drawer.Screen name="Jadlodajnie" component={Jadlodajnie} options={
+          <Drawer.Screen name="Jadlodajnie" component={Jadlodajnie} 
+          initialParams={{navigation: Drawer.navigation}}
+          options={
             {
-              drawerIcon: ({ color }) => <MaterialCommunityIcons name="food-fork-drink" size={24} color={color} />
+              drawerIcon: ({ color }) => <MaterialCommunityIcons name="food-fork-drink" size={24} color={color} />,
+              
             }
           } />
           <Drawer.Screen name="Ulubione" component={Ulubione} options={
