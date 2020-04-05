@@ -13,6 +13,10 @@ export default class Connection {
     static getMapy(){
         return fetch('http://www.mocky.io/v2/5e7a4d4730000078009309fa');
     }
+    static getUserOptions(){
+        return fetch('http://www.mocky.io/v2/5e820a472f00000d002fb833');
+    }
+
     static logIn(){
 
     }

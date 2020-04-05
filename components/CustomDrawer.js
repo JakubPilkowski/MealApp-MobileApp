@@ -26,7 +26,9 @@ import Logowanie from "../screens/Logowanie";
 const CustomDrawer = props => {
   let loginButton;
   let editButton;
-
+  let nazwa = props.dataSource.login;
+  let email = props.dataSource.email;
+  let avatar = props.dataSource.avatar;
   if (Platform.OS === "android") {
     loginButton = <AndroidButton text="Zaloguj się" containerStyle={{ borderRadius: dimensions.defaultHugeBorderRadius }}
       buttonStyle={{ color: Colors.accent, borderWidth: 0 }} onClick={() => {
@@ -35,7 +37,7 @@ const CustomDrawer = props => {
     editButton =
       <View style={{ backgroundColor: Colors.primary, position: 'absolute', right: 12 }}>
         <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(Colors.accent, true)}
-          onPress={()=>{props.navigation.navigate("EdytujProfil");}}
+          onPress={() => { props.navigation.navigate("EdytujProfil", { uzytkownik : props.dataSource}); }}
           useForeground={true}>
           <View style={{ flexDirection: 'column' }}>
             <MaterialIcons name="edit" color={Colors.colorTextWhite} size={32} />
@@ -59,11 +61,18 @@ const CustomDrawer = props => {
           {editButton}
         </View>
         <View style={styles.drawerUserInfoContainer}>
-          <Avatar rounded size="large" containerStyle={styles.drawerAvatar} />
+          <Avatar rounded size="large" containerStyle={styles.drawerAvatar} source={{
+            uri:
+              avatar,
+          }} />
           <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', }}>
-            <Text style={styles.drawerUserInfo}>Nazwa</Text>
+            <Text style={styles.drawerUserInfo}>
+              {email}
+            </Text>
             <Divider style={styles.divider}></Divider>
-            <Text style={styles.drawerUserInfo}>Email</Text>
+            <Text style={styles.drawerUserInfo}>
+              {nazwa}
+            </Text>
           </View>
         </View>
         <View style={styles.drawerLoginContainer} >
