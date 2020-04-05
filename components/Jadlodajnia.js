@@ -26,7 +26,7 @@ const Jadlodajnia = props => {
         }} text={Strings.more} containerStyle={styles.androidButtonView} buttonStyle={styles.buttonStyle}/>
     }
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, props.containerStyle]}>
             <View style={styles.avatarContainer}>
                 <Image style={styles.image} source={{uri:jadlodajnia.iconUrl}} ></Image>
                 <View style={{ flexDirection: 'column', flex: 1, justifyContent: "center" }}>

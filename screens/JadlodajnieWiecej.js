@@ -15,29 +15,8 @@ const { width, height } = Dimensions.get('window');
 const JadlodajnieWiecej = props => {
 
 
-    // constructor(props) {
-    //     super(props);
-    //     this.state = {
-    //         scrollY: new Animated.Value(0),
-    //         isLoading: true,
-    //         dataSource: null
-    //     }
-    // }
-    // componentDidMount() {
-    //     return Connection.getSzczegolyJadlodajnia()
-    //         .then((response) => response.json()).
-    //         then((responseJson) => {
-    //             this.setState({
-    //                 isLoading: false,
-    //                 dataSource: responseJson.szczegoly
-    //             })
-    //         })
-    //         .catch((error) => {
-    //             console.log('blad ' + error);
-    //         });
-    // }
     const szczegoly = [];
-    // const pobranySzczegol;
+    
     const [isLoading, setIsLoading] = useState(true);
     const [dataSource, setDataSource] = useState([]);
     const [scrollY, setScrollY] = useState(new Animated.Value(0));
@@ -49,15 +28,6 @@ const JadlodajnieWiecej = props => {
             res
                 .json()
                 .then(res => {
-                    // res.szczegoly.map((szczegol) => {
-                    //     szczegoly.push(szczegol);
-                    //   });
-                    //   szczegoly.map((szczegol, index) => {
-                    //     if (index === 0) {
-                    //     //   pobranySzczegol = szczegol;
-                    //     }
-                    //   });
-
                     setDataSource(res.szczegoly);
                     setIsLoading(false);
                 })

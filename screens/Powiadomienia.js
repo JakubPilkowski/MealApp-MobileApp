@@ -13,6 +13,7 @@ import CustomAlert from '../components/CustomAlert';
 import SimpleAlert from '../components/SimpleAlert';
 import AndroidButton from '../components/AndroidButton';
 import strings from '../src/themes/strings';
+import {Feather} from 'react-native-vector-icons';
 let id = 0;
 
 function PowiadomieniaScreen({ navigation }) {
@@ -60,7 +61,7 @@ function PowiadomieniaScreen({ navigation }) {
     }
     navigation.setOptions({
         headerLeft: () => (
-            <IconWithAction src={require('../src/images/burger_bialy_m.png')} onClick={HomeButtonHandler} />
+            <IconWithAction content={<Feather name="menu" size={26} color={Colors.colorTextWhite} />} onClick={HomeButtonHandler} />
         )
     });
     return (

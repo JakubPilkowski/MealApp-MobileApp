@@ -9,7 +9,7 @@ import ScreenStyle from "../src/themes/screenStyle";
 import Connection from "../api/Connection";
 import dimensions from '../src/themes/dimensions';
 import Card from "../components/Card";
-import { FontAwesome, Feather } from 'react-native-vector-icons';
+import { Feather } from 'react-native-vector-icons';
 import IosButton from "../components/IosButton";
 import MapView, { PROVIDER_GOOGLE, Marker, Callout } from 'react-native-maps';
 
@@ -26,7 +26,7 @@ function MapaScreen({ navigation, route }) {
     }
     navigation.setOptions({
         headerLeft: () => (
-            <IconWithAction src={require('../src/images/burger_bialy_m.png')} onClick={HomeButtonHandler} />
+            <IconWithAction content={<Feather name="menu" size={26} color={Colors.colorTextWhite} />} onClick={HomeButtonHandler} />
         )
     });
     return (

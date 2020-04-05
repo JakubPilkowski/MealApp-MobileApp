@@ -4,10 +4,14 @@ import Dimensions from "../src/themes/dimensions";
 
 
 const IconWithAction = props => {
+
     return (
         <View style={styles.buttonContainer}>
             <TouchableOpacity onPress={props.onClick}>
-                <Image style={[styles.button, props.imageStyle]} source={props.src}></Image>
+               
+                    {props.content}
+                        {/* <Image style={[styles.button, props.imageStyle]} source={props.src}></Image> */}
+             
             </TouchableOpacity>
         </View>
     );
