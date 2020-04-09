@@ -12,6 +12,7 @@ import Card from "../components/Card";
 import { Feather } from 'react-native-vector-icons';
 import IosButton from "../components/IosButton";
 import MapView, { PROVIDER_GOOGLE, Marker, Callout } from 'react-native-maps';
+import colors from '../src/themes/colors';
 
 
 function MapaScreen({ navigation, route }) {
@@ -57,7 +58,12 @@ function renderMarker(point, navigation) {
             <Callout tooltip={true} >
                 <Card
                     pressEnabled={false}
-                    cardStyle={{ borderRadius: dimensions.defaultHugeBorderRadius }}
+                    containerStyle={{
+                        borderRadius: 0,
+                        borderColor: Colors.accent,
+                        borderWidth: 0,
+                    }}
+                    cardStyle={{ borderRadius: dimensions.defaultHugeBorderRadius, borderColor:colors.accent, borderWidth: dimensions.defaultBorderWidth,}}
                     content={
                         <View style={{ alignItems: 'center' }}>
                             <Text style={{ fontSize: 12 }}>{point.title}</Text>

@@ -7,6 +7,7 @@ import IosButton from '../components/IosButton';
 const ZapomnialemHasla = props => {
 
     let sendNewPasswordButton;
+    // const {drawerNavigation } = props.route.params;
 
     if (Platform.OS === "android") {
         sendNewPasswordButton =
@@ -31,6 +32,9 @@ const ZapomnialemHasla = props => {
                 }}
             />
     }
+    // drawerNavigation.setOptions({
+    //     gestureEnabled:false
+    // });
     return (
         <View style={styles.container}>
             <ImageBackground source={require('../src/images/cutlery.jpg')} style={styles.imageBackground} imageStyle={styles.imageStyle}>

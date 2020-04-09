@@ -10,10 +10,10 @@ import Connection from '../api/Connection';
 import { FlatList } from 'react-native-gesture-handler';
 import Zestaw from '../components/Zestaw';
 import InformacjeOgolneJadlodajnia from '../components/InformacjeOgolneJadlodajnia';
+import IconWithAction from '../components/IconWithAction';
 const { width, height } = Dimensions.get('window');
 
 const JadlodajnieWiecej = props => {
-
 
     const szczegoly = [];
     
@@ -80,13 +80,16 @@ const JadlodajnieWiecej = props => {
                                 <Animated.Text style={[styles.headerExpanded, { opacity: 1 }]}>{szczegoly.nazwa} </Animated.Text>
                             </Animated.View>
                         </Animated.View>
-                        <View style={styles.backButtonContainer}>
+                        <View style={[styles.backButtonContainer,{left:0}]}>
                             <TouchableOpacity
                                 onPress={() => {
                                     props.navigation.goBack();
                                 }}>
                                 <Ionicons name="ios-arrow-round-back" size={36} color={Colors.colorTextWhite}></Ionicons>
                             </TouchableOpacity>
+                        </View>
+                        <View style={[styles.backButtonContainer,{right:0}]}>
+                            <IconWithAction content={<FontAwesome name="star" color="white" size={26}/>} onClick={()=>{}} />
                         </View>
                         <ScrollView
                             contentContainerStyle={styles.scrollContainer}
@@ -192,7 +195,6 @@ const styles = StyleSheet.create({
     },
     backButtonContainer: {
         flex: 1,
-        left: 0,
         top: 0,
         position: 'absolute',
         height: 56,

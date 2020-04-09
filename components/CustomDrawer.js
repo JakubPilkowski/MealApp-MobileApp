@@ -40,7 +40,7 @@ const CustomDrawer = props => {
           onPress={() => { props.navigation.navigate("EdytujProfil", { uzytkownik : props.dataSource}); }}
           useForeground={true}>
           <View style={{ flexDirection: 'column' }}>
-            <MaterialIcons name="edit" color={Colors.colorTextWhite} size={32} />
+            <MaterialIcons name="edit" color={Colors.colorTextWhite} size={28} />
           </View>
         </TouchableNativeFeedback>
       </View>
@@ -101,7 +101,7 @@ const CustomDrawer = props => {
                   activeBackgroundColor={props.activeBackgroundColor}
                   inactiveBackgroundColor={props.inactiveBackgroundColor}
                   labelStyle={props.labelStyle}
-                  style={props.itemStyle}
+                  style={{paddingLeft:dimensions.defaultSmallPadding}}
                   onPress={() => {
                     props.navigation.dispatch({
                       ...(focused

@@ -77,14 +77,14 @@ export default function App() {
             labelStyle: { fontSize: 18, fontWeight: 'bold' },
           }}
         >
-          <Drawer.Screen name="Jadlodajnie" component={Jadlodajnie} 
-          initialParams={{navigation: Drawer.navigation}}
-          options={
-            {
-              drawerIcon: ({ color }) => <MaterialCommunityIcons name="food-fork-drink" size={24} color={color} />,
-              
-            }
-          } />
+          <Drawer.Screen name="Jadlodajnie" component={Jadlodajnie}
+            initialParams={{ navigation: Drawer.navigation }}
+            options={
+              {
+                drawerIcon: ({ color }) => <MaterialCommunityIcons name="food-fork-drink" size={24} color={color} />,
+
+              }
+            } />
           <Drawer.Screen name="Ulubione" component={Ulubione} options={
             {
               drawerIcon: ({ color }) => <Ionicons name="md-star" size={30} color={color} />,
@@ -100,11 +100,14 @@ export default function App() {
               drawerIcon: ({ color }) => <Foundation name="map" size={27} color={color} />,
             }
           } />
-          <Drawer.Screen name="Logowanie" component={Logowanie} options={
-            {
-              title: "Logowanie"
-            }
-          } />
+          <Drawer.Screen name="Logowanie" component={Logowanie}
+            // initialParams={{ navigation: Drawer.navigation }}
+            options={
+              {
+                title: "Logowanie",
+                gestureEnabled: false
+              }
+            } />
           <Drawer.Screen name="EdytujProfil" component={EdytujProfil} options={
             {
               title: "EdytujProfil",

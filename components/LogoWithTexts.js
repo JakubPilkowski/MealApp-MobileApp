@@ -2,15 +2,15 @@ import React from 'react';
 import { View, StyleSheet, Image, Text } from 'react-native';
 import Dimensions from '../src/themes/dimensions';
 import Colors from '../src/themes/colors';
-import {Divider} from 'react-native-elements';
-
+import GradientDivider from './GradientDivider';
 const LogoWithTexts = props => {
     return (
         <View style={styles.container}>
             <Image style={styles.logo} source={props.logo} ></Image>
             <View style={{ flexDirection: 'column', flex: 1, justifyContent: "center" }}>
                 <Text style={styles.logoTitle}>{props.title}</Text>
-                <Divider style={styles.divider}></Divider>
+                <GradientDivider startColor={Colors.primary} endColor={Colors.accent}
+                    from="left" locationEnd={0.5} dividerStyle={{ flex: 0 }} />
                 <View>
                     {props.subTitleContent}
                 </View>
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
         fontSize: Dimensions.hugeFontSize,
         marginLeft: 10,
     },
-    divider:{
+    divider: {
         backgroundColor: Colors.accent,
         height: Dimensions.defaultBorderWidth,
     }

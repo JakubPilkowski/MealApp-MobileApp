@@ -8,6 +8,7 @@ import dimensions from '../src/themes/dimensions';
 
 const { width, height } = Dimensions.get("screen");
 const Rejestracja = props => {
+    // const {drawerNavigation } = props.route.params;
     const [firstInputFocus, setFirstInputFocus] = useState(true);
     const [secondInputFocus, setSecondInputFocus] = useState(false);
     const [thirdInputFocus, setThirdInputFocus] = useState(false);
@@ -31,6 +32,9 @@ const Rejestracja = props => {
         setSecondInputFocus(false);
         setThirdInputFocus(true);
     }
+    // drawerNavigation.setOptions({
+    //     gestureEnabled:false
+    // });
     let registerButton;
     if (Platform.OS === "android") {
         registerButton =

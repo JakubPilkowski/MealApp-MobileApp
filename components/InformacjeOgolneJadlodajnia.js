@@ -52,9 +52,14 @@ const InformacjeOgolneJadlodajnia = props => {
             </View>
             <Text style={styles.centerAlignText}>Mapa</Text>
             <View style={{ borderWidth: 2, borderColor: Colors.accent, margin: dimensions.defaultMargin, }}>
-                <MapView provider={PROVIDER_GOOGLE} style={{ height: 200, borderColor: Colors.primary, borderWidth: dimensions.borderWidth }} initialRegion={{
-                    latitude: 53.77020960646819,
-                    longitude: 20.4703061185026,
+                <MapView provider={PROVIDER_GOOGLE}
+                scrollEnabled={false}
+                rotateEnabled={false}
+                pitchEnabled={false}
+                zoomEnabled={false}
+                style={{ height: 200, borderColor: Colors.primary, borderWidth: dimensions.borderWidth }} initialRegion={{
+                    latitude: informacje.mapa.szerokoscGeo,
+                    longitude: informacje.mapa.dlugoscGeo,
                     longitudeDelta: 0.003,
                     latitudeDelta: 0.003
                 }} minZoomLevel={10} >
