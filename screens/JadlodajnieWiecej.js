@@ -11,6 +11,7 @@ import { FlatList } from 'react-native-gesture-handler';
 import Zestaw from '../components/Zestaw';
 import InformacjeOgolneJadlodajnia from '../components/InformacjeOgolneJadlodajnia';
 import IconWithAction from '../components/IconWithAction';
+import CustomLoadingComponent from '../components/CustromLoadingComponent';
 const { width, height } = Dimensions.get('window');
 
 const JadlodajnieWiecej = props => {
@@ -41,9 +42,7 @@ const JadlodajnieWiecej = props => {
 
 
         if (isLoading) {
-            return <View style={{ flex: 1 }}>
-                <ActivityIndicator></ActivityIndicator>
-            </View>
+            return <CustomLoadingComponent />
         }
         else {
             let currentWidth = 0;
@@ -89,7 +88,7 @@ const JadlodajnieWiecej = props => {
                             </TouchableOpacity>
                         </View>
                         <View style={[styles.backButtonContainer,{right:0}]}>
-                            <IconWithAction content={<FontAwesome name="star" color="white" size={26}/>} onClick={()=>{}} />
+                            <IconWithAction content={<FontAwesome name="star" color="white" size={24}/>} onClick={()=>{}} />
                         </View>
                         <ScrollView
                             contentContainerStyle={styles.scrollContainer}
@@ -103,18 +102,6 @@ const JadlodajnieWiecej = props => {
                                 }])}
                             scrollEventThrottle={16}
                         >
-                            {/* <View style={{ flex: 1, flexDirection: 'row', margin: dimensions.defaultMargin }}>
-                        <Image style={styles.image}></Image>
-                        <View style={{ flexDirection: 'column', justifyContent: "center", flex: 1 }}>
-                            <TouchableOpacity onPress={() => { }} >
-                                <Text style={styles.avatarName}>Dodaj do ulubionych</Text>
-                            </TouchableOpacity>
-                            <Divider style={styles.divider}></Divider>
-                            <View style={{ flexDirection: 'row' }}>
-                                <Text style={styles.avatarName}>Ocena: </Text>
-                            </View>
-                        </View>
-                    </View> */}
                             <Text style={{ fontSize: 20, textAlign: "center", marginVertical: dimensions.defaultHugeMargin }}>Zestawy</Text>
                             <View style={{ flex: 1, flexDirection: 'row', marginBottom: dimensions.defaultMarginBetweenItems }}>
                                 <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 50 }}>

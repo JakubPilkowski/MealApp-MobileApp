@@ -16,6 +16,7 @@ import LogoWithTexts from '../components/LogoWithTexts';
 import colors from "../src/themes/colors";
 import dimensions from "../src/themes/dimensions";
 import {Feather} from 'react-native-vector-icons';
+import CustomLoadingComponent from "../components/CustromLoadingComponent";
 
 function UlubioneScreen({ navigation, route }) {
     const { ulubione } = route.params;
@@ -113,25 +114,25 @@ const Ulubione = props => {
 
         if (isLoading) {
             return (
-                <View style={{ flex: 1 }}>
-                    <ActivityIndicator></ActivityIndicator>
-                </View>
+                <CustomLoadingComponent />
             )
         }
-        return (
-            <Stack.Navigator initialRouteName="Ulubione" screenOptions={ScreenStyle}>
-                <Stack.Screen name="Ulubione" component={UlubioneScreen} options={{
-                    headerTitle: Strings.ulubione,
-                }} initialParams={{ ulubione: dataSource }} />
-                <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
-                    options={{
-                        headerStyle: {
-                            opacity: 0, height: 0
-                        }
-                    }}
-                />
-            </Stack.Navigator>
-        );
+        else{
+            return (
+                <Stack.Navigator initialRouteName="Ulubione" screenOptions={ScreenStyle}>
+                    <Stack.Screen name="Ulubione" component={UlubioneScreen} options={{
+                        headerTitle: Strings.ulubione,
+                    }} initialParams={{ ulubione: dataSource }} />
+                    <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
+                        options={{
+                            headerStyle: {
+                                opacity: 0, height: 0
+                            }
+                        }}
+                    />
+                </Stack.Navigator>
+            );
+        }
     
 }
 

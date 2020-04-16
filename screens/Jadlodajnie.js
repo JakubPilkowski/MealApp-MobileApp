@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, ImageBackground, Text, LayoutAnimation, TextInput, Platform, Picker } from "react-native";
+import { View, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, ImageBackground, Text, Easing, LayoutAnimation, TextInput, Platform, Picker, Modal, Animated } from "react-native";
 import Strings from "../src/themes/strings";
 import Colors from "../src/themes/colors";
 import { createStackNavigator, HeaderTitle } from '@react-navigation/stack';
@@ -18,6 +18,7 @@ import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
 import { Dimensions } from 'react-native';
+import CustomLoadingComponent from '../components/CustromLoadingComponent';
 
 const { width, height } = Dimensions.get("screen");
 
@@ -40,9 +41,9 @@ function JadlodajnieScreen({ navigation, route }) {
 
     let searchButton;
     if (Platform.OS === "android")
-        searchButton = <AndroidButton text="Wyszukaj" containerStyle={{ width: '60%', alignSelf: 'center', marginTop: 12 }} onClick={toggleView}/>
+        searchButton = <AndroidButton text="Wyszukaj" containerStyle={{ width: '60%', alignSelf: 'center', marginTop: 12 }} onClick={toggleView} />
     if (Platform.OS === "ios")
-        searchButton = <IosButton text="Wyszukaj" onClick={toggleView}/>
+        searchButton = <IosButton text="Wyszukaj" onClick={toggleView} />
 
 
     navigation.setOptions({
@@ -56,14 +57,14 @@ function JadlodajnieScreen({ navigation, route }) {
                     onClick={toggleView} />;
         },
         headerLeft: () => {
-            return expanded ? 
-                null : 
-            <IconWithAction content={<Feather name="menu" size={26} color={Colors.colorTextWhite} />} onClick={HomeButtonHandler} />
+            return expanded ?
+                null :
+                <IconWithAction content={<Feather name="menu" size={26} color={Colors.colorTextWhite} />} onClick={HomeButtonHandler} />
         },
         headerTitle: expanded ? "Wyszukiwanie" : "Jadłodajnie",
     });
     drawerNavigation.setOptions({
-        gestureEnabled: expanded ? false: true
+        gestureEnabled: expanded ? false : true
     });
 
     return (
@@ -75,12 +76,12 @@ function JadlodajnieScreen({ navigation, route }) {
                 alignItems: 'center',
                 borderColor: Colors.primary, borderBottomLeftRadius: 16, borderBottomRightRadius: 16
             }}>
-                <Text style={{textAlign:'center'}}>Rodzaj potrawy</Text>
+                <Text style={{ textAlign: 'center' }}>Rodzaj potrawy</Text>
                 <View style={{
-                    backgroundColor: Colors.colorTextWhite, 
-                    borderRadius: 6, 
-                    borderColor: Colors.accent, 
-                    borderWidth: 2 ,
+                    backgroundColor: Colors.colorTextWhite,
+                    borderRadius: 6,
+                    borderColor: Colors.accent,
+                    borderWidth: 2,
                     marginTop: dimensions.defaultSmallMargin
                 }}>
                     <Picker
@@ -88,23 +89,23 @@ function JadlodajnieScreen({ navigation, route }) {
                         style={{ height: 40, width: 250 }}
                         onValueChange={(itemValue, itemIndex) => setSelectedValue(itemValue)}
                     >
-                        <Picker.Item label="Wszystko" value ="wszystko" />
+                        <Picker.Item label="Wszystko" value="wszystko" />
                         <Picker.Item label="Desery" value="deser" />
                         <Picker.Item label="Fast-foody" value="fast-food" />
-                        <Picker.Item label="Potrawy mięsne" value ="miesne" />
-                        <Picker.Item label="Potrawy warzywne" value ="warzywne" />
-                        <Picker.Item label="Potrawy rybne" value ="ryby" />
-                        <Picker.Item label="Chińskie" value ="chinskie" />
-                        <Picker.Item label="Włoskie" value ="wloskie" />
-                        <Picker.Item label="Śniadanie" value ="sniadanie" />
+                        <Picker.Item label="Potrawy mięsne" value="miesne" />
+                        <Picker.Item label="Potrawy warzywne" value="warzywne" />
+                        <Picker.Item label="Potrawy rybne" value="ryby" />
+                        <Picker.Item label="Chińskie" value="chinskie" />
+                        <Picker.Item label="Włoskie" value="wloskie" />
+                        <Picker.Item label="Śniadanie" value="sniadanie" />
                     </Picker>
                 </View>
 
 
-                <Text style={{ textAlign: 'center', marginTop:dimensions.defaultMargin, marginBottom:-dimensions.defaultSmallMargin }}>Przedział cenowy</Text>
+                <Text style={{ textAlign: 'center', marginTop: dimensions.defaultMargin, marginBottom: -dimensions.defaultSmallMargin }}>Przedział cenowy</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={{ width:35, textAlign:'center'}}>5zł</Text>
-                    <View style={{ flex: 1, alignItems: 'center',  }}>
+                    <Text style={{ width: 35, textAlign: 'center' }}>5zł</Text>
+                    <View style={{ flex: 1, alignItems: 'center', }}>
                         <MultiSlider
                             trackStyle={{
                                 height: 5,
@@ -115,7 +116,7 @@ function JadlodajnieScreen({ navigation, route }) {
                             unselectedStyle={{
                                 backgroundColor: 'silver',
                             }}
-                            sliderLength={width-(2*35)-30}
+                            sliderLength={width - (2 * 35) - 30}
                             values={[firstThumbValue, secondThumbValue]}
                             min={5}
                             max={30}
@@ -140,11 +141,11 @@ function JadlodajnieScreen({ navigation, route }) {
                             minMarkerOverlapDistance={40}
                         />
                     </View>
-                    <Text style={{  width:35, textAlign:'center'}}>30zł</Text>
+                    <Text style={{ width: 35, textAlign: 'center' }}>30zł</Text>
                 </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between',alignItems:'center' }}>
-                    <Text style={{flex:1, marginHorizontal: dimensions.defaultSmallMargin, textAlign:'left' }}>Min wartość: {firstThumbValue}zł</Text>
-                    <Text style={{flex:1, marginHorizontal: dimensions.defaultSmallMargin, textAlign:'right' }}>Max wartość: {secondThumbValue}zł</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={{ flex: 1, marginHorizontal: dimensions.defaultSmallMargin, textAlign: 'left' }}>Min wartość: {firstThumbValue}zł</Text>
+                    <Text style={{ flex: 1, marginHorizontal: dimensions.defaultSmallMargin, textAlign: 'right' }}>Max wartość: {secondThumbValue}zł</Text>
                 </View>
                 <Text style={styles.title}>Fraza</Text>
                 <TextInput style={styles.input} />
@@ -153,10 +154,10 @@ function JadlodajnieScreen({ navigation, route }) {
             <ImageBackground source={require('../src/images/pancakes.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>
                 <SafeAreaView>
                     <FlatList
-                    
-                    scrollEnabled={expanded ? false : true}
-                        data={jadlodajnie} renderItem={({item,index}) =>
-                            <Jadlodajnia title={item.title} containerStyle={{marginBottom: index+1===jadlodajnie.length ? dimensions.defaultMarginBetweenItems:0}} navigation={navigation} jadlodajnia={item} ></Jadlodajnia>}
+
+                        scrollEnabled={expanded ? false : true}
+                        data={jadlodajnie} renderItem={({ item, index }) =>
+                            <Jadlodajnia title={item.title} containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} navigation={navigation} jadlodajnia={item} ></Jadlodajnia>}
                         keyExtractor={itemData => itemData.id}
                     />
                 </SafeAreaView>
@@ -172,40 +173,40 @@ const Jadlodajnie = props => {
     const [dataSource, setDataSource] = useState([]);
     async function fetchData() {
         if (isLoading) {
-            const res = await Connection.getJadlodajnie();
-            res
-                .json()
-                .then(res => {
-                    setDataSource(res.jadlodajnie);
-                    setIsLoading(false);
-                })
-                .catch(err => console.log(err + 'blad'));
+            setTimeout(async function () {
+                const res = await Connection.getJadlodajnie();
+                res
+                    .json()
+                    .then(res => {
+                        setDataSource(res.jadlodajnie);
+                        setIsLoading(false);
+                    })
+                    .catch(err => console.log(err + 'blad'));
+            }, 3000);
         }
     }
-
     useEffect(() => {
         fetchData();
     }, isLoading);
 
     const Stack = createStackNavigator();
     if (isLoading) {
-        return <View style={{ flex: 1 }}>
-            <ActivityIndicator></ActivityIndicator>
-        </View>
+        return <CustomLoadingComponent />
     }
-
-    return (
-        <Stack.Navigator initialRouteName="Jadlodajnie" screenOptions={ScreenStyle}>
-            <Stack.Screen name="Jadlodajnie" component={JadlodajnieScreen} initialParams={{ jadlodajnie: dataSource, drawerNavigation: props.navigation }} />
-            <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
-                options={{
-                    headerStyle: {
-                        opacity: 0, height: 0
-                    }
-                }}
-            />
-        </Stack.Navigator>
-    );
+    else {
+        return (
+            <Stack.Navigator initialRouteName="Jadlodajnie" screenOptions={ScreenStyle}>
+                <Stack.Screen name="Jadlodajnie" component={JadlodajnieScreen} initialParams={{ jadlodajnie: dataSource, drawerNavigation: props.navigation }} />
+                <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
+                    options={{
+                        headerStyle: {
+                            opacity: 0, height: 0
+                        }
+                    }}
+                />
+            </Stack.Navigator>
+        );
+    }
 
 }
 const styles = StyleSheet.create({
@@ -218,13 +219,13 @@ const styles = StyleSheet.create({
         borderBottomWidth: dimensions.defaultBorderWidth,
         borderBottomColor: Colors.accent,
         padding: dimensions.defaultSmallPadding,
-        marginTop:dimensions.defaultSmallMargin,
+        marginTop: dimensions.defaultSmallMargin,
         marginBottom: dimensions.defaultMargin
     },
     title: {
         textAlign: 'center',
-        marginTop:dimensions.defaultMargin,
-        color: Colors.colorTextDark,      
+        marginTop: dimensions.defaultMargin,
+        color: Colors.colorTextDark,
     }
 });
 

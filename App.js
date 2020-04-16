@@ -17,6 +17,7 @@ import { Ionicons, Foundation, MaterialCommunityIcons } from '@expo/vector-icons
 import Logowanie from './screens/Logowanie';
 import EdytujProfil from './screens/EdytujProfil';
 import { ActivityIndicator } from 'react-native';
+import CustomLoadingComponent from './components/CustromLoadingComponent';
 
 
 const Drawer = createDrawerNavigator();
@@ -54,15 +55,11 @@ export default function App() {
   }, isLoading);
   if (isLoading) {
     return (
-      <View style={{ flex: 1 }}>
-        <ActivityIndicator></ActivityIndicator>
-      </View>
+      <CustomLoadingComponent/>
     )
   }
   else {
     return (
-
-
       <NavigationContainer>
         <Drawer.Navigator initialRouteName="Jadlodajnie" drawerContent={(props) => {
           return (

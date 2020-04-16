@@ -13,6 +13,7 @@ import { Feather } from 'react-native-vector-icons';
 import IosButton from "../components/IosButton";
 import MapView, { PROVIDER_GOOGLE, Marker, Callout } from 'react-native-maps';
 import colors from '../src/themes/colors';
+import CustomLoadingComponent from '../components/CustromLoadingComponent';
 
 
 function MapaScreen({ navigation, route }) {
@@ -101,25 +102,25 @@ const Mapa = props => {
     const Stack = createStackNavigator();
     if (isLoading) {
         return (
-            <View style={{ flex: 1 }}>
-                <ActivityIndicator></ActivityIndicator>
-            </View>
+            <CustomLoadingComponent />
         );
     }
-    return (
-        <Stack.Navigator initialRouteName="Mapa" screenOptions={ScreenStyle}>
-            <Stack.Screen name="Mapa" component={MapaScreen} options={{
-                headerTitle: Strings.mapa,
-            }} initialParams={{ punkty: dataSource }} />
-            <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
-                options={{
-                    headerStyle: {
-                        opacity: 0, height: 0
-                    }
-                }}
-            />
-        </Stack.Navigator>
-    );
+    else{
+        return (
+            <Stack.Navigator initialRouteName="Mapa" screenOptions={ScreenStyle}>
+                <Stack.Screen name="Mapa" component={MapaScreen} options={{
+                    headerTitle: Strings.mapa,
+                }} initialParams={{ punkty: dataSource }} />
+                <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
+                    options={{
+                        headerStyle: {
+                            opacity: 0, height: 0
+                        }
+                    }}
+                />
+            </Stack.Navigator>
+        );
+    }
 }
 
 const styles = StyleSheet.create({
