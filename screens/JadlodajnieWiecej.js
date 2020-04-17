@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef} from 'react';
-import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, ActivityIndicator, TouchableOpacity, Dimensions, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, ActivityIndicator, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
 import Strings from "../src/themes/strings";
@@ -88,7 +88,9 @@ const JadlodajnieWiecej = props => {
                             </TouchableOpacity>
                         </View>
                         <View style={[styles.backButtonContainer,{right:0}]}>
-                            <IconWithAction content={<FontAwesome name="star" color="white" size={24}/>} onClick={()=>{}} />
+                            <IconWithAction content={<FontAwesome name="star" color="white" size={24}/>} onClick={()=>{
+                                ToastAndroid.show("Dodano do ulubionych!!", ToastAndroid.SHORT);
+                            }} />
                         </View>
                         <ScrollView
                             contentContainerStyle={styles.scrollContainer}

@@ -9,16 +9,23 @@ import AndroidButton from './AndroidButton';
 
 const CustomAlert = props => {
     const [enteredGoal, setEnteredGoal] = useState('');
-
+    const [errorDisplay, setErrorDisplay] = useState('none');
     const goalInputHandler = (enteredText) => {
         setEnteredGoal(enteredText);
     };
     const addGoalHandler = () => {
-        props.onPositiveClick(enteredGoal);
+        if(enteredGoal.length>0){
+            props.onPositiveClick(enteredGoal);    
+            setErrorDisplay('none');
+        }
+        else{
+            setErrorDisplay('flex');
+        }
         setEnteredGoal('');
     };
     const onCancelHandler = () => {
         props.onCancel();
+        setErrorDisplay('none');
         setEnteredGoal('');
     }
     let cancelButton;
@@ -46,6 +53,7 @@ const CustomAlert = props => {
                     <Text style={styles.title}>Dodaj powiadomienie</Text>
                     <Text style={styles.message}>Wpisz nazwe alertu:</Text>
                     <TextInput selectionColor={colors.accent} style={styles.input} onChangeText={goalInputHandler} value={enteredGoal} />
+                    <Text style={[styles.message, styles.error, {display:errorDisplay}]}>{props.errorMessage}</Text>
                     <View style={styles.buttonsContainer}>
                         {cancelButton}{okButton}
                     </View>
@@ -87,14 +95,17 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         textAlign: 'left'
     },
+    error:{
+        color: 'red',
+    },
     input: {
         width: '80%',
         borderColor: colors.accent,
         borderWidth: 1,
         padding: 6,
-        marginBottom: 20
     },
     buttonsContainer: {
+        marginTop:20,
         flexDirection: "row",
         justifyContent: 'flex-end',
         width: '100%',

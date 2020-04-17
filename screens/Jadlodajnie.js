@@ -19,6 +19,7 @@ import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
 import { Dimensions } from 'react-native';
 import CustomLoadingComponent from '../components/CustromLoadingComponent';
+import PlaceHolder from '../components/PlaceHolder';
 
 const { width, height } = Dimensions.get("screen");
 
@@ -67,6 +68,23 @@ function JadlodajnieScreen({ navigation, route }) {
         gestureEnabled: expanded ? false : true
     });
 
+    let content;
+    if (jadlodajnie.length > 0) {
+        content =
+            <FlatList
+                scrollEnabled={expanded ? false : true}
+                data={jadlodajnie} renderItem={({ item, index }) =>
+                    <Jadlodajnia title={item.title} containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} navigation={navigation} jadlodajnia={item} ></Jadlodajnia>}
+                keyExtractor={itemData => itemData.id}
+            />
+    }
+    else {
+        content = <PlaceHolder text={"Ups, nie ma \ntakich restauracji"} src={require('../src/images/plate_v2.png')}/>
+    }
+
+    useEffect(()=>{
+
+    },jadlodajnie);
     return (
         <View style={styles.container} >
             <View style={{
@@ -151,16 +169,8 @@ function JadlodajnieScreen({ navigation, route }) {
                 <TextInput style={styles.input} />
                 {searchButton}
             </View>
-            <ImageBackground source={require('../src/images/pancakes.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>
-                <SafeAreaView>
-                    <FlatList
-
-                        scrollEnabled={expanded ? false : true}
-                        data={jadlodajnie} renderItem={({ item, index }) =>
-                            <Jadlodajnia title={item.title} containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} navigation={navigation} jadlodajnia={item} ></Jadlodajnia>}
-                        keyExtractor={itemData => itemData.id}
-                    />
-                </SafeAreaView>
+            <ImageBackground source={require('../src/images/pancakes.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>               
+                    {content}
             </ImageBackground>
         </View>
     );
