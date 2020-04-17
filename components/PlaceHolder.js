@@ -16,7 +16,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        marginHorizontal: dimensions.defaultMarginBetweenItems
     },
     imageStyle: {
         width: 170,

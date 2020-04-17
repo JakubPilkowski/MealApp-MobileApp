@@ -15,8 +15,9 @@ import Connection from "../api/Connection";
 import LogoWithTexts from '../components/LogoWithTexts';
 import colors from "../src/themes/colors";
 import dimensions from "../src/themes/dimensions";
-import {Feather} from 'react-native-vector-icons';
+import { Feather } from 'react-native-vector-icons';
 import CustomLoadingComponent from "../components/CustromLoadingComponent";
+import PlaceHolder from "../components/PlaceHolder";
 
 function UlubioneScreen({ navigation, route }) {
     const { ulubione } = route.params;
@@ -41,46 +42,58 @@ function UlubioneScreen({ navigation, route }) {
             <IconWithAction content={<Feather name="menu" size={26} color={Colors.colorTextWhite} />} onClick={HomeButtonHandler} />
         )
     });
+    let content;
+    if (ulubioneJadlodajnie.length > 0) {
+        content =
+            <FlatList data={ulubioneJadlodajnie}
+                renderItem={({ item, index }) =>
+                    <Card
+                        pressEnabled={true}
+                        onSwipeRight={(progress, dragX) => <RightActions progress={progress} length={ulubioneJadlodajnie.length} index={index} dragX={dragX} onPress={() => { onUlubioneDeleteHandler(item.id) }}></RightActions>}
+                        containerStyle={{marginBottom: index + 1 === ulubioneJadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0}}
+                        cardStyle={{ marginTop: dimensions.defaultHugeMargin }}
+                        onCardPress={() => {
+                            navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: item.jadlodajnia_id });
+                        }}
+                        content={
+                            <LogoWithTexts title={item.title} logo={{ uri: item.iconUrl }}
+                                subTitleContent={
+                                    <View style={{ flexDirection: 'row', marginLeft: 10, marginTop: 3 }}>
+                                        <Text>Ocena: </Text>
+                                        <Rating ratingCount={5} ratingColor={colors.primary}
+
+                                            type="custom" startingValue={item.ocena}
+                                            imageSize={20} />
+                                    </View>
+                                } />
+                        } />
+                }
+                keyExtractor={item => item.id}
+            />;
+    }
+    else {
+        content = <PlaceHolder text={"Coś tu pusto dodaj \nulubioną jadłodajnie"} src={require("../src/images/heart_v2.png")} />
+    }
+    useEffect(()=>{
+
+    },ulubioneJadlodajnie.length);
     return (
         <View style={styles.container}>
             <ImageBackground source={require('../src/images/jedzonko.jpg')} style={{ flex: 1, backgroundColor: Colors.backgroundColor }} imageStyle={{ opacity: 0.3 }}>
-                <FlatList data={ulubioneJadlodajnie}
-                    renderItem={itemData =>
-                        <Card
-                            pressEnabled={true}
-                            onSwipeRight={(progress, dragX) => <RightActions progress={progress} dragX={dragX} onPress={() => { onUlubioneDeleteHandler(itemData.item.id) }}></RightActions>}
-                            cardStyle={{ marginTop: dimensions.defaultHugeMargin }}
-                            onCardPress={() => {
-                                navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: itemData.jadlodajnia_id });
-                            }}
-                            content={
-                                <LogoWithTexts title={itemData.item.title} logo={{ uri: itemData.item.iconUrl }}
-                                    subTitleContent={
-                                        <View style={{flexDirection:'row', marginLeft:10, marginTop:3}}>
-                                            <Text>Ocena: </Text>
-                                            <Rating ratingCount={5} ratingColor={colors.primary} 
-                                            
-                                            type="custom" startingValue={itemData.item.ocena} 
-                                            imageSize={20}/>
-                                        </View>
-                                    } />
-                            } />
-                    }
-                    keyExtractor={item => item.id}
-                />
+                {content}
             </ImageBackground>
         </View>
     );
 }
 
-const RightActions = ({ progress, dragX, onPress }) => {
+const RightActions = ({ progress, dragX, index, length, onPress }) => {
     const scale = dragX.interpolate({
         inputRange: [-100, 0],
         outputRange: [1, 0],
         extrapolate: 'clamp'
     })
     return (
-        <TouchableHighlight onPress={onPress} style={{height:"100%"}} >
+        <TouchableHighlight onPress={onPress} style={{ marginBottom: index + 1 === length ? dimensions.defaultMarginBetweenItems : 0 }} >
             <View style={styles.rightActionContainer}>
                 <Animated.Text style={[styles.rightActionText, { transform: [{ scale }] }]}>USUŃ</Animated.Text>
                 {/* dodac kiedys zdjecie */}
@@ -95,14 +108,14 @@ const Ulubione = props => {
     const [dataSource, setDataSource] = useState([]);
     async function fetchData() {
         if (isLoading) {
-        const res = await Connection.getUlubione();
-        res
-            .json()
-            .then(res => {
-                setDataSource(res.ulubione);
-                setIsLoading(false);
-            })
-            .catch(err => console.log(err + 'blad'));
+            const res = await Connection.getUlubione();
+            res
+                .json()
+                .then(res => {
+                    setDataSource(res.ulubione);
+                    setIsLoading(false);
+                })
+                .catch(err => console.log(err + 'blad'));
         }
     }
 
@@ -110,30 +123,30 @@ const Ulubione = props => {
         fetchData();
     }, isLoading);
 
-        const Stack = createStackNavigator();
+    const Stack = createStackNavigator();
 
-        if (isLoading) {
-            return (
-                <CustomLoadingComponent />
-            )
-        }
-        else{
-            return (
-                <Stack.Navigator initialRouteName="Ulubione" screenOptions={ScreenStyle}>
-                    <Stack.Screen name="Ulubione" component={UlubioneScreen} options={{
-                        headerTitle: Strings.ulubione,
-                    }} initialParams={{ ulubione: dataSource }} />
-                    <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
-                        options={{
-                            headerStyle: {
-                                opacity: 0, height: 0
-                            }
-                        }}
-                    />
-                </Stack.Navigator>
-            );
-        }
-    
+    if (isLoading) {
+        return (
+            <CustomLoadingComponent />
+        )
+    }
+    else {
+        return (
+            <Stack.Navigator initialRouteName="Ulubione" screenOptions={ScreenStyle}>
+                <Stack.Screen name="Ulubione" component={UlubioneScreen} options={{
+                    headerTitle: Strings.ulubione,
+                }} initialParams={{ ulubione: dataSource }} />
+                <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
+                    options={{
+                        headerStyle: {
+                            opacity: 0, height: 0
+                        }
+                    }}
+                />
+            </Stack.Navigator>
+        );
+    }
+
 }
 
 
@@ -142,7 +155,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     rightActionContainer: {
-        flex:1,
+        flex: 1,
         backgroundColor: 'red',
         justifyContent: 'flex-end',
         alignItems: 'center',
