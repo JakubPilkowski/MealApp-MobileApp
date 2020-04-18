@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, ActivityIndicator, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
@@ -12,16 +12,19 @@ import Zestaw from '../components/Zestaw';
 import InformacjeOgolneJadlodajnia from '../components/InformacjeOgolneJadlodajnia';
 import IconWithAction from '../components/IconWithAction';
 import CustomLoadingComponent from '../components/CustromLoadingComponent';
+import { Divider } from 'react-native-elements';
 const { width, height } = Dimensions.get('window');
 
 const JadlodajnieWiecej = props => {
 
     const szczegoly = [];
-    
+
     const [isLoading, setIsLoading] = useState(true);
     const [dataSource, setDataSource] = useState([]);
     const [scrollY, setScrollY] = useState(new Animated.Value(0));
     const scrollRef = useRef(null);
+    const [iconColor, setIconColor] = useState("white");
+    const [isFavourite, setIsFavourite] = useState(false);
 
     async function fetchData() {
         if (isLoading) {
@@ -41,117 +44,151 @@ const JadlodajnieWiecej = props => {
     }, isLoading);
 
 
-        if (isLoading) {
-            return <CustomLoadingComponent />
-        }
-        else {
-            let currentWidth = 0;
-            const szczegoly = dataSource;
-            const zestawRange = szczegoly.zestawy.length;
-            const { jadlodajniaId } = props.route.params;
-            const headerHeight = scrollY.interpolate(
-                {
-                    inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
-                    outputRange: [HEADER_EXPANDED_HEIGHT, HEADER_COLLAPSED_HEIGHT],
-                    extrapolate: 'clamp'
-                })
-            const headerTitleOpacity = scrollY.interpolate({
-                inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
-                outputRange: [0, 1],
-                extrapolate: 'clamp'
-            });
-            const heroTitleOpacity = scrollY.interpolate({
-                inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
-                outputRange: [1, 0],
-                extrapolate: 'clamp'
-            });
-            return (
-                <View style={styles.container}>
-                    <ImageBackground source={require('../src/images/zupka.jpg')} imageStyle={{opacity:0.3}} style={{flex:1, backgroundColor:Colors.backgroundColor}}>
-                        <Animated.View style={[styles.header, { height: headerHeight }]} >
-                            <Animated.View style={styles.headerImageContainer}>
-                                <Animated.Image source={{ uri: szczegoly.imageUrl }}
-                                    style={[styles.headerImage, {
-                                        height: headerHeight,
-                                        opacity: heroTitleOpacity,
-                                    }]}
-                                ></Animated.Image>
-                                <Animated.Text style={[styles.headerExpanded, { opacity: 1 }]}>{szczegoly.nazwa} </Animated.Text>
-                            </Animated.View>
-                        </Animated.View>
-                        <View style={[styles.backButtonContainer,{left:0}]}>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    props.navigation.goBack();
-                                }}>
-                                <Ionicons name="ios-arrow-round-back" size={36} color={Colors.colorTextWhite}></Ionicons>
-                            </TouchableOpacity>
-                        </View>
-                        <View style={[styles.backButtonContainer,{right:0}]}>
-                            <IconWithAction content={<FontAwesome name="star" color="white" size={24}/>} onClick={()=>{
-                                ToastAndroid.show("Dodano do ulubionych!!", ToastAndroid.SHORT);
-                            }} />
-                        </View>
-                        <ScrollView
-                            contentContainerStyle={styles.scrollContainer}
-                            onScroll={Animated.event(
-                                [{
-                                    nativeEvent: {
-                                        contentOffset: {
-                                            y: scrollY
-                                        }
-                                    }
-                                }])}
-                            scrollEventThrottle={16}
-                        >
-                            <Text style={{ fontSize: 20, textAlign: "center", marginVertical: dimensions.defaultHugeMargin }}>Zestawy</Text>
-                            <View style={{ flex: 1, flexDirection: 'row', marginBottom: dimensions.defaultMarginBetweenItems }}>
-                                <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 50 }}>
-                                    <TouchableOpacity onPress={() => {
-                                        if (currentWidth === 0) {
-                                            return;
-                                        }
-                                        else {
-                                            currentWidth = currentWidth - (width - 100);
-                                            scrollRef.current.scrollTo({ x: currentWidth });
-                                        }
-                                    }}>
-                                        <Feather name="arrow-left-circle" color={Colors.primary} size={36}></Feather>
-                                    </TouchableOpacity>
-                                </View>
-                                <ScrollView
-                                    horizontal={true}
-                                    scrollEnabled={false}
-                                    showsHorizontalScrollIndicator={false}
-                                    ref={scrollRef}
-                                    >
-                                    <FlatList data={szczegoly.zestawy}
-                                        horizontal={true}
-                                        renderItem={itemData =>
-                                            <Zestaw date={itemData.item.data} name={itemData.item.nazwa} price={itemData.item.cena}></Zestaw>}
-                                        keyExtractor={itemData => itemData.zestaw_id}
-                                    />
-                                </ScrollView>
-                                <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: "center", width: 50 }}>
-                                    <TouchableOpacity onPress={() => {
-                                        currentWidth = currentWidth + width - 100;
-                                        scrollRef.current.scrollTo({ x: currentWidth });
-                                    }}>
-                                        <Feather name="arrow-right-circle" color={Colors.primary} size={36}></Feather>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                            <Text style={{ textAlign: "center", fontSize: 20, marginBottom: dimensions.defaultHugeMargin }}>Dostępne punkty</Text>
-                            <SafeAreaView>
-                                {szczegoly.lokalizacje.map(lokalizacja => renderInformacje(szczegoly, lokalizacja))}
-                            </SafeAreaView>
-
-                        </ScrollView>
-                    </ImageBackground>
-                </View>
-            )
-        }
+    if (isLoading) {
+        return <CustomLoadingComponent />
     }
+    else {
+
+        let currentWidth = 0;
+
+        const szczegoly = dataSource;
+        const zestawRange = szczegoly.zestawy.length;
+        const { jadlodajniaId } = props.route.params;
+        const headerHeight = scrollY.interpolate(
+            {
+                inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
+                outputRange: [HEADER_EXPANDED_HEIGHT, HEADER_COLLAPSED_HEIGHT],
+                extrapolate: 'clamp'
+            })
+        const headerTitleOpacity = scrollY.interpolate({
+            inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
+            outputRange: [0, 1],
+            extrapolate: 'clamp'
+        });
+        const heroTitleOpacity = scrollY.interpolate({
+            inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
+            outputRange: [1, 0],
+            extrapolate: 'clamp'
+        });
+
+        // if(isFavourite){
+        //     setIconColor("gold");
+        // }
+        // else{
+        //     setIconColor("white");
+        // }
+        return (
+            <View style={styles.container}>
+                <ImageBackground source={require('../src/images/zupka.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>
+                    <Animated.View style={[styles.header, { height: headerHeight }]} >
+                        <Animated.View style={styles.headerImageContainer}>
+                            <Animated.Image source={{ uri: szczegoly.imageUrl }}
+                                style={[styles.headerImage, {
+                                    height: headerHeight,
+                                    opacity: heroTitleOpacity,
+                                }]}
+                            ></Animated.Image>
+                            <Animated.Text style={[styles.headerExpanded, { opacity: 1 }]}>{szczegoly.nazwa} </Animated.Text>
+                        </Animated.View>
+                    </Animated.View>
+                    <View style={[styles.backButtonContainer, { left: 0 }]}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                props.navigation.goBack();
+                            }}>
+                            <Ionicons name="ios-arrow-round-back" size={36} color={Colors.colorTextWhite}></Ionicons>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={[styles.backButtonContainer, { right: 0 }]}>
+                        <IconWithAction content={<FontAwesome name="star" color={iconColor} size={24} />} onClick={() => {
+                            if (isFavourite) {
+                                ToastAndroid.show("Usunięto z ulubionych !!!", ToastAndroid.SHORT);
+                                setIsFavourite(!isFavourite);
+                                setIconColor("white");
+                            }
+                            else {
+                                ToastAndroid.show("Dodano do ulubionych !!!", ToastAndroid.SHORT);
+                                setIsFavourite(!isFavourite);
+                                setIconColor("gold");
+                            }
+                        }} />
+                    </View>
+                    <ScrollView
+                        contentContainerStyle={styles.scrollContainer}
+                        onScroll={Animated.event(
+                            [{
+                                nativeEvent: {
+                                    contentOffset: {
+                                        y: scrollY
+                                    }
+                                }
+                            }])}
+                        scrollEventThrottle={16}
+                    >
+                        <Text style={{ fontSize: 20, textAlign: "center", marginVertical: dimensions.defaultHugeMargin }}>Aktualności</Text>
+                        <View style={{ flex: 1, flexDirection: 'row', marginBottom: dimensions.defaultMarginBetweenItems }}>
+                            <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 50 }}>
+                                <TouchableOpacity onPress={() => {
+                                    if (currentWidth === 0) {
+                                        return;
+                                    }
+                                    else {
+                                        currentWidth = currentWidth - (width - 100);
+                                        scrollRef.current.scrollTo({ x: currentWidth });
+                                    }
+                                }}>
+                                    <Feather name="arrow-left-circle" color={Colors.primary} size={36}></Feather>
+                                </TouchableOpacity>
+                            </View>
+                            <ScrollView
+                                horizontal={true}
+                                scrollEnabled={false}
+                                showsHorizontalScrollIndicator={false}
+                                ref={scrollRef}
+                            >
+                                <FlatList data={szczegoly.zestawy}
+                                    horizontal={true}
+                                    renderItem={itemData =>
+                                        <View style={{ flexDirection: 'column' }}>
+                                            <Zestaw date={itemData.item.data} name={itemData.item.nazwa} price={itemData.item.cena}></Zestaw>
+                                            <Text style={{ textAlign: 'center', fontSize: 20, marginVertical:dimensions.defaultHugeMargin }}>
+                                                Menu główne
+                                            </Text>
+                                            <View style={{width: width - 100}}>
+                                                <Text>UWAGA! Do odwołania nasze lokale pracują w godzinach 11:00 - 16:30.{'\n'}Obowiązuje zakaz spożywania posiłków na miejscu!{'\n'}Nadal funkcjonuje sprzedaż posiłków na wynos oraz z dowozem!{'\n'}Uprzejmie prosimy o zastosowanie zasady podchodzenia do bufetu pojedynczo oraz wchodzenia do lokalu nie więcej niż trzech osób w jednym momencie.{'\n'}Dostawy w zależności od odległości realizujemy za dodatkową opłatą.{'\n'}W ofercie stałej:{'\n'}codziennie, od godziny 11{'\n'}1. pierogi{'\n'}- z kapustą i grzybami 8 szt. cena 10,99 zł{'\n'}- z mięsem 8 szt. cena 10,99 zł{'\n'}- ruskie 8 szt. cena 10,99 zł{'\n'}{'\n'}2. duża zupa \"Pełny Gar\" cena 6,99 zł{'\n'}zupa codzienna cena 5,50 zł{'\n'}3. kotlet schabowy + zupa dnia + surówka cena 14,99 zł{'\n'}{'\n'}4. kompot cena 1,50 zł</Text>
+                                                <Divider style={{ height: 2, backgroundColor: Colors.accent }}></Divider>
+                                            </View>
+                                        </View>
+
+                                    }
+                                    keyExtractor={itemData => itemData.zestaw_id}
+
+
+                                />
+                            </ScrollView>
+                            <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: "center", width: 50 }}>
+                                <TouchableOpacity onPress={() => {
+                                    currentWidth = currentWidth + width - 100;
+                                    scrollRef.current.scrollTo({ x: currentWidth });
+                                }}>
+                                    <Feather name="arrow-right-circle" color={Colors.primary} size={36}></Feather>
+                                </TouchableOpacity>
+                            </View>
+
+
+
+                        </View>
+                        <Text style={{ textAlign: "center", fontSize: 20, marginBottom: dimensions.defaultHugeMargin }}>Dostępne punkty</Text>
+                        <SafeAreaView>
+                            {szczegoly.lokalizacje.map(lokalizacja => renderInformacje(szczegoly, lokalizacja))}
+                        </SafeAreaView>
+
+                    </ScrollView>
+                </ImageBackground>
+            </View>
+        )
+    }
+}
 
 
 function renderInformacje(szczegoly, lokalizacja) {
