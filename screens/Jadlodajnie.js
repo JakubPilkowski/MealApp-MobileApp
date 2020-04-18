@@ -198,7 +198,7 @@ const Jadlodajnie = props => {
     useEffect(() => {
         fetchData();
     }, isLoading);
-
+    console.log("ile razy pobieram jadlodajnie");
     const Stack = createStackNavigator();
     if (isLoading) {
         return <CustomLoadingComponent />

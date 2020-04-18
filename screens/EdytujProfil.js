@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Platform, TextInput, Image, TouchableOpacity, Dimensions, KeyboardAvoidingView, SafeAreaView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ImageBackground, Platform, Picker, AsyncStorage, TextInput, Image, TouchableOpacity, Dimensions, KeyboardAvoidingView, SafeAreaView } from 'react-native';
 import { Divider } from 'react-native-elements';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import AndroidButton from '../components/AndroidButton';
@@ -12,11 +12,22 @@ import { Ionicons } from "react-native-vector-icons";
 import IosButton from '../components/IosButton';
 import GradientDivider from '../components/GradientDivider';
 const { width, height } = Dimensions.get("screen");
+import { AntDesign } from 'react-native-vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import CustomLoadingComponent from '../components/CustromLoadingComponent';
 function EdytujScreen({ navigation, route }) {
-    const { uzytkownik } = route.params;
+
+    const { uzytkownik, wojewodztwo, miasto } = route.params;
     const [selectedImage, setSelectedImage] = useState(uzytkownik.avatar);
+    const [wojewodztwoField, setWojewodztwoField] = useState(wojewodztwo);
+    const [miastoField, setMiastoField] = useState(miasto);
+    const [miastoEnabled, setMiastoEnabled] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    if (miastoField !== "defualt") {
+        setMiastoEnabled(true);
+    }
     let image;
+
     let openImagePickerAsync = async () => {
         let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
 
@@ -61,54 +72,107 @@ function EdytujScreen({ navigation, route }) {
             onClick={openImagePickerAsync}
         />
         saveSettingsButton = <AndroidButton text="Zapisz zmiany"
-            containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9 }} />
+            containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9 }}
+            onClick={() => {
+                navigation.goBack();
+                navigation.openDrawer();
+            }}
+        />
     }
     if (Platform.OS === 'ios') {
         addImageButton = <IosButton text="Zmień Avatar"
             containerStyle={{
                 borderColor: colors.primary, borderWidth: dimensions.defaultBorderWidth,
                 borderRadius: dimensions.defaultBorderRadius, backgroundColor: colors.colorTextWhite
-            }} buttonStyle={{ paddingVertical: 9 }} />
+            }} buttonStyle={{ paddingVertical: 9 }} onClick={openImagePickerAsync} />
         saveSettingsButton = <IosButton text="Zapisz zmiany"
             containerStyle={{
                 width: "60%", borderColor: colors.primary, borderWidth: dimensions.defaultBorderWidth,
                 borderRadius: dimensions.defaultBorderRadius, backgroundColor: colors.colorTextWhite
-            }} buttonStyle={{ paddingVertical: 9 }} />
+            }} buttonStyle={{ paddingVertical: 9 }} onClick={() => {
+                navigation.goBack();
+                navigation.openDrawer();
+            }} />
+    }
+    const onWojewodztwoChangedHandler = (wojewodztwo) => {
+        setWojewodztwoField(wojewodztwo);
+        if (wojewodztwo !== "default")
+            setMiastoEnabled(true);
+        else {
+            setMiastoField("default");
+            setMiastoEnabled(false);
+        }
+    };
+    const onMiastoChangedHandler = (miasto) => {
+        setMiastoField(miasto);
     }
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <ImageBackground source={require('../src/images/sniadanko.jpg')} style={styles.imageBackground} imageStyle={styles.imageStyle}>
                 <KeyboardAwareScrollView
-                style={{width:'100%'}}
-                contentContainerStyle={{   alignItems:'center'}}
+                    style={{ width: '100%' }}
+                    contentContainerStyle={{ alignItems: 'center' }}
                 >
                     <View style={{
                         alignItems: 'center',
                         marginVertical: dimensions.defaultHugeMargin
                     }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems:'center' }}>
-                        <GradientDivider startColor={colors.accent} endColor={colors.primary}
-                            from="left" locationEnd={1} />
-                               {image}
-                        <GradientDivider startColor={colors.accent} endColor={colors.primary}
-                            from="right" locationEnd={1} />
-                    </View> 
-                        
-                    <GradientDivider startColor={colors.primary} endColor={colors.accent}
-                        from="up" dividerStyle={{ flex: 0, height: 50, width: 2 }} />
-                    {addImageButton}
+                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                            <GradientDivider startColor={colors.accent} endColor={colors.primary}
+                                from="left" locationEnd={1} />
+                            {image}
+                            <GradientDivider startColor={colors.accent} endColor={colors.primary}
+                                from="right" locationEnd={1} />
+                        </View>
+
+                        <GradientDivider startColor={colors.primary} endColor={colors.accent}
+                            from="up" dividerStyle={{ flex: 0, height: 50, width: 2 }} />
+                        {addImageButton}
                     </View>
                     <Text style={styles.title}>Login</Text>
                     <TextInput style={styles.input}
-                        returnKeyType="next" 
+                        returnKeyType="next"
                         value={uzytkownik.login}
-                        />
+                    />
                     <Text style={styles.title}>Email</Text>
                     <TextInput style={styles.input}
-                        returnKeyType="next" 
-                        value = {uzytkownik.email}
-                        />
-                    <View style={{ flexDirection: "row", alignItems: 'center', marginTop:50}}>
+                        returnKeyType="next"
+                        value={uzytkownik.email}
+                    />
+                    <Text style={styles.title}>Województwo</Text>
+                    <View style={{ width: "75%", borderWidth: 2, backgroundColor: colors.colorTextWhite, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}>
+                        <Picker
+                            mode="dialog"
+                            selectedValue={wojewodztwoField}
+                            style={{ height: 45, width: "100%", backgroundColor: 'transparent' }}
+                            onValueChange={(itemValue, itemIndex) => onWojewodztwoChangedHandler(itemValue)}>
+                            <Picker.Item label="Wybierz województwo..." value="default" color={wojewodztwoField === "default" ? colors.primary : colors.colorTextDark} />
+                            <Picker.Item label="Mazowieckie" value="mazowieckie" color={wojewodztwoField === "mazowieckie" ? colors.primary : colors.colorTextDark} />
+                            <Picker.Item label="Kujawsko-Pomorskie" value="kujawsko-pomorskie" color={wojewodztwoField === "kujawsko-pomorskie" ? colors.primary : colors.colorTextDark} />
+                            <Picker.Item label="Warmińsko-Mazurskie" value="warmińsko-mazurskie" color={wojewodztwoField === "warmińsko-mazurskie" ? colors.primary : colors.colorTextDark} />
+                        </Picker>
+                        <View style={{ position: 'absolute', alignSelf: 'flex-end', right: 10 }}>
+                            <AntDesign name="downcircle" color={colors.accent} size={24} />
+                        </View>
+                    </View>
+                    <Text style={styles.title}>Miasto</Text>
+                    <View style={{ width: "75%", borderWidth: 2, opacity: miastoEnabled ? 1 : 0.5, backgroundColor: colors.colorTextWhite, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}>
+                        <Picker
+                            enabled={miastoEnabled}
+                            selectedValue={miastoField}
+                            style={{ height: 45, width: "100%", backgroundColor: 'transparent' }}
+                            onValueChange={(itemValue, itemIndex) => onMiastoChangedHandler(itemValue)}>
+                            <Picker.Item label="Wybierz miasto..." value="default" color={miastoField === "default" ? colors.primary : colors.colorTextDark} />
+                            <Picker.Item label="Olsztyn" value="Olsztyn" color={miastoField === "Olsztyn" ? colors.primary : colors.colorTextDark} />
+                            <Picker.Item label="Ełk" value="Elk" color={miastoField === "Elk" ? colors.primary : colors.colorTextDark} />
+                            <Picker.Item label="Braniewo" value="Braniewo" color={miastoField === "Braniewo" ? colors.primary : colors.colorTextDark} />
+                            <Picker.Item label="Szczytno" value="Szczytno" color={miastoField === "Szczytno" ? colors.primary : colors.colorTextDark} />
+                        </Picker>
+                        <View style={{ position: 'absolute', alignSelf: 'flex-end', right: 10 }}>
+                            <AntDesign name="downcircle" color={colors.accent} size={24} />
+                        </View>
+                    </View>
+                    <View style={{ flexDirection: "row", alignItems: 'center', marginTop: 50, marginBottom: 16 }}>
                         <GradientDivider startColor={colors.primary} endColor={colors.accent}
                             from="left" locationEnd={0.7} />
                         {saveSettingsButton}
@@ -126,19 +190,49 @@ function EdytujScreen({ navigation, route }) {
 const EdytujProfil = props => {
 
     const { uzytkownik } = props.route.params;
-
-
+    const [isLoading, setIsLoading] = useState(true);
+    const [wojewodztwo, setWojewodztwo] = useState("default");
+    const [miasto, setMiasto] = useState("default");
     const Stack = createStackNavigator();
-    return (
-        <Stack.Navigator initialRouteName="EdytujProfil" screenOptions={ScreenStyle}>
-            <Stack.Screen name="EdytujProfil" component={EdytujScreen} options={
-                {
-                    title: "Edytuj profil"
+    console.log("haloEdytujProfil");
+    console.log(isLoading);
+    useEffect(() => {
+        fetchStorage();
+    },isLoading);
+    async function fetchStorage() {
+            if (isLoading) {
+                try {
+                    console.log("try set");
+                    const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
+                    const miastoValue = await AsyncStorage.getItem("miasto");
+                    setWojewodztwo(wojewodztwoValue);
+                    setMiasto(miastoValue);
+                    setIsLoading(false);
+                    console.log("try end");
                 }
-            } initialParams={{uzytkownik : uzytkownik}}/>
+                catch (error) {
+                    console.log(error);
+                }
+            }
+      
+    }
+    if (isLoading) {
+        return (
+            <CustomLoadingComponent />
+        )
+    }
+    else {
+        return (
+            <Stack.Navigator initialRouteName="EdytujProfil" screenOptions={ScreenStyle}>
+                <Stack.Screen name="EdytujProfil" component={EdytujScreen} options={
+                    {
+                        title: "Edytuj profil"
+                    }
+                } initialParams={{ uzytkownik: uzytkownik, wojewodztwo: wojewodztwo, miasto: miasto }} />
 
-        </Stack.Navigator>
-    );
+            </Stack.Navigator>
+        );
+    }
 }
 const styles = StyleSheet.create({
 
@@ -185,7 +279,6 @@ const styles = StyleSheet.create({
         borderBottomColor: colors.accent,
         padding: 6,
         fontSize: 16,
-        marginBottom: 20
     },
     title: {
         textAlign: 'center',
