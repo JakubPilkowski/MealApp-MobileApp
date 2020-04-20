@@ -6,7 +6,7 @@ import Strings from "../src/themes/strings";
 const HEADER_EXPANDED_HEIGHT = 225;
 const HEADER_COLLAPSED_HEIGHT = 56;
 import { Ionicons, FontAwesome, Feather } from '@expo/vector-icons';
-import Connection from '../api/Connection';
+import Connection from '../service/Connection';
 import { FlatList } from 'react-native-gesture-handler';
 import Zestaw from '../components/Zestaw';
 import InformacjeOgolneJadlodajnia from '../components/InformacjeOgolneJadlodajnia';

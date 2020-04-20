@@ -7,7 +7,7 @@ import JadlodajnieWiecej from './JadlodajnieWiecej';
 import IconWithAction from "../components/IconWithAction";
 import ScreenStyle from "../src/themes/screenStyle";
 import Jadlodajnia from "../components/Jadlodajnia";
-import Connection from '../api/Connection';
+import Connection from '../service/Connection';
 import Switch from 'react-native-customisable-switch';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import {

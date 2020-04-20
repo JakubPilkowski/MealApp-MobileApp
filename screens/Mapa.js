@@ -6,7 +6,7 @@ import Colors from "../src/themes/colors";
 import Strings from "../src/themes/strings";
 import IconWithAction from "../components/IconWithAction";
 import ScreenStyle from "../src/themes/screenStyle";
-import Connection from "../api/Connection";
+import Connection from "../service/Connection";
 import dimensions from '../src/themes/dimensions';
 import Card from "../components/Card";
 import { Feather } from 'react-native-vector-icons';

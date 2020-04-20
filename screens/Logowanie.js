@@ -13,9 +13,17 @@ import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
 import ZapomnialemHasla from './ZapomnialemHasla';
+import Validation from '../service/Validation';
 
 const { width, height } = Dimensions.get("screen");
 function LogowanieScreen({ navigation }) {
+
+    
+    const [loginField, setLoginField] = useState('');
+    const [passwordField, setPasswordField] = useState('');
+    const [loginError, setLoginError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+
     let loginButton;
     let registerButton;
 
@@ -35,7 +43,7 @@ function LogowanieScreen({ navigation }) {
     if (Platform.OS === "android") {
         loginButton =
             <AndroidButton text="Zaloguj się" containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9 }} 
-            onClick={()=>{navigation.navigate("Jadlodajnie");}}/>
+            onClick={()=>loginButtonHandler()}/>
         registerButton =
             <AndroidButton text="Zarejestruj się" containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9 }}
                 onClick={() => navigation.navigate("Rejestracja")}
@@ -46,7 +54,7 @@ function LogowanieScreen({ navigation }) {
             <IosButton text="Zaloguj się" containerStyle={{width:"60%", borderColor:colors.primary, 
             borderWidth:2, borderRadius:6, backgroundColor:colors.colorTextWhite}} 
             buttonStyle={{paddingVertical:9}}
-            onClick={()=>{navigation.navigate("Jadlodajnie");}}
+            onClick={()=> loginButtonHandler()}
             />
         registerButton =
             <IosButton text="Zarejestruj się" 
@@ -56,15 +64,29 @@ function LogowanieScreen({ navigation }) {
                 onClick={() => navigation.navigate("Rejestracja")}
             />
     }
+
+    const loginButtonHandler = () => {
+        setLoginError(Validation.loginVerification(loginField));
+        setPasswordError(Validation.passwordVerification(passwordField));
+        if(loginError.length===0 && passwordError.length===0){
+            navigation.navigate("Jadlodajnie");
+        }
+    }
+
     return (
         <View style={styles.container}>
             <ImageBackground source={require('../src/images/cutlery.jpg')} style={styles.imageBackground} imageStyle={styles.imageStyle}>
                 <Text style={[styles.title, { marginTop: dimensions.defaultHugeMargin }]}>Login</Text>
-                <TextInput style={styles.input} />
-
+                <TextInput style={styles.input} 
+                    onChangeText={(text) => setLoginField(text)}
+                />
+                <Text style={{ fontSize: 14, color:'red', width:"75%"}}>{loginError}</Text>
                 <Text style={styles.title}>Hasło</Text>
-                <TextInput style={styles.input} />
-
+                <TextInput style={styles.input} 
+                    onChangeText={(text) => setPasswordField(text)}
+                    secureTextEntry={true}
+                />
+                <Text style={{ fontSize: 14, color:'red', width:"75%"}}>{passwordError}</Text>
                 <Text style={{ textAlign: 'center', color: colors.colorTextDark, fontSize: 16, marginVertical: dimensions.defaultHugeMargin }}>Inne opcje logowania</Text>
                 <View style={{ flexDirection: 'row', marginHorizontal: 20, marginBottom: 30 }}>
                     <View style={{ marginHorizontal: 20 }}>

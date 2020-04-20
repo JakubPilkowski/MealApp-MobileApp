@@ -11,7 +11,7 @@ import { Rating } from 'react-native-elements';
 import IconWithAction from "../components/IconWithAction";
 import ScreenStyle from "../src/themes/screenStyle";
 import Card from '../components/Card';
-import Connection from "../api/Connection";
+import Connection from "../service/Connection";
 import LogoWithTexts from '../components/LogoWithTexts';
 import colors from "../src/themes/colors";
 import dimensions from "../src/themes/dimensions";
