@@ -70,7 +70,7 @@ function JadlodajnieScreen({ navigation, route }) {
 
     let content;
     if (jadlodajnie.length > 0) {
-        content =
+        content = 
             <FlatList
                 scrollEnabled={expanded ? false : true}
                 data={jadlodajnie} renderItem={({ item, index }) =>
