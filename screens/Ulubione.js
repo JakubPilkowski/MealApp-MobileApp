@@ -120,15 +120,14 @@ const Ulubione = props => {
     }
 
     useEffect(() => {
-        fetchData();
+        fetchData();    
     }, isLoading);
-
     const Stack = createStackNavigator();
-
+    console.log("Halo z ulubionych");
     if (isLoading) {
         return (
             <CustomLoadingComponent />
-        )
+        );
     }
     else {
         return (

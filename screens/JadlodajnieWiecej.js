@@ -151,12 +151,12 @@ const JadlodajnieWiecej = props => {
                                     renderItem={itemData =>
                                         <View style={{ flexDirection: 'column' }}>
                                             <Zestaw date={itemData.item.data} name={itemData.item.nazwa} price={itemData.item.cena}></Zestaw>
+                                            
                                             <Text style={{ textAlign: 'center', fontSize: 20, marginVertical:dimensions.defaultHugeMargin }}>
                                                 Menu główne
                                             </Text>
                                             <View style={{width: width - 100}}>
                                                 <Text>UWAGA! Do odwołania nasze lokale pracują w godzinach 11:00 - 16:30.{'\n'}Obowiązuje zakaz spożywania posiłków na miejscu!{'\n'}Nadal funkcjonuje sprzedaż posiłków na wynos oraz z dowozem!{'\n'}Uprzejmie prosimy o zastosowanie zasady podchodzenia do bufetu pojedynczo oraz wchodzenia do lokalu nie więcej niż trzech osób w jednym momencie.{'\n'}Dostawy w zależności od odległości realizujemy za dodatkową opłatą.{'\n'}W ofercie stałej:{'\n'}codziennie, od godziny 11{'\n'}1. pierogi{'\n'}- z kapustą i grzybami 8 szt. cena 10,99 zł{'\n'}- z mięsem 8 szt. cena 10,99 zł{'\n'}- ruskie 8 szt. cena 10,99 zł{'\n'}{'\n'}2. duża zupa \"Pełny Gar\" cena 6,99 zł{'\n'}zupa codzienna cena 5,50 zł{'\n'}3. kotlet schabowy + zupa dnia + surówka cena 14,99 zł{'\n'}{'\n'}4. kompot cena 1,50 zł</Text>
-                                                <Divider style={{ height: 2, backgroundColor: Colors.accent }}></Divider>
                                             </View>
                                         </View>
 
