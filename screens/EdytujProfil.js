@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Platform, Picker, AsyncStorage, TextInput, Image, TouchableOpacity, Dimensions, KeyboardAvoidingView, SafeAreaView } from 'react-native';
 import { Divider } from 'react-native-elements';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -19,13 +19,15 @@ function EdytujScreen({ navigation, route }) {
 
     const { uzytkownik, wojewodztwo, miasto } = route.params;
     const [selectedImage, setSelectedImage] = useState(uzytkownik.avatar);
+    const [loginField, setLoginField] = useState(uzytkownik.login);
+    const [emailField, setEmailField] = useState(uzytkownik.email);
     const [wojewodztwoField, setWojewodztwoField] = useState(wojewodztwo);
     const [miastoField, setMiastoField] = useState(miasto);
-    const [miastoEnabled, setMiastoEnabled] = useState(false);
+    const [miastoEnabled, setMiastoEnabled] = useState(miastoField !== "default" ? true:false);
     const [errorMessage, setErrorMessage] = useState("");
-    if (miastoField !== "defualt") {
-        setMiastoEnabled(true);
-    }
+    const scrollY = useRef(null);
+
+
     let image;
 
     let openImagePickerAsync = async () => {
@@ -112,6 +114,7 @@ function EdytujScreen({ navigation, route }) {
                 <KeyboardAwareScrollView
                     style={{ width: '100%' }}
                     contentContainerStyle={{ alignItems: 'center' }}
+                    ref={scrollY}
                 >
                     <View style={{
                         alignItems: 'center',
@@ -132,15 +135,24 @@ function EdytujScreen({ navigation, route }) {
                     <Text style={styles.title}>Login</Text>
                     <TextInput style={styles.input}
                         returnKeyType="next"
-                        value={uzytkownik.login}
+                        value={loginField}
+                        onChangeText={(value)=>setLoginField(value)}
+                        onEndEditing={
+                            ()=>
+                            scrollY.current.scrollToEnd()
+                        }
                     />
                     <Text style={styles.title}>Email</Text>
                     <TextInput style={styles.input}
                         returnKeyType="next"
-                        value={uzytkownik.email}
+                        value={emailField}
+                        onChangeText={(value)=>setEmailField(value)}
+                        onEndEditing={ () => 
+                            scrollY.current.scrollToEnd()
+                        }
                     />
                     <Text style={styles.title}>Województwo</Text>
-                    <View style={{ width: "75%", borderWidth: 2, backgroundColor: colors.colorTextWhite, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}>
+                    <View style={{ width: "75%", borderWidth: 2, marginTop:3, backgroundColor: colors.colorTextWhite, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}>
                         <Picker
                             mode="dialog"
                             selectedValue={wojewodztwoField}
@@ -156,12 +168,15 @@ function EdytujScreen({ navigation, route }) {
                         </View>
                     </View>
                     <Text style={styles.title}>Miasto</Text>
-                    <View style={{ width: "75%", borderWidth: 2, opacity: miastoEnabled ? 1 : 0.5, backgroundColor: colors.colorTextWhite, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}>
+                    <View style={{ width: "75%", borderWidth: 2, marginTop:3 , opacity: miastoEnabled ? 1 : 0.5, backgroundColor: colors.colorTextWhite, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}>
                         <Picker
                             enabled={miastoEnabled}
                             selectedValue={miastoField}
                             style={{ height: 45, width: "100%", backgroundColor: 'transparent' }}
-                            onValueChange={(itemValue, itemIndex) => onMiastoChangedHandler(itemValue)}>
+                            onValueChange={(itemValue, itemIndex) => {
+                                onMiastoChangedHandler(itemValue);
+                                scrollY.current.scrollToEnd();
+                            }}>
                             <Picker.Item label="Wybierz miasto..." value="default" color={miastoField === "default" ? colors.primary : colors.colorTextDark} />
                             <Picker.Item label="Olsztyn" value="Olsztyn" color={miastoField === "Olsztyn" ? colors.primary : colors.colorTextDark} />
                             <Picker.Item label="Ełk" value="Elk" color={miastoField === "Elk" ? colors.primary : colors.colorTextDark} />
@@ -196,8 +211,8 @@ const EdytujProfil = props => {
     const Stack = createStackNavigator();
     console.log("haloEdytujProfil");
     console.log(isLoading);
-    useEffect(() => {
-        fetchStorage();
+    useEffect(async () => {
+        await fetchStorage();
     },isLoading);
     async function fetchStorage() {
             if (isLoading) {
@@ -279,12 +294,14 @@ const styles = StyleSheet.create({
         borderBottomColor: colors.accent,
         padding: 6,
         fontSize: 16,
+        marginTop:3
     },
     title: {
         textAlign: 'center',
         color: colors.colorTextDark,
         fontSize: 17,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        marginTop:6
     }
 });
 
