@@ -11,7 +11,7 @@ import { FlatList } from 'react-native-gesture-handler';
 import Zestaw from '../components/Zestaw';
 import InformacjeOgolneJadlodajnia from '../components/InformacjeOgolneJadlodajnia';
 import IconWithAction from '../components/IconWithAction';
-import CustomLoadingComponent from '../components/CustromLoadingComponent';
+import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import { Divider } from 'react-native-elements';
 const { width, height } = Dimensions.get('window');
 
@@ -28,14 +28,16 @@ const JadlodajnieWiecej = props => {
 
     async function fetchData() {
         if (isLoading) {
-            const res = await Connection.getSzczegolyJadlodajnia();
-            res
-                .json()
-                .then(res => {
-                    setDataSource(res.szczegoly);
-                    setIsLoading(false);
-                })
-                .catch(err => console.log(err + 'blad'));
+            setTimeout(async function(){
+                const res = await Connection.getSzczegolyJadlodajnia();
+                res
+                    .json()
+                    .then(res => {
+                        setDataSource(res.szczegoly);
+                        setIsLoading(false);
+                    })
+                    .catch(err => console.log(err + 'blad'));
+            },500);
         }
     }
 

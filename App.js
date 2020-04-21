@@ -15,7 +15,7 @@ import Colors from './src/themes/colors';
 import { Ionicons, Foundation, MaterialCommunityIcons } from '@expo/vector-icons';
 import Logowanie from './screens/Logowanie';
 import EdytujProfil from './screens/EdytujProfil';
-import CustomLoadingComponent from './components/CustromLoadingComponent';
+import CustomLoadingComponent from './components/CustomLoadingComponent';
 import WyborLokalizacji from './screens/WyborLokalizacji';
 
 const Drawer = createDrawerNavigator();
@@ -36,7 +36,6 @@ export default function App() {
       if (isStorageLoading) {
         try {
           setFirstUse(await AsyncStorage.getItem("firstUse"));
-          console.log(firstUse);
           setIsStorageLoading(false);
         }
         catch (error) {
@@ -89,7 +88,6 @@ export default function App() {
             .catch(err => console.log(err));
         }
       }
-      console.log("halo z app.js");
       fetchData();
       if (isLoading) {
         return (

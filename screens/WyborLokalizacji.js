@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Platform, Picker, Image, TouchableNativeFeedback, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Platform, Picker, Image, TouchableNativeFeedback, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Colors from '../src/themes/colors';
 import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
 import { AntDesign } from 'react-native-vector-icons';
 import GradientDivider from '../components/GradientDivider';
+import Validation from '../service/Validation';
 
 
 
@@ -15,6 +16,7 @@ const WyborLokalizacji = props => {
     const [miasto, setMiasto] = useState("default");
     const [miastoEnabled, setMiastoEnabled] = useState(false);
     const [errorMessage, setErrorMessage] = useState("\n");
+    const [isLoading, setIsLoading] = useState(false);
     let confirmButton;
     if (Platform.OS === "android") {
         confirmButton =
@@ -31,8 +33,11 @@ const WyborLokalizacji = props => {
     }
     const onWojewodztwoChangedHandler = (wojewodztwo) => {
         setWojewodztwo(wojewodztwo);
-        if (wojewodztwo !== "default")
-            setMiastoEnabled(true);
+        if (wojewodztwo !== "default"){
+            setIsLoading(true);
+            setMiastoEnabled(false);
+            changeCities();
+        }
         else {
             setMiasto("default");
             setMiastoEnabled(false);
@@ -41,22 +46,21 @@ const WyborLokalizacji = props => {
     const onMiastoChangedHandler = (miasto) => {
         setMiasto(miasto);
     }
-
+    async function changeCities(){
+        setTimeout(async function(){
+            setIsLoading(false);
+            setMiastoEnabled(true);
+        },500)
+    }
     const confirmButtonHandler = () => {
-        if (wojewodztwo === "default" || miasto === "default") {
-            setErrorMessage("");
-            let message = "";
-            if (wojewodztwo === "default") {
-                message = message + "Nie wybrałeś województwa \n";
-            }
-            if (miasto === "default") {
-                message = message + "Nie wybrałeś miasta \n";
-            }
-            setErrorMessage(message);
-        }
-        else {
-            setErrorMessage("\n");
+        let message ="";
+        message = message + Validation.wojewodztwoVerification(wojewodztwo) +
+        Validation.miastoVerification(miasto);
+        if(message.length===0){
             props.onConfirm(wojewodztwo, miasto);
+        }
+        else{
+            setErrorMessage(message);
         }
     }
 
@@ -64,7 +68,6 @@ const WyborLokalizacji = props => {
         <ImageBackground source={require('../src/images/lokalizacja.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor, alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ textAlign: 'center', fontSize: 22, marginBottom: 15, color: Colors.primary }}>Zanim zaczniemy... {'\n'} wybierz lokalizacje domyślną</Text>
             <Image source={require("../src/images/place_v2.png")} style={{ width: 170, height: 170, marginBottom: 15 }} />
-            
             <Text style={{ width: "70%", alignSelf: 'center', fontSize: 16, color: Colors.colorTextDark, marginTop: dimensions.defaultHugeMargin, marginBottom: 3 }}>Województwo</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <GradientDivider startColor={Colors.accent} endColor={Colors.primary}
@@ -111,6 +114,7 @@ const WyborLokalizacji = props => {
                     from="right" locationEnd={1} />
             </View>
             <Text style={{ width: "70%", color: 'red', fontSize: 14, opacity: errorMessage.length > 0 ? 1 : 0 }}>{errorMessage}</Text>
+            <ActivityIndicator size="large" color={Colors.primary} animating={isLoading} />
             <View style={{ flexDirection: 'row', marginTop: 50, alignItems: 'center' }}>
                 <GradientDivider startColor={Colors.primary} endColor={Colors.accent}
                     from="left" locationEnd={1} />

@@ -68,14 +68,14 @@ const CustomLoadingComponent = props => {
 
     loaderImageAnim();
     loadTextAnim();
-    const spin = bounceValue.interpolate({
+    const spin = spinValue.interpolate({
         inputRange: [0, 0.5, 1],
         outputRange: ['0deg', '360deg', '720deg']
     });
-    const bounce = spinValue.interpolate(
+    const bounce = bounceValue.interpolate(
         {
             inputRange: [0, 0.25, 0.5, 0.75, 1],
-            outputRange: [0, 150, 0, 150, 0]
+            outputRange: [0, 110, 0, 110, 0]
         }
     );
     const opacity1 = dotOneValue.interpolate(
@@ -103,11 +103,10 @@ const CustomLoadingComponent = props => {
             <View style={{ flex: 1, alignItems: "center", justifyContent: 'center', borderColor: Colors.primary }}>
                 <View style={{ width: "100%", alignItems: 'center' }}>
                     <Animated.Image
-                        style={{ transform: [{ rotate: spin }], width: 90, height: 90, bottom: bounce }}
-                        source={require("../src/images/ikonka_v2.png")}
+                        style={{ transform: [{ rotate: spin }], width: 70, height: 70, bottom: bounce }}
+                        source={require("../src/images/ikonka_v3.png")}
                     />
-                    <View style={{ height: 40 }}></View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop:40}}>
                         <Text style={{ color: Colors.primary, fontSize: 28 }}>Ładowanie</Text>
                         <Animated.Text style={{ color: Colors.primary, marginLeft: 3, fontSize: 28, opacity: opacity1 }}>.</Animated.Text>
                         <Animated.Text style={{ color: Colors.primary, marginLeft: 3, fontSize: 28, opacity: opacity2 }}>.</Animated.Text>

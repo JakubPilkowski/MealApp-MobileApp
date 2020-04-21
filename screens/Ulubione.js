@@ -16,7 +16,7 @@ import LogoWithTexts from '../components/LogoWithTexts';
 import colors from "../src/themes/colors";
 import dimensions from "../src/themes/dimensions";
 import { Feather } from 'react-native-vector-icons';
-import CustomLoadingComponent from "../components/CustromLoadingComponent";
+import CustomLoadingComponent from "../components/CustomLoadingComponent";
 import PlaceHolder from "../components/PlaceHolder";
 
 function UlubioneScreen({ navigation, route }) {
@@ -108,14 +108,16 @@ const Ulubione = props => {
     const [dataSource, setDataSource] = useState([]);
     async function fetchData() {
         if (isLoading) {
-            const res = await Connection.getUlubione();
-            res
-                .json()
-                .then(res => {
-                    setDataSource(res.ulubione);
-                    setIsLoading(false);
-                })
-                .catch(err => console.log(err + 'blad'));
+            setTimeout(async function(){
+                const res = await Connection.getUlubione();
+                res
+                    .json()
+                    .then(res => {
+                        setDataSource(res.ulubione);
+                        setIsLoading(false);
+                    })
+                    .catch(err => console.log(err + 'blad'));
+            },500);
         }
     }
 
@@ -123,7 +125,6 @@ const Ulubione = props => {
         fetchData();    
     }, isLoading);
     const Stack = createStackNavigator();
-    console.log("Halo z ulubionych");
     if (isLoading) {
         return (
             <CustomLoadingComponent />

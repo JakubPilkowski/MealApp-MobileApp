@@ -13,7 +13,7 @@ import { Feather } from 'react-native-vector-icons';
 import IosButton from "../components/IosButton";
 import MapView, { PROVIDER_GOOGLE, Marker, Callout } from 'react-native-maps';
 import colors from '../src/themes/colors';
-import CustomLoadingComponent from '../components/CustromLoadingComponent';
+import CustomLoadingComponent from '../components/CustomLoadingComponent';
 
 
 function MapaScreen({ navigation, route }) {
@@ -84,14 +84,16 @@ const Mapa = props => {
 
     async function fetchData() {
         if (isLoading) {
-            const res = await Connection.getMapy();
-            res
-                .json()
-                .then(res => {
-                    setDataSource(res.punkty);
-                    setIsLoading(false);
-                })
-                .catch(err => console.log(err + 'blad'));
+            setTimeout(async function(){
+                const res = await Connection.getMapy();
+                res
+                    .json()
+                    .then(res => {
+                        setDataSource(res.punkty);
+                        setIsLoading(false);
+                    })
+                    .catch(err => console.log(err + 'blad'));
+            },500);
         }
     }
 

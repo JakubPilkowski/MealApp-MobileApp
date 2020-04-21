@@ -72,7 +72,6 @@ function PowiadomieniaScreen({ navigation }) {
     if (Platform.OS === "android") {
         addPowiadomienieButton =
             <AndroidButton onClick={() => {
-                console.log(powiadomienia.length);
                 if (powiadomienia.length < 10) {
                     setButtonOpacity(0);
                     setAddAlertVisibility(true);

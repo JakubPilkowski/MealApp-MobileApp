@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ImageBackground, Text, TextInput, Dimensions, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, StyleSheet, ImageBackground, Text, TextInput, Dimensions, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import colors from '../src/themes/colors';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
 import dimensions from '../src/themes/dimensions';
 import Validation from '../service/Validation';
-import CustomSmallLoadingComponent from '../components/CustomSmallLoadingComponent';
 import Hashing from '../service/Hashing';
 
 
@@ -68,20 +67,13 @@ const Rejestracja = props => {
             if (emailField === "pelnygar@gmail.com") {
                 errors = errors + "Na podany adres email założono już konto \n";
             }
-            console.log(registerError.length);
             if (errors.length === 0) {
                 setIsLoading(false);
+                props.navigation.popToTop();
+                props.navigation.navigate("Jadlodajnie");
             }
             setRegisterError(errors);
-            // if (res) {
-            //     props.navigation.popToTop();
-            //     props.navigation.navigate("Jadlodajnie");
-            // }
-            // else {
-            //     setRegisterError(res);
-            // }
-
-        },2000);
+        }, 1000);
     }
 
     let registerButton;
@@ -133,7 +125,9 @@ const Rejestracja = props => {
                 />
                 <Text style={{ fontSize: 14, color: 'red', width: "75%" }}>{emailError}</Text>
                 <Text style={styles.title}>Hasło</Text>
-                <TextInput style={styles.input} secureTextEntry={true} returnKeyType="next"
+                <TextInput style={styles.input}
+                    secureTextEntry={true}
+                    returnKeyType="next"
                     onFocus={onThirdInputFocus}
                     onChangeText={(text) => setPasswordField(text)}
                     ref={(input) => {
@@ -147,7 +141,8 @@ const Rejestracja = props => {
                 <Text style={{ fontSize: 14, marginBottom: 100, color: 'red', width: "75%" }}>{passwordError}</Text>
                 {registerButton}
                 <Text style={{ fontSize: 14, color: 'red', width: "75%" }}>{registerError}</Text>
-                <CustomSmallLoadingComponent text={"Sprawdzam dane"} visibility={isLoading} />
+                <ActivityIndicator size="large" color={colors.primary} animating={isLoading} />
+                {/* <CustomSmallLoadingComponent text={"Sprawdzam dane"} visibility={isLoading} /> */}
             </ImageBackground>
         </KeyboardAvoidingView>
     );

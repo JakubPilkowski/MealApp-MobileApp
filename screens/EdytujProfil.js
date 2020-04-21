@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Platform, Picker, AsyncStorage, TextInput, Image, TouchableOpacity, Dimensions, KeyboardAvoidingView, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Platform, Picker, AsyncStorage, TextInput, Image, TouchableOpacity, Dimensions, KeyboardAvoidingView, SafeAreaView, ActivityIndicator } from 'react-native';
 import { Divider } from 'react-native-elements';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import AndroidButton from '../components/AndroidButton';
@@ -14,7 +14,7 @@ import GradientDivider from '../components/GradientDivider';
 const { width, height } = Dimensions.get("screen");
 import { AntDesign } from 'react-native-vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import CustomLoadingComponent from '../components/CustromLoadingComponent';
+import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import Validation from '../service/Validation';
 function EdytujScreen({ navigation, route }) {
 
@@ -23,6 +23,7 @@ function EdytujScreen({ navigation, route }) {
     const [loginField, setLoginField] = useState(uzytkownik.login);
     const [emailField, setEmailField] = useState(uzytkownik.email);
     const [wojewodztwoField, setWojewodztwoField] = useState(wojewodztwo);
+    const [isLoading, setIsLoading] = useState(false);
     const [miastoField, setMiastoField] = useState(miasto);
     const [miastoEnabled, setMiastoEnabled] = useState(miastoField !== "default" ? true : false);
     const [errorMessage, setErrorMessage] = useState("");
@@ -43,8 +44,10 @@ function EdytujScreen({ navigation, route }) {
         if (pickerResult.cancelled === true) {
             return;
         }
-
         setSelectedImage(pickerResult.uri);
+        setTimeout(()=>{
+            scrollY.current.scrollToEnd();
+        },1000);
     }
     if (selectedImage === "") {
         image = <Image style={[styles.logo, { backgroundColor: colors.backgroundColor, }]}></Image>
@@ -74,14 +77,20 @@ function EdytujScreen({ navigation, route }) {
             Validation.wojewodztwoVerification(wojewodztwoField) +
             Validation.miastoVerification(miastoField);
         if (message.length === 0) {
-            navigation.goBack();
-            navigation.openDrawer();
+            setIsLoading(true);
+            verifyFields();
         }
         else {
             setErrorMessage(message);
         }
     }
-
+    async function verifyFields(){
+        setTimeout(async function(){
+            setIsLoading(false);
+            navigation.goBack();
+            navigation.openDrawer();
+        },1000);
+    }
     let addImageButton;
     let saveSettingsButton;
     if (Platform.OS === "android") {
@@ -112,7 +121,11 @@ function EdytujScreen({ navigation, route }) {
     const onWojewodztwoChangedHandler = (wojewodztwo) => {
         setWojewodztwoField(wojewodztwo);
         if (wojewodztwo !== "default")
-            setMiastoEnabled(true);
+        {   
+            setIsLoading(true);
+            setMiastoEnabled(false);
+            changeCities();
+        }
         else {
             setMiastoField("default");
             setMiastoEnabled(false);
@@ -120,6 +133,13 @@ function EdytujScreen({ navigation, route }) {
     };
     const onMiastoChangedHandler = (miasto) => {
         setMiastoField(miasto);
+    }
+
+    async function changeCities(){
+        setTimeout(async function(){
+            setIsLoading(false);
+            setMiastoEnabled(true);
+        },500)
     }
     return (
         <SafeAreaView style={{ flex: 1 }}>
@@ -204,8 +224,9 @@ function EdytujScreen({ navigation, route }) {
                         color: 'red',
                         fontSize: 14,
                         width: "75%",
-                        marginTop: 6
+                        marginTop: 6,
                     }} >{errorMessage}</Text>
+                    <ActivityIndicator size="large" color={colors.primary} animating={isLoading} />
                     <View style={{ flexDirection: "row", alignItems: 'center', marginTop: 50, marginBottom: 16 }}>
                         <GradientDivider startColor={colors.primary} endColor={colors.accent}
                             from="left" locationEnd={0.7} />
@@ -228,25 +249,25 @@ const EdytujProfil = props => {
     const [wojewodztwo, setWojewodztwo] = useState("default");
     const [miasto, setMiasto] = useState("default");
     const Stack = createStackNavigator();
-    console.log("haloEdytujProfil");
-    console.log(isLoading);
     useEffect(async () => {
         await fetchStorage();
     }, isLoading);
     async function fetchStorage() {
         if (isLoading) {
-            try {
-                console.log("try set");
-                const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
-                const miastoValue = await AsyncStorage.getItem("miasto");
-                setWojewodztwo(wojewodztwoValue);
-                setMiasto(miastoValue);
-                setIsLoading(false);
-                console.log("try end");
-            }
-            catch (error) {
-                console.log(error);
-            }
+            setTimeout(async function(){
+                try {
+                
+                    const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
+                    const miastoValue = await AsyncStorage.getItem("miasto");
+                    setWojewodztwo(wojewodztwoValue);
+                    setMiasto(miastoValue);
+                    setIsLoading(false);
+                
+                }
+                catch (error) {
+                    console.log(error);
+                }
+            },500);
         }
 
     }
