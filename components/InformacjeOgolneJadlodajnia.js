@@ -14,7 +14,6 @@ import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 const InformacjeOgolneJadlodajnia = props => {
 
     const informacje = props.informacje;
-    console.log(informacje);
     return (
         <View style={{ flex: 1 }}>
             <View style={{ marginHorizontal: dimensions.defaultMargin }}>

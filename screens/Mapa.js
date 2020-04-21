@@ -6,14 +6,14 @@ import Colors from "../src/themes/colors";
 import Strings from "../src/themes/strings";
 import IconWithAction from "../components/IconWithAction";
 import ScreenStyle from "../src/themes/screenStyle";
-import Connection from "../api/Connection";
+import Connection from "../service/Connection";
 import dimensions from '../src/themes/dimensions';
 import Card from "../components/Card";
 import { Feather } from 'react-native-vector-icons';
 import IosButton from "../components/IosButton";
 import MapView, { PROVIDER_GOOGLE, Marker, Callout } from 'react-native-maps';
 import colors from '../src/themes/colors';
-import CustomLoadingComponent from '../components/CustromLoadingComponent';
+import CustomLoadingComponent from '../components/CustomLoadingComponent';
 
 
 function MapaScreen({ navigation, route }) {
@@ -84,14 +84,16 @@ const Mapa = props => {
 
     async function fetchData() {
         if (isLoading) {
-            const res = await Connection.getMapy();
-            res
-                .json()
-                .then(res => {
-                    setDataSource(res.punkty);
-                    setIsLoading(false);
-                })
-                .catch(err => console.log(err + 'blad'));
+            setTimeout(async function(){
+                const res = await Connection.getMapy();
+                res
+                    .json()
+                    .then(res => {
+                        setDataSource(res.punkty);
+                        setIsLoading(false);
+                    })
+                    .catch(err => console.log(err + 'blad'));
+            },500);
         }
     }
 

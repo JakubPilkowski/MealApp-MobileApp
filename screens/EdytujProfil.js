@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Platform, Picker, AsyncStorage, TextInput, Image, TouchableOpacity, Dimensions, KeyboardAvoidingView, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Platform, Picker, AsyncStorage, TextInput, Image, TouchableOpacity, Dimensions, KeyboardAvoidingView, SafeAreaView, ActivityIndicator } from 'react-native';
 import { Divider } from 'react-native-elements';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import AndroidButton from '../components/AndroidButton';
@@ -14,7 +14,8 @@ import GradientDivider from '../components/GradientDivider';
 const { width, height } = Dimensions.get("screen");
 import { AntDesign } from 'react-native-vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import CustomLoadingComponent from '../components/CustromLoadingComponent';
+import CustomLoadingComponent from '../components/CustomLoadingComponent';
+import Validation from '../service/Validation';
 function EdytujScreen({ navigation, route }) {
 
     const { uzytkownik, wojewodztwo, miasto } = route.params;
@@ -22,8 +23,9 @@ function EdytujScreen({ navigation, route }) {
     const [loginField, setLoginField] = useState(uzytkownik.login);
     const [emailField, setEmailField] = useState(uzytkownik.email);
     const [wojewodztwoField, setWojewodztwoField] = useState(wojewodztwo);
+    const [isLoading, setIsLoading] = useState(false);
     const [miastoField, setMiastoField] = useState(miasto);
-    const [miastoEnabled, setMiastoEnabled] = useState(miastoField !== "default" ? true:false);
+    const [miastoEnabled, setMiastoEnabled] = useState(miastoField !== "default" ? true : false);
     const [errorMessage, setErrorMessage] = useState("");
     const scrollY = useRef(null);
 
@@ -42,8 +44,10 @@ function EdytujScreen({ navigation, route }) {
         if (pickerResult.cancelled === true) {
             return;
         }
-
         setSelectedImage(pickerResult.uri);
+        setTimeout(()=>{
+            scrollY.current.scrollToEnd();
+        },1000);
     }
     if (selectedImage === "") {
         image = <Image style={[styles.logo, { backgroundColor: colors.backgroundColor, }]}></Image>
@@ -65,8 +69,28 @@ function EdytujScreen({ navigation, route }) {
         )
     });
 
-
-
+    const saveSettingHandler = () => {
+        let message = "";
+        setErrorMessage('');
+        message = Validation.loginVerification(loginField) +
+            Validation.emailVerification(emailField) +
+            Validation.wojewodztwoVerification(wojewodztwoField) +
+            Validation.miastoVerification(miastoField);
+        if (message.length === 0) {
+            setIsLoading(true);
+            verifyFields();
+        }
+        else {
+            setErrorMessage(message);
+        }
+    }
+    async function verifyFields(){
+        setTimeout(async function(){
+            setIsLoading(false);
+            navigation.goBack();
+            navigation.openDrawer();
+        },1000);
+    }
     let addImageButton;
     let saveSettingsButton;
     if (Platform.OS === "android") {
@@ -76,8 +100,7 @@ function EdytujScreen({ navigation, route }) {
         saveSettingsButton = <AndroidButton text="Zapisz zmiany"
             containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9 }}
             onClick={() => {
-                navigation.goBack();
-                navigation.openDrawer();
+                saveSettingHandler();
             }}
         />
     }
@@ -92,14 +115,17 @@ function EdytujScreen({ navigation, route }) {
                 width: "60%", borderColor: colors.primary, borderWidth: dimensions.defaultBorderWidth,
                 borderRadius: dimensions.defaultBorderRadius, backgroundColor: colors.colorTextWhite
             }} buttonStyle={{ paddingVertical: 9 }} onClick={() => {
-                navigation.goBack();
-                navigation.openDrawer();
+                saveSettingHandler();
             }} />
     }
     const onWojewodztwoChangedHandler = (wojewodztwo) => {
         setWojewodztwoField(wojewodztwo);
         if (wojewodztwo !== "default")
-            setMiastoEnabled(true);
+        {   
+            setIsLoading(true);
+            setMiastoEnabled(false);
+            changeCities();
+        }
         else {
             setMiastoField("default");
             setMiastoEnabled(false);
@@ -107,6 +133,13 @@ function EdytujScreen({ navigation, route }) {
     };
     const onMiastoChangedHandler = (miasto) => {
         setMiastoField(miasto);
+    }
+
+    async function changeCities(){
+        setTimeout(async function(){
+            setIsLoading(false);
+            setMiastoEnabled(true);
+        },500)
     }
     return (
         <SafeAreaView style={{ flex: 1 }}>
@@ -136,23 +169,23 @@ function EdytujScreen({ navigation, route }) {
                     <TextInput style={styles.input}
                         returnKeyType="next"
                         value={loginField}
-                        onChangeText={(value)=>setLoginField(value)}
+                        onChangeText={(value) => setLoginField(value)}
                         onEndEditing={
-                            ()=>
-                            scrollY.current.scrollToEnd()
+                            () =>
+                                scrollY.current.scrollToEnd()
                         }
                     />
                     <Text style={styles.title}>Email</Text>
                     <TextInput style={styles.input}
                         returnKeyType="next"
                         value={emailField}
-                        onChangeText={(value)=>setEmailField(value)}
-                        onEndEditing={ () => 
+                        onChangeText={(value) => setEmailField(value)}
+                        onEndEditing={() =>
                             scrollY.current.scrollToEnd()
                         }
                     />
                     <Text style={styles.title}>Województwo</Text>
-                    <View style={{ width: "75%", borderWidth: 2, marginTop:3, backgroundColor: colors.colorTextWhite, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}>
+                    <View style={{ width: "75%", borderWidth: 2, marginTop: 3, backgroundColor: colors.colorTextWhite, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}>
                         <Picker
                             mode="dialog"
                             selectedValue={wojewodztwoField}
@@ -168,7 +201,7 @@ function EdytujScreen({ navigation, route }) {
                         </View>
                     </View>
                     <Text style={styles.title}>Miasto</Text>
-                    <View style={{ width: "75%", borderWidth: 2, marginTop:3 , opacity: miastoEnabled ? 1 : 0.5, backgroundColor: colors.colorTextWhite, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}>
+                    <View style={{ width: "75%", borderWidth: 2, marginTop: 3, opacity: miastoEnabled ? 1 : 0.5, backgroundColor: colors.colorTextWhite, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}>
                         <Picker
                             enabled={miastoEnabled}
                             selectedValue={miastoField}
@@ -187,6 +220,13 @@ function EdytujScreen({ navigation, route }) {
                             <AntDesign name="downcircle" color={colors.accent} size={24} />
                         </View>
                     </View>
+                    <Text style={{
+                        color: 'red',
+                        fontSize: 14,
+                        width: "75%",
+                        marginTop: 6,
+                    }} >{errorMessage}</Text>
+                    <ActivityIndicator size="large" color={colors.primary} animating={isLoading} />
                     <View style={{ flexDirection: "row", alignItems: 'center', marginTop: 50, marginBottom: 16 }}>
                         <GradientDivider startColor={colors.primary} endColor={colors.accent}
                             from="left" locationEnd={0.7} />
@@ -209,27 +249,27 @@ const EdytujProfil = props => {
     const [wojewodztwo, setWojewodztwo] = useState("default");
     const [miasto, setMiasto] = useState("default");
     const Stack = createStackNavigator();
-    console.log("haloEdytujProfil");
-    console.log(isLoading);
     useEffect(async () => {
         await fetchStorage();
-    },isLoading);
+    }, isLoading);
     async function fetchStorage() {
-            if (isLoading) {
+        if (isLoading) {
+            setTimeout(async function(){
                 try {
-                    console.log("try set");
+                
                     const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
                     const miastoValue = await AsyncStorage.getItem("miasto");
                     setWojewodztwo(wojewodztwoValue);
                     setMiasto(miastoValue);
                     setIsLoading(false);
-                    console.log("try end");
+                
                 }
                 catch (error) {
                     console.log(error);
                 }
-            }
-      
+            },500);
+        }
+
     }
     if (isLoading) {
         return (
@@ -294,14 +334,14 @@ const styles = StyleSheet.create({
         borderBottomColor: colors.accent,
         padding: 6,
         fontSize: 16,
-        marginTop:3
+        marginTop: 3
     },
     title: {
         textAlign: 'center',
         color: colors.colorTextDark,
         fontSize: 17,
         fontWeight: 'bold',
-        marginTop:6
+        marginTop: 6
     }
 });
 

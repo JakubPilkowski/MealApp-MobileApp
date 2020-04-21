@@ -7,7 +7,7 @@ import JadlodajnieWiecej from './JadlodajnieWiecej';
 import IconWithAction from "../components/IconWithAction";
 import ScreenStyle from "../src/themes/screenStyle";
 import Jadlodajnia from "../components/Jadlodajnia";
-import Connection from '../api/Connection';
+import Connection from '../service/Connection';
 import Switch from 'react-native-customisable-switch';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import {
@@ -18,7 +18,7 @@ import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
 import { Dimensions } from 'react-native';
-import CustomLoadingComponent from '../components/CustromLoadingComponent';
+import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import PlaceHolder from '../components/PlaceHolder';
 
 const { width, height } = Dimensions.get("screen");
@@ -198,7 +198,6 @@ const Jadlodajnie = props => {
     useEffect(() => {
         fetchData();
     }, isLoading);
-    console.log("ile razy pobieram jadlodajnie");
     const Stack = createStackNavigator();
     if (isLoading) {
         return <CustomLoadingComponent />

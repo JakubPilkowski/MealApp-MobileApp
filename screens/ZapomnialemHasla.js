@@ -1,20 +1,22 @@
-import React from 'react';
-import { Text, View, StyleSheet, ImageBackground, TextInput, Platform } from 'react-native';
+import React, {useState} from 'react';
+import { Text, View, StyleSheet, ImageBackground, TextInput, Platform, ActivityIndicator } from 'react-native';
 import colors from '../src/themes/colors';
 import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
+import Validation from '../service/Validation';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 const ZapomnialemHasla = props => {
 
+    const [emailField, setEmailField] = useState('');
+    const [emailErrorMessage, setEmailErrorMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [forgetPasswordError, setForgetPasswordError] = useState('');
     let sendNewPasswordButton;
-    // const {drawerNavigation } = props.route.params;
 
     if (Platform.OS === "android") {
         sendNewPasswordButton =
-            <AndroidButton text="Przejdź dalej" onClick={() => {
-                props.navigation.popToTop();
-                props.navigation.navigate("Jadlodajnie");
-            }}
+            <AndroidButton text="Przejdź dalej" onClick={() => sendNewPasswordHandler()}
                 containerStyle={{ width: '60%' }}
                 buttonStyle={{ paddingVertical: 9 }}
             />
@@ -22,28 +24,48 @@ const ZapomnialemHasla = props => {
     if (Platform.OS === "ios") {
         sendNewPasswordButton =
             <IosButton tex="Przejdź dalej" onClick={
-                () => {
-                    props.navigation.popToTop();
-                    props.navigation.navigate("Jadlodajnie");
-                }}
+                () => sendNewPasswordHandler()}
                 containerStyle={{
                     width: "60%", borderColor: colors.primary, borderWidth: 2,
                     borderRadius: 6, backgroundColor: colors.colorTextWhite
                 }}
             />
     }
-    // drawerNavigation.setOptions({
-    //     gestureEnabled:false
-    // });
+
+    const sendNewPasswordHandler = () =>{
+        let errorMessage = Validation.emailVerification(emailField);
+
+        if(errorMessage.length===0){
+            setIsLoading(true);
+            verifyEmail();
+        }
+        setEmailErrorMessage(errorMessage);
+    }
+    async function verifyEmail() {
+        setTimeout(async function () {
+            let errors = "";
+            if (errors.length === 0) {
+                setIsLoading(false);
+                props.navigation.popToTop();
+                props.navigation.navigate("Jadlodajnie");
+            }
+            setForgetPasswordError(errors);
+        },1000);
+    }
     return (
         <View style={styles.container}>
             <ImageBackground source={require('../src/images/cutlery.jpg')} style={styles.imageBackground} imageStyle={styles.imageStyle}>
                 <Text style={[styles.title, { marginTop: dimensions.defaultHugeMargin }]}>Email</Text>
                 <TextInput style={styles.input}
                     returnKeyType="next"
+                    keyboardType="email-address"
+                    onChangeText={(text) => setEmailField(text)}
                 />
+                <Text style={{width:"75%", color:'red', fontSize:14}}>{emailErrorMessage}</Text>
                 <Text style={{fontSize:16, marginBottom:50, textAlign:'center'}}>Podaj email na który wyślemy wygenerowane hasło</Text>
                 {sendNewPasswordButton}
+                <Text style={{width:"75%", color:'red', fontSize:14}}>{forgetPasswordError}</Text>
+                <ActivityIndicator size="large" color={colors.primary} animating={isLoading} />
             </ImageBackground>
         </View>
     );
