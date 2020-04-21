@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, ImageBackground, Text, Easing, LayoutAnimation, TextInput, Platform, Picker, Modal, Animated } from "react-native";
+import { View, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, ImageBackground, Text, Easing, LayoutAnimation, TextInput, Platform, Picker, Modal, Animated, Image } from "react-native";
 import Strings from "../src/themes/strings";
 import Colors from "../src/themes/colors";
 import { createStackNavigator, HeaderTitle } from '@react-navigation/stack';
@@ -20,17 +20,19 @@ import IosButton from '../components/IosButton';
 import { Dimensions } from 'react-native';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import PlaceHolder from '../components/PlaceHolder';
-
+import { Slider } from 'react-native-elements';
+import MultiSelect from 'react-native-multiple-select';
 const { width, height } = Dimensions.get("screen");
 
 
 function JadlodajnieScreen({ navigation, route }) {
 
-    const [selectedValue, setSelectedValue] = useState("wszystko");
+    const [selectedValue, setSelectedValue] = useState("default");
     const [expanded, setExpanded] = useState(false);
-    const [firstThumbValue, setFirstThumbValue] = useState(5);
-    const [secondThumbValue, setSecondThumbValue] = useState(30);
+    const [sliderValue, setSliderValue] = useState(25);
+    const [indicatorValue, setIndicatorValue] = useState(12.5 + ((sliderValue-1) * 75 / 54) + '%');
     const [enabled, setEnabled] = useState(false);
+    
     const { jadlodajnie, drawerNavigation } = route.params;
     const HomeButtonHandler = () => {
         navigation.openDrawer();
@@ -39,6 +41,35 @@ function JadlodajnieScreen({ navigation, route }) {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setExpanded(!expanded);
     }
+
+    items = [{
+        id: '92iijs7yta',
+        name: 'Ondo',
+      }, {
+        id: 'a0s0a8ssbsd',
+        name: 'Ogun',
+      }, {
+        id: '16hbajsabsd',
+        name: 'Calabar',
+      }, {
+        id: 'nahs75a5sg',
+        name: 'Lagos',
+      }, {
+        id: '667atsas',
+        name: 'Maiduguri',
+      }, {
+        id: 'hsyasajs',
+        name: 'Anambra',
+      }, {
+        id: 'djsjudksjd',
+        name: 'Benue',
+      }, {
+        id: 'sdhyaysdj',
+        name: 'Kaduna',
+      }, {
+        id: 'suudydjsjd',
+        name: 'Abuja',
+      }];
 
     let searchButton;
     if (Platform.OS === "android")
@@ -70,7 +101,7 @@ function JadlodajnieScreen({ navigation, route }) {
 
     let content;
     if (jadlodajnie.length > 0) {
-        content = 
+        content =
             <FlatList
                 scrollEnabled={expanded ? false : true}
                 data={jadlodajnie} renderItem={({ item, index }) =>
@@ -79,12 +110,12 @@ function JadlodajnieScreen({ navigation, route }) {
             />
     }
     else {
-        content = <PlaceHolder text={"Ups, nie ma \ntakich restauracji"} src={require('../src/images/plate_v2.png')}/>
+        content = <PlaceHolder text={"Ups, nie ma \ntakich restauracji"} src={require('../src/images/plate_v2.png')} />
     }
 
-    useEffect(()=>{
+    useEffect(() => {
 
-    },jadlodajnie);
+    }, jadlodajnie);
     return (
         <View style={styles.container} >
             <View style={{
@@ -94,83 +125,38 @@ function JadlodajnieScreen({ navigation, route }) {
                 alignItems: 'center',
                 borderColor: Colors.primary, borderBottomLeftRadius: 16, borderBottomRightRadius: 16
             }}>
-                <Text style={{ textAlign: 'center' }}>Rodzaj potrawy</Text>
-                <View style={{
-                    backgroundColor: Colors.colorTextWhite,
-                    borderRadius: 6,
-                    borderColor: Colors.accent,
-                    borderWidth: 2,
-                    marginTop: dimensions.defaultSmallMargin
-                }}>
-                    <Picker
-                        selectedValue={selectedValue}
-                        style={{ height: 40, width: 250 }}
-                        onValueChange={(itemValue, itemIndex) => setSelectedValue(itemValue)}
-                    >
-                        <Picker.Item label="Wszystko" value="wszystko" />
-                        <Picker.Item label="Desery" value="deser" />
-                        <Picker.Item label="Fast-foody" value="fast-food" />
-                        <Picker.Item label="Potrawy mięsne" value="miesne" />
-                        <Picker.Item label="Potrawy warzywne" value="warzywne" />
-                        <Picker.Item label="Potrawy rybne" value="ryby" />
-                        <Picker.Item label="Chińskie" value="chinskie" />
-                        <Picker.Item label="Włoskie" value="wloskie" />
-                        <Picker.Item label="Śniadanie" value="sniadanie" />
-                    </Picker>
-                </View>
-
-
-                <Text style={{ textAlign: 'center', marginTop: dimensions.defaultMargin, marginBottom: -dimensions.defaultSmallMargin }}>Przedział cenowy</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={{ width: 35, textAlign: 'center' }}>5zł</Text>
-                    <View style={{ flex: 1, alignItems: 'center', }}>
-                        <MultiSlider
-                            trackStyle={{
-                                height: 5,
+                <Text style={{ textAlign: 'center', marginTop: dimensions.defaultMargin, marginBottom: Dimensions.defaultSmallMargin }}>Odległość od lokalizacji</Text>
+                <View style={{ flexDirection: 'column', justifyContent: 'center', }}>
+                    <View style={{ width: "100%", flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ textAlign: 'center', flex: 1 }}>1km</Text>
+                        <Slider style={{ width: "75%", height: 40 }}
+                            animateTransitions={false}
+                            minimumValue={1}
+                            maximumValue={50}
+                            value={25}
+                            onValueChange={(value) => {
+                                setSliderValue(value)
+                                setIndicatorValue(12.5 + ((value - 1) * 75 / 54) + '%')
                             }}
-                            selectedStyle={{
-                                backgroundColor: Colors.accent,
-                            }}
-                            unselectedStyle={{
-                                backgroundColor: 'silver',
-                            }}
-                            sliderLength={width - (2 * 35) - 30}
-                            values={[firstThumbValue, secondThumbValue]}
-                            min={5}
-                            max={30}
                             step={1}
-                            enabledOne={true}
-                            enabledTwo={true}
-                            onValuesChange={(values) => {
-                                setFirstThumbValue(values[0]);
-                                setSecondThumbValue(values[1]);
+                            minimumTrackTintColor={Colors.primary}
+                            trackStyle={{ height: 6 }}
+                            thumbStyle={{
+                                height: 24, width: 24, borderColor: Colors.primary, backgroundColor: Colors.accent, borderWidth: 6, borderRadius: 12
                             }}
-                            allowOverlap={false}
-                            customMarker={() => {
-                                return (
-                                    <View style={{
-                                        backgroundColor: Colors.primary, borderWidth: 4, borderColor: Colors.accent
-                                        , width: 24, height: 24, borderRadius: 12
-                                    }} />
-                                )
-                            }}
-                            valuePrefix={"prefix"}
-                            valueSuffix={"suffix"}
-                            minMarkerOverlapDistance={40}
                         />
+                        <Text style={{ textAlign: 'center', flex: 1 }}>50km</Text>
                     </View>
-                    <Text style={{ width: 35, textAlign: 'center' }}>30zł</Text>
+                    <View style={{ width: 24,justifyContent: 'center',borderRadius:6,borderWidth:1,borderColor:Colors.accent, backgroundColor: Colors.colorTextWhite, height: 24, left: indicatorValue }}>
+                        <Text style={{textAlign:'center'}}>{sliderValue}</Text>
+                    </View>
                 </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={{ flex: 1, marginHorizontal: dimensions.defaultSmallMargin, textAlign: 'left' }}>Min wartość: {firstThumbValue}zł</Text>
-                    <Text style={{ flex: 1, marginHorizontal: dimensions.defaultSmallMargin, textAlign: 'right' }}>Max wartość: {secondThumbValue}zł</Text>
-                </View>
-                <Text style={styles.title}>Fraza</Text>
+                <Text style={styles.title}>Tagi</Text>
                 <TextInput style={styles.input} />
                 {searchButton}
             </View>
-            <ImageBackground source={require('../src/images/pancakes.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>               
-                    {content}
+            <ImageBackground source={require('../src/images/pancakes.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>
+                {content}
             </ImageBackground>
         </View>
     );

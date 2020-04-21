@@ -7,6 +7,8 @@ import IosButton from '../components/IosButton';
 import { AntDesign } from 'react-native-vector-icons';
 import GradientDivider from '../components/GradientDivider';
 import Validation from '../service/Validation';
+import PickerItem from '../models/PickerItem';
+import CustomPicker from '../components/CustomPicker';
 
 
 
@@ -17,15 +19,30 @@ const WyborLokalizacji = props => {
     const [miastoEnabled, setMiastoEnabled] = useState(false);
     const [errorMessage, setErrorMessage] = useState("\n");
     const [isLoading, setIsLoading] = useState(false);
+
+    const wojewodztwa = [
+        new PickerItem('Wybierz województwo...', 'default'),
+        new PickerItem('Kujawsko-Pomorskie', 'kuj-pom'),
+        new PickerItem('Dolnośląskie', 'dol'),
+        new PickerItem('Warmińsko-Mazurskie', 'war-maz'),
+        new PickerItem('Wielkopolskie', 'wiel')];
+    const miasta = [
+        new PickerItem('Wybierz miasto...', 'default'),
+        new PickerItem('Olsztyn', 'olsztyn'),
+        new PickerItem('Ełk', 'ełk'),
+        new PickerItem('Braniewo', 'braniewo'),
+        new PickerItem('Szczytno', 'szczytno'),
+        new PickerItem('Barczewo', 'braniewo')];
+
     let confirmButton;
     if (Platform.OS === "android") {
         confirmButton =
-            <AndroidButton text="Przejdź dalej" containerStyle={{ width: "70%" }} buttonStyle={{ paddingVertical: 9 }}
+            <AndroidButton text="Przejdź dalej" containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9 }}
                 onClick={() => confirmButtonHandler()} />
     }
     if (Platform.OS === "ios") {
         confirmButton = <IosButton text="Przejdź dalej" containerStyle={{
-            width: "70%", borderColor: colors.primary,
+            width: "60%", borderColor: colors.primary,
             borderWidth: 2, borderRadius: 6, backgroundColor: colors.colorTextWhite
         }}
             buttonStyle={{ paddingVertical: 9 }}
@@ -33,7 +50,8 @@ const WyborLokalizacji = props => {
     }
     const onWojewodztwoChangedHandler = (wojewodztwo) => {
         setWojewodztwo(wojewodztwo);
-        if (wojewodztwo !== "default"){
+
+        if (wojewodztwo !== "default") {
             setIsLoading(true);
             setMiastoEnabled(false);
             changeCities();
@@ -46,20 +64,20 @@ const WyborLokalizacji = props => {
     const onMiastoChangedHandler = (miasto) => {
         setMiasto(miasto);
     }
-    async function changeCities(){
-        setTimeout(async function(){
+    async function changeCities() {
+        setTimeout(async function () {
             setIsLoading(false);
             setMiastoEnabled(true);
-        },500)
+        }, 500)
     }
     const confirmButtonHandler = () => {
-        let message ="";
+        let message = "";
         message = message + Validation.wojewodztwoVerification(wojewodztwo) +
-        Validation.miastoVerification(miasto);
-        if(message.length===0){
+            Validation.miastoVerification(miasto);
+        if (message.length === 0) {
             props.onConfirm(wojewodztwo, miasto);
         }
-        else{
+        else {
             setErrorMessage(message);
         }
     }
@@ -72,21 +90,9 @@ const WyborLokalizacji = props => {
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <GradientDivider startColor={Colors.accent} endColor={Colors.primary}
                     from="left" locationEnd={1} />
-                <View style={{ width: "70%", borderWidth: 2, backgroundColor: Colors.colorTextWhite, borderColor: Colors.accent, alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}>
-                    <Picker
-                        mode="dialog"
-                        selectedValue={wojewodztwo}
-                        style={{ height: 45, width:"100%", backgroundColor: 'transparent' }}
-                        onValueChange={(itemValue, itemIndex) => onWojewodztwoChangedHandler(itemValue)}>
-                        <Picker.Item label="Wybierz województwo..." value="default" color={wojewodztwo === "default" ? Colors.primary : Colors.colorTextDark} />
-                        <Picker.Item label="Mazowieckie" value="mazowieckie" color={wojewodztwo === "mazowieckie" ? Colors.primary : Colors.colorTextDark} />
-                        <Picker.Item label="Kujawsko-Pomorskie" value="kujawsko-pomorskie" color={wojewodztwo === "kujawsko-pomorskie" ? Colors.primary : Colors.colorTextDark} />
-                        <Picker.Item label="Warmińsko-Mazurskie" value="warmińsko-mazurskie" color={wojewodztwo === "warmińsko-mazurskie" ? Colors.primary : Colors.colorTextDark} />
-                    </Picker>
-                    <View style={{ position: 'absolute', alignSelf: 'flex-end', right: 10 }}>
-                        <AntDesign name="downcircle" color={Colors.accent} size={24} />
-                    </View>
-                </View>
+                <CustomPicker pickerItems={wojewodztwa} selectedValue={wojewodztwo}
+                    onPickerChange={(wojewodztwo) => onWojewodztwoChangedHandler(wojewodztwo)}
+                />
                 <GradientDivider startColor={Colors.accent} endColor={Colors.primary}
                     from="right" locationEnd={1} />
             </View>
@@ -94,22 +100,11 @@ const WyborLokalizacji = props => {
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <GradientDivider startColor={Colors.accent} endColor={Colors.primary}
                     from="left" locationEnd={1} />
-                <View style={{ width: "70%", borderWidth: 2, opacity: miastoEnabled ? 1 : 0.5, backgroundColor: Colors.colorTextWhite, borderColor: Colors.accent, alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}>
-                    <Picker
-                        enabled={miastoEnabled}
-                        selectedValue={miasto}
-                        style={{ height: 45, width:"100%", backgroundColor:'transparent'}}
-                        onValueChange={(itemValue, itemIndex) => onMiastoChangedHandler(itemValue)}>
-                        <Picker.Item label="Wybierz miasto..." value="default" color={miasto === "default" ? Colors.primary : Colors.colorTextDark} />
-                        <Picker.Item label="Olsztyn" value="Olsztyn" color={miasto === "Olsztyn" ? Colors.primary : Colors.colorTextDark} />
-                        <Picker.Item label="Ełk" value="Elk" color={miasto === "Elk" ? Colors.primary : Colors.colorTextDark} />
-                        <Picker.Item label="Braniewo" value="Braniewo" color={miasto === "Braniewo" ? Colors.primary : Colors.colorTextDark} />
-                        <Picker.Item label="Szczytno" value="Szczytno" color={miasto === "Szczytno" ? Colors.primary : Colors.colorTextDark} />
-                    </Picker>
-                    <View style={{ position: 'absolute', alignSelf: 'flex-end', right: 10 }}>
-                        <AntDesign name="downcircle" color={Colors.accent} size={24} />
-                    </View>
-                </View>
+                <CustomPicker containerStyle={{ opacity: miastoEnabled ? 1 : 0.5 }}
+                    enabled={miastoEnabled}
+                    pickerItems={miasta} selectedValue={miasto}
+                    onPickerChange={(miasto) => onMiastoChangedHandler(miasto)}
+                />
                 <GradientDivider startColor={Colors.accent} endColor={Colors.primary}
                     from="right" locationEnd={1} />
             </View>
