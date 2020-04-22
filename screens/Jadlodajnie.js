@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, ImageBackground, Text, Easing, LayoutAnimation, TextInput, Platform, Picker, Modal, Animated, Image, ScrollView, TouchableOpacity, TouchableNativeFeedback, Keyboard } from "react-native";
 import Strings from "../src/themes/strings";
 import Colors from "../src/themes/colors";
@@ -22,6 +22,8 @@ import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import PlaceHolder from '../components/PlaceHolder';
 import { Slider, SearchBar } from 'react-native-elements';
 import MultiSelect from 'react-native-multiple-select';
+import SectionedMultiSelect from 'react-native-sectioned-multi-select';
+import CustomMultiSelect from '../components/CustomMultiSelect';
 const { width, height } = Dimensions.get("screen");
 
 
@@ -34,8 +36,10 @@ function JadlodajnieScreen({ navigation, route }) {
     const [searchResults, setSearchResults] = useState([]);
     const [sliderOpacity, setSliderOpacity] = useState(0);
     const [searchViewValue, setSearchViewValue] = useState('');
+    const [selectedItems, setSelectedItems] = useState([]);
     const [indicatorValue, setIndicatorValue] = useState(12.5 + ((sliderValue - 1) * 75 / 54) + '%');
     const [enabled, setEnabled] = useState(false);
+    const multiSelect = useRef(null);
 
     const { jadlodajnie, drawerNavigation } = route.params;
     const HomeButtonHandler = () => {
@@ -52,12 +56,12 @@ function JadlodajnieScreen({ navigation, route }) {
         setDetailedSearchExpanded(!detailedSearchExpanded);
     }
     const toggleSlider = () => {
-        if(sliderOpacity===0){
-            setTimeout(function(){
+        if (sliderOpacity === 0) {
+            setTimeout(function () {
                 setSliderOpacity(1);
-            },150);
+            }, 150);
         }
-        else{
+        else {
             setSliderOpacity(0);
         }
     }
@@ -90,6 +94,50 @@ function JadlodajnieScreen({ navigation, route }) {
         id: 'suudydjsjd',
         name: 'Feta',
     }];
+
+    multiSelectItems = [{
+        id: '92iij',
+        name: 'Pierogi',
+        selected: false
+    }, {
+        id: 'a0s0a8ssbsds',
+        name: 'Kapustka',
+        selected: false
+    }, {
+        id: '16hbajsabsds',
+        name: 'Kotlet',
+        selected: false
+    }, {
+        id: 'nahs75a5sgs',
+        name: 'Brokuły',
+        selected: false
+    }, {
+        id: '667atsas',
+        name: 'Ciasto',
+        selected: false
+    }, {
+        id: 'hsyasajss',
+        name: 'Kurczak',
+        selected: false
+    }, {
+        id: 'djsjudksjds',
+        name: 'Pierwsze danie',
+        selected: false
+    }, {
+        id: 'sdhyaysdjs',
+        name: 'Śniadanie',
+        selected: false
+    }, {
+        id: 'suudydjsjds',
+        name: 'Obiad',
+        selected: false
+    }, {
+        id: 'suudydjsjdss',
+        name: 'Kolacja',
+        selected: false
+    }
+
+    ];
 
     let searchButton;
     if (Platform.OS === "android")
@@ -135,7 +183,9 @@ function JadlodajnieScreen({ navigation, route }) {
 
     useEffect(() => {
     }, jadlodajnie);
-
+    const onSelectedItemsChange = selectedItems => {
+        setSelectedItems(selectedItems);
+    };
     function applyFilter(text) {
         setSearchViewValue(text);
         if (text !== "") {
@@ -169,7 +219,7 @@ function JadlodajnieScreen({ navigation, route }) {
                         placeholder="Wyszukaj jadłodajnie..."
                         platform="android"
                         inputStyle={{ fontSize: 16 }}
-                        onFocus={()=>{applyFilter(searchViewValue)}}
+                        onFocus={() => { applyFilter(searchViewValue) }}
                         onSubmitEditing={() => { setSearchResults([]) }}
                         containerStyle={{ borderRadius: dimensions.defaultBorderRadius }}
                         onChangeText={(text) => applyFilter(text)}
@@ -195,12 +245,12 @@ function JadlodajnieScreen({ navigation, route }) {
                             )
                         }}
                     />
-                    <TouchableOpacity onPress={()=>{
+                    <TouchableOpacity onPress={() => {
                         setSearchResults([]);
                         Keyboard.dismiss();
                         toggleDetailedSearchView();
                         toggleSlider();
-                        }}>
+                    }}>
                         <Text style={{ fontSize: 16, color: Colors.accent, marginTop: 12 }}>{!detailedSearchExpanded ? "Zaawansowane" : "Schowaj zaawansowane"}</Text>
                     </TouchableOpacity>
                 </View>
@@ -208,14 +258,15 @@ function JadlodajnieScreen({ navigation, route }) {
                     height: detailedSearchExpanded ? null : 0,
                     display: detailedSearchExpanded ? 'flex' : 'none', overflow: 'hidden',
                     paddingVertical: 12,
-                    width:'100%',
+                    width: '100%',
                     alignItems: 'center',
                 }}>
                     <Text style={{ fontSize: 16, marginTop: dimensions.defaultMargin, marginBottom: Dimensions.defaultSmallMargin }}>Odległość od lokalizacji</Text>
                     <View style={{ justifyContent: 'center', }}>
                         <View style={{ width: "100%", flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                             <Text style={{ textAlign: 'center', flex: 1 }}>1km</Text>
-                            <Slider style={{ width: "75%", height: 40, opacity: sliderOpacity}}
+                            <Slider
+                                style={{ width: "75%", height: 40, opacity: sliderOpacity }}
                                 animateTransitions={false}
                                 minimumValue={1}
                                 maximumValue={50}
@@ -238,7 +289,7 @@ function JadlodajnieScreen({ navigation, route }) {
                         </View>
                     </View>
                     <Text style={styles.title}>Tagi</Text>
-                    
+                    <CustomMultiSelect placeHolder="Wybierz tagi (max 3)" items={multiSelectItems}/>
                 </View>
                 {searchButton}
             </View>
