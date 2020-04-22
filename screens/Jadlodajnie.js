@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, ImageBackground, Text, Easing, LayoutAnimation, TextInput, Platform, Picker, Modal, Animated, Image } from "react-native";
+import { View, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, ImageBackground, Text, Easing, LayoutAnimation, TextInput, Platform, Picker, Modal, Animated, Image, ScrollView, TouchableOpacity, TouchableNativeFeedback, Keyboard } from "react-native";
 import Strings from "../src/themes/strings";
 import Colors from "../src/themes/colors";
 import { createStackNavigator, HeaderTitle } from '@react-navigation/stack';
@@ -20,7 +20,7 @@ import IosButton from '../components/IosButton';
 import { Dimensions } from 'react-native';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import PlaceHolder from '../components/PlaceHolder';
-import { Slider } from 'react-native-elements';
+import { Slider, SearchBar } from 'react-native-elements';
 import MultiSelect from 'react-native-multiple-select';
 const { width, height } = Dimensions.get("screen");
 
@@ -29,53 +29,73 @@ function JadlodajnieScreen({ navigation, route }) {
 
     const [selectedValue, setSelectedValue] = useState("default");
     const [expanded, setExpanded] = useState(false);
+    const [detailedSearchExpanded, setDetailedSearchExpanded] = useState(false);
     const [sliderValue, setSliderValue] = useState(25);
-    const [indicatorValue, setIndicatorValue] = useState(12.5 + ((sliderValue-1) * 75 / 54) + '%');
+    const [searchResults, setSearchResults] = useState([]);
+    const [sliderOpacity, setSliderOpacity] = useState(0);
+    const [searchViewValue, setSearchViewValue] = useState('');
+    const [indicatorValue, setIndicatorValue] = useState(12.5 + ((sliderValue - 1) * 75 / 54) + '%');
     const [enabled, setEnabled] = useState(false);
-    
+
     const { jadlodajnie, drawerNavigation } = route.params;
     const HomeButtonHandler = () => {
         navigation.openDrawer();
     }
-    const toggleView = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    const toggleSearchView = () => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeIn);
+        setDetailedSearchExpanded(false);
+        setSliderOpacity(0);
         setExpanded(!expanded);
+    }
+    const toggleDetailedSearchView = () => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeIn);
+        setDetailedSearchExpanded(!detailedSearchExpanded);
+    }
+    const toggleSlider = () => {
+        if(sliderOpacity===0){
+            setTimeout(function(){
+                setSliderOpacity(1);
+            },150);
+        }
+        else{
+            setSliderOpacity(0);
+        }
     }
 
     items = [{
         id: '92iijs7yta',
-        name: 'Ondo',
-      }, {
+        name: 'Pełny gar',
+    }, {
         id: 'a0s0a8ssbsd',
-        name: 'Ogun',
-      }, {
+        name: 'Stołówka warmińska',
+    }, {
         id: '16hbajsabsd',
-        name: 'Calabar',
-      }, {
+        name: 'Bistro-Kociołek',
+    }, {
         id: 'nahs75a5sg',
-        name: 'Lagos',
-      }, {
+        name: 'Bar Kąsek',
+    }, {
         id: '667atsas',
-        name: 'Maiduguri',
-      }, {
+        name: 'Bar u Sióstr',
+    }, {
         id: 'hsyasajs',
-        name: 'Anambra',
-      }, {
+        name: 'Bistro Kopernika',
+    }, {
         id: 'djsjudksjd',
-        name: 'Benue',
-      }, {
+        name: 'Kuźnia smaków',
+    }, {
         id: 'sdhyaysdj',
-        name: 'Kaduna',
-      }, {
+        name: 'Kwadrans',
+    }, {
         id: 'suudydjsjd',
-        name: 'Abuja',
-      }];
+        name: 'Feta',
+    }];
 
     let searchButton;
     if (Platform.OS === "android")
-        searchButton = <AndroidButton text="Wyszukaj" containerStyle={{ width: '60%', alignSelf: 'center', marginTop: 12 }} onClick={toggleView} />
+        searchButton = <AndroidButton text="Wyszukaj" containerStyle={{ width: '60%', alignSelf: 'center', marginTop: 12 }} onClick={toggleSearchView} />
     if (Platform.OS === "ios")
-        searchButton = <IosButton text="Wyszukaj" onClick={toggleView} />
+        searchButton = <IosButton text="Wyszukaj" onClick={toggleSearchView} />
 
 
     navigation.setOptions({
@@ -83,10 +103,10 @@ function JadlodajnieScreen({ navigation, route }) {
             return expanded ?
                 <IconWithAction
                     content={<AntDesign name="close" size={26} color={Colors.colorTextWhite} />}
-                    onClick={toggleView} /> :
+                    onClick={toggleSearchView} /> :
                 <IconWithAction
                     content={<Ionicons name="md-search" size={26} color={Colors.colorTextWhite} />}
-                    onClick={toggleView} />;
+                    onClick={toggleSearchView} />;
         },
         headerLeft: () => {
             return expanded ?
@@ -114,8 +134,24 @@ function JadlodajnieScreen({ navigation, route }) {
     }
 
     useEffect(() => {
-
     }, jadlodajnie);
+
+    function applyFilter(text) {
+        setSearchViewValue(text);
+        if (text !== "") {
+            const filterResults = items.filter(item => {
+                const itemData = item.name.toLowerCase();
+                const searchResult = text.toLowerCase();
+                return itemData.indexOf(searchResult) > -1;
+            });
+            setSearchResults(filterResults);
+        }
+        else {
+            setSearchResults([]);
+        }
+    }
+
+
     return (
         <View style={styles.container} >
             <View style={{
@@ -125,34 +161,85 @@ function JadlodajnieScreen({ navigation, route }) {
                 alignItems: 'center',
                 borderColor: Colors.primary, borderBottomLeftRadius: 16, borderBottomRightRadius: 16
             }}>
-                <Text style={{ textAlign: 'center', marginTop: dimensions.defaultMargin, marginBottom: Dimensions.defaultSmallMargin }}>Odległość od lokalizacji</Text>
-                <View style={{ flexDirection: 'column', justifyContent: 'center', }}>
-                    <View style={{ width: "100%", flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ textAlign: 'center', flex: 1 }}>1km</Text>
-                        <Slider style={{ width: "75%", height: 40 }}
-                            animateTransitions={false}
-                            minimumValue={1}
-                            maximumValue={50}
-                            value={25}
-                            onValueChange={(value) => {
-                                setSliderValue(value)
-                                setIndicatorValue(12.5 + ((value - 1) * 75 / 54) + '%')
-                            }}
-                            step={1}
-                            minimumTrackTintColor={Colors.primary}
-                            trackStyle={{ height: 6 }}
-                            thumbStyle={{
-                                height: 24, width: 24, borderColor: Colors.primary, backgroundColor: Colors.accent, borderWidth: 6, borderRadius: 12
-                            }}
-                        />
-                        <Text style={{ textAlign: 'center', flex: 1 }}>50km</Text>
-                    </View>
-                    <View style={{ width: 24,justifyContent: 'center',borderRadius:6,borderWidth:1,borderColor:Colors.accent, backgroundColor: Colors.colorTextWhite, height: 24, left: indicatorValue }}>
-                        <Text style={{textAlign:'center'}}>{sliderValue}</Text>
-                    </View>
+
+                <Text style={{ fontSize: 16, marginTop: 6, marginBottom: 6 }}>Nazwa Jadłodajnii</Text>
+                <View style={{ width: '85%', alignItems: 'center' }}>
+                    <SearchBar
+                        onCancel={() => { setSearchResults([]); }}
+                        placeholder="Wyszukaj jadłodajnie..."
+                        platform="android"
+                        inputStyle={{ fontSize: 16 }}
+                        onFocus={()=>{applyFilter(searchViewValue)}}
+                        onSubmitEditing={() => { setSearchResults([]) }}
+                        containerStyle={{ borderRadius: dimensions.defaultBorderRadius }}
+                        onChangeText={(text) => applyFilter(text)}
+                        value={searchViewValue}
+                    />
+                    <FlatList
+                        keyboardShouldPersistTaps='handled'
+                        style={{
+                            height: searchResults.length * 40 <= 160 ? searchResults.length * 40 : 160,
+                        }}
+                        data={searchResults} renderItem={({ item, index }) => {
+                            return (
+                                <TouchableNativeFeedback onPress={() => {
+                                    setSearchViewValue(item.name)
+                                    setSearchResults([]);
+                                    Keyboard.dismiss();
+                                }}
+                                >
+                                    <View style={{ height: 40, width: 85 * width / 100, alignItems: 'center', justifyContent: 'center', }}>
+                                        <Text style={{ fontSize: 16 }}>{item.name}</Text>
+                                    </View>
+                                </TouchableNativeFeedback>
+                            )
+                        }}
+                    />
+                    <TouchableOpacity onPress={()=>{
+                        setSearchResults([]);
+                        Keyboard.dismiss();
+                        toggleDetailedSearchView();
+                        toggleSlider();
+                        }}>
+                        <Text style={{ fontSize: 16, color: Colors.accent, marginTop: 12 }}>{!detailedSearchExpanded ? "Zaawansowane" : "Schowaj zaawansowane"}</Text>
+                    </TouchableOpacity>
                 </View>
-                <Text style={styles.title}>Tagi</Text>
-                <TextInput style={styles.input} />
+                <View style={{
+                    height: detailedSearchExpanded ? null : 0,
+                    display: detailedSearchExpanded ? 'flex' : 'none', overflow: 'hidden',
+                    paddingVertical: 12,
+                    width:'100%',
+                    alignItems: 'center',
+                }}>
+                    <Text style={{ fontSize: 16, marginTop: dimensions.defaultMargin, marginBottom: Dimensions.defaultSmallMargin }}>Odległość od lokalizacji</Text>
+                    <View style={{ justifyContent: 'center', }}>
+                        <View style={{ width: "100%", flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                            <Text style={{ textAlign: 'center', flex: 1 }}>1km</Text>
+                            <Slider style={{ width: "75%", height: 40, opacity: sliderOpacity}}
+                                animateTransitions={false}
+                                minimumValue={1}
+                                maximumValue={50}
+                                value={25}
+                                onValueChange={(value) => {
+                                    setSliderValue(value)
+                                    setIndicatorValue(12.5 + ((value - 1) * 75 / 54) + '%')
+                                }}
+                                step={1}
+                                minimumTrackTintColor={Colors.primary}
+                                trackStyle={{ height: 6 }}
+                                thumbStyle={{
+                                    height: 24, width: 24, borderColor: Colors.primary, backgroundColor: Colors.accent, borderWidth: 6, borderRadius: 12
+                                }}
+                            />
+                            <Text style={{ textAlign: 'center', flex: 1 }}>50km</Text>
+                        </View>
+                        <View style={{ width: 24, justifyContent: 'center', borderRadius: 6, borderWidth: 1, borderColor: Colors.accent, backgroundColor: Colors.colorTextWhite, height: 24, left: indicatorValue }}>
+                            <Text style={{ textAlign: 'center' }}>{sliderValue}</Text>
+                        </View>
+                    </View>
+                    <Text style={styles.title}>Tagi</Text>
+                    
+                </View>
                 {searchButton}
             </View>
             <ImageBackground source={require('../src/images/pancakes.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>
