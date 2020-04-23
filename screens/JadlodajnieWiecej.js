@@ -28,7 +28,7 @@ const JadlodajnieWiecej = props => {
 
     async function fetchData() {
         if (isLoading) {
-            setTimeout(async function(){
+            setTimeout(async function () {
                 const res = await Connection.getSzczegolyJadlodajnia();
                 res
                     .json()
@@ -37,22 +37,20 @@ const JadlodajnieWiecej = props => {
                         setIsLoading(false);
                     })
                     .catch(err => console.log(err + 'blad'));
-            },500);
+            }, 500);
         }
     }
 
     useEffect(() => {
         fetchData();
     }, isLoading);
-
+    let content;
 
     if (isLoading) {
-        return <CustomLoadingComponent />
+        content = <CustomLoadingComponent />
     }
     else {
-
         let currentWidth = 0;
-
         const szczegoly = dataSource;
         const zestawRange = szczegoly.zestawy.length;
         const { jadlodajniaId } = props.route.params;
@@ -79,117 +77,119 @@ const JadlodajnieWiecej = props => {
         // else{
         //     setIconColor("white");
         // }
-        return (
-            <View style={styles.container}>
-                <ImageBackground source={require('../src/images/zupka.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>
-                    <Animated.View style={[styles.header, { height: headerHeight }]} >
-                        <Animated.View style={styles.headerImageContainer}>
-                            <Animated.Image source={{ uri: szczegoly.imageUrl }}
-                                style={[styles.headerImage, {
-                                    height: headerHeight,
-                                    opacity: heroTitleOpacity,
-                                }]}
-                            ></Animated.Image>
-                            <Animated.Text style={[styles.headerExpanded, { opacity: 1 }]}>{szczegoly.nazwa} </Animated.Text>
-                        </Animated.View>
+
+        content =
+            <View>
+                <Animated.View style={[styles.header, { height: headerHeight }]} >
+                    <Animated.View style={styles.headerImageContainer}>
+                        <Animated.Image source={{ uri: szczegoly.imageUrl }}
+                            style={[styles.headerImage, {
+                                height: headerHeight,
+                                opacity: heroTitleOpacity,
+                            }]}
+                        ></Animated.Image>
+                        <Animated.Text style={[styles.headerExpanded, { opacity: 1 }]}>{szczegoly.nazwa} </Animated.Text>
                     </Animated.View>
-                    <View style={[styles.backButtonContainer, { left: 0 }]}>
-                        <TouchableOpacity
-                            onPress={() => {
-                                props.navigation.goBack();
-                            }}>
-                            <Ionicons name="ios-arrow-round-back" size={36} color={Colors.colorTextWhite}></Ionicons>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={[styles.backButtonContainer, { right: 0 }]}>
-                        <IconWithAction content={<FontAwesome name="star" color={iconColor} size={24} />} onClick={() => {
-                            if (isFavourite) {
-                                ToastAndroid.show("Usunięto z ulubionych !!!", ToastAndroid.SHORT);
-                                setIsFavourite(!isFavourite);
-                                setIconColor("white");
-                            }
-                            else {
-                                ToastAndroid.show("Dodano do ulubionych !!!", ToastAndroid.SHORT);
-                                setIsFavourite(!isFavourite);
-                                setIconColor("gold");
-                            }
-                        }} />
-                    </View>
-                    <ScrollView
-                        contentContainerStyle={styles.scrollContainer}
-                        onScroll={Animated.event(
-                            [{
-                                nativeEvent: {
-                                    contentOffset: {
-                                        y: scrollY
-                                    }
+                </Animated.View>
+                <View style={[styles.backButtonContainer, { left: 0 }]}>
+                    <TouchableOpacity
+                        onPress={() => {
+                            props.navigation.goBack();
+                        }}>
+                        <Ionicons name="ios-arrow-round-back" size={36} color={Colors.colorTextWhite}></Ionicons>
+                    </TouchableOpacity>
+                </View>
+                <View style={[styles.backButtonContainer, { right: 0 }]}>
+                    <IconWithAction content={<FontAwesome name="star" color={iconColor} size={24} />} onClick={() => {
+                        if (isFavourite) {
+                            ToastAndroid.show("Usunięto z ulubionych !!!", ToastAndroid.SHORT);
+                            setIsFavourite(!isFavourite);
+                            setIconColor("white");
+                        }
+                        else {
+                            ToastAndroid.show("Dodano do ulubionych !!!", ToastAndroid.SHORT);
+                            setIsFavourite(!isFavourite);
+                            setIconColor("gold");
+                        }
+                    }} />
+                </View>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContainer}
+                    onScroll={Animated.event(
+                        [{
+                            nativeEvent: {
+                                contentOffset: {
+                                    y: scrollY
                                 }
-                            }])}
-                        scrollEventThrottle={16}
-                    >
-                        <Text style={{ fontSize: 20, textAlign: "center", marginVertical: dimensions.defaultHugeMargin }}>Aktualności</Text>
-                        <View style={{ flex: 1, flexDirection: 'row', marginBottom: dimensions.defaultMarginBetweenItems }}>
-                            <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 50 }}>
-                                <TouchableOpacity onPress={() => {
-                                    if (currentWidth === 0) {
-                                        return;
-                                    }
-                                    else {
-                                        currentWidth = currentWidth - (width - 100);
-                                        scrollRef.current.scrollTo({ x: currentWidth });
-                                    }
-                                }}>
-                                    <Feather name="arrow-left-circle" color={Colors.primary} size={36}></Feather>
-                                </TouchableOpacity>
-                            </View>
-                            <ScrollView
-                                horizontal={true}
-                                scrollEnabled={false}
-                                showsHorizontalScrollIndicator={false}
-                                ref={scrollRef}
-                            >
-                                <FlatList data={szczegoly.zestawy}
-                                    horizontal={true}
-                                    renderItem={itemData =>
-                                        <View style={{ flexDirection: 'column' }}>
-                                            <Zestaw date={itemData.item.data} name={itemData.item.nazwa} price={itemData.item.cena}></Zestaw>
-                                            
-                                            <Text style={{ textAlign: 'center', fontSize: 20, marginVertical:dimensions.defaultHugeMargin }}>
-                                                Menu główne
-                                            </Text>
-                                            <View style={{width: width - 100}}>
-                                                <Text>UWAGA! Do odwołania nasze lokale pracują w godzinach 11:00 - 16:30.{'\n'}Obowiązuje zakaz spożywania posiłków na miejscu!{'\n'}Nadal funkcjonuje sprzedaż posiłków na wynos oraz z dowozem!{'\n'}Uprzejmie prosimy o zastosowanie zasady podchodzenia do bufetu pojedynczo oraz wchodzenia do lokalu nie więcej niż trzech osób w jednym momencie.{'\n'}Dostawy w zależności od odległości realizujemy za dodatkową opłatą.{'\n'}W ofercie stałej:{'\n'}codziennie, od godziny 11{'\n'}1. pierogi{'\n'}- z kapustą i grzybami 8 szt. cena 10,99 zł{'\n'}- z mięsem 8 szt. cena 10,99 zł{'\n'}- ruskie 8 szt. cena 10,99 zł{'\n'}{'\n'}2. duża zupa \"Pełny Gar\" cena 6,99 zł{'\n'}zupa codzienna cena 5,50 zł{'\n'}3. kotlet schabowy + zupa dnia + surówka cena 14,99 zł{'\n'}{'\n'}4. kompot cena 1,50 zł</Text>
-                                            </View>
-                                        </View>
-
-                                    }
-                                    keyExtractor={itemData => itemData.zestaw_id}
-
-
-                                />
-                            </ScrollView>
-                            <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: "center", width: 50 }}>
-                                <TouchableOpacity onPress={() => {
-                                    currentWidth = currentWidth + width - 100;
+                            }
+                        }])}
+                    scrollEventThrottle={16}
+                >
+                    <Text style={{ fontSize: 20, textAlign: "center", marginVertical: dimensions.defaultHugeMargin }}>Aktualności</Text>
+                    <View style={{ flex: 1, flexDirection: 'row', marginBottom: dimensions.defaultMarginBetweenItems }}>
+                        <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 50 }}>
+                            <TouchableOpacity onPress={() => {
+                                if (currentWidth === 0) {
+                                    return;
+                                }
+                                else {
+                                    currentWidth = currentWidth - (width - 100);
                                     scrollRef.current.scrollTo({ x: currentWidth });
-                                }}>
-                                    <Feather name="arrow-right-circle" color={Colors.primary} size={36}></Feather>
-                                </TouchableOpacity>
-                            </View>
-
-
-
+                                }
+                            }}>
+                                <Feather name="arrow-left-circle" color={Colors.primary} size={36}></Feather>
+                            </TouchableOpacity>
                         </View>
-                        <Text style={{ textAlign: "center", fontSize: 20, marginBottom: dimensions.defaultHugeMargin }}>Dostępne punkty</Text>
-                        <SafeAreaView>
-                            {szczegoly.lokalizacje.map(lokalizacja => renderInformacje(szczegoly, lokalizacja))}
-                        </SafeAreaView>
+                        <ScrollView
+                            horizontal={true}
+                            scrollEnabled={false}
+                            showsHorizontalScrollIndicator={false}
+                            ref={scrollRef}
+                        >
+                            <FlatList data={szczegoly.zestawy}
+                                horizontal={true}
+                                renderItem={itemData =>
+                                    <View style={{ flexDirection: 'column' }}>
+                                        <Zestaw date={itemData.item.data} name={itemData.item.nazwa} price={itemData.item.cena}></Zestaw>
 
-                    </ScrollView>
-                </ImageBackground>
+                                        <Text style={{ textAlign: 'center', fontSize: 20, marginVertical: dimensions.defaultHugeMargin }}>
+                                            Menu główne
+                                            </Text>
+                                        <View style={{ width: width - 100 }}>
+                                            <Text>UWAGA! Do odwołania nasze lokale pracują w godzinach 11:00 - 16:30.{'\n'}Obowiązuje zakaz spożywania posiłków na miejscu!{'\n'}Nadal funkcjonuje sprzedaż posiłków na wynos oraz z dowozem!{'\n'}Uprzejmie prosimy o zastosowanie zasady podchodzenia do bufetu pojedynczo oraz wchodzenia do lokalu nie więcej niż trzech osób w jednym momencie.{'\n'}Dostawy w zależności od odległości realizujemy za dodatkową opłatą.{'\n'}W ofercie stałej:{'\n'}codziennie, od godziny 11{'\n'}1. pierogi{'\n'}- z kapustą i grzybami 8 szt. cena 10,99 zł{'\n'}- z mięsem 8 szt. cena 10,99 zł{'\n'}- ruskie 8 szt. cena 10,99 zł{'\n'}{'\n'}2. duża zupa \"Pełny Gar\" cena 6,99 zł{'\n'}zupa codzienna cena 5,50 zł{'\n'}3. kotlet schabowy + zupa dnia + surówka cena 14,99 zł{'\n'}{'\n'}4. kompot cena 1,50 zł</Text>
+                                        </View>
+                                    </View>
+
+                                }
+                                keyExtractor={itemData => itemData.zestaw_id}
+                            />
+                        </ScrollView>
+                        <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: "center", width: 50 }}>
+                            <TouchableOpacity onPress={() => {
+                                currentWidth = currentWidth + width - 100;
+                                scrollRef.current.scrollTo({ x: currentWidth });
+                            }}>
+                                <Feather name="arrow-right-circle" color={Colors.primary} size={36}></Feather>
+                            </TouchableOpacity>
+                        </View>
+
+
+
+                    </View>
+                    <Text style={{ textAlign: "center", fontSize: 20, marginBottom: dimensions.defaultHugeMargin }}>Dostępne punkty</Text>
+                    <SafeAreaView>
+                        {szczegoly.lokalizacje.map(lokalizacja => renderInformacje(szczegoly, lokalizacja))}
+                    </SafeAreaView>
+                </ScrollView>
             </View>
-        )
     }
+
+    return (
+        <View style={styles.container}>
+            <ImageBackground source={require('../src/images/zupka.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>
+                {content}
+            </ImageBackground >
+        </View >)
 }
 
 

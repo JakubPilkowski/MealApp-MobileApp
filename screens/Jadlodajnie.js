@@ -42,9 +42,30 @@ function JadlodajnieScreen({ navigation, route }) {
     const [enabled, setEnabled] = useState(false);
     const multiSelect = useRef(null);
     const [chosenItems, setChosenItems] = useState([]);
-    const colors = ['crimson', 'darkgreen','slateGray', 'darkmagenta', 'darkorange', 'darkturquoise', 'hotpink'];
+    const colors = ['crimson', 'darkgreen', 'slateGray', 'darkmagenta', 'darkorange', 'darkturquoise', 'hotpink'];
+    const {drawerNavigation } = route.params;
+    const [isLoading, setIsLoading] = useState(true);
+    const [jadlodajnie, setJadlodajnie] = useState([]);
+    async function fetchData() {
+        if (isLoading) {
+            setTimeout(async function () {
+                const res = await Connection.getJadlodajnie();
+                res
+                    .json()
+                    .then(res => {
+                        setJadlodajnie(res.jadlodajnie);
+                        setIsLoading(false);
+                    })
+                    .catch(err => console.log(err + 'blad'));
+            }, 500);
+        }
+    }
+    useEffect(() => {
+        fetchData();
+    }, isLoading);
 
-    const { jadlodajnie, drawerNavigation } = route.params;
+
+
     const HomeButtonHandler = () => {
         navigation.openDrawer();
     }
@@ -181,22 +202,23 @@ function JadlodajnieScreen({ navigation, route }) {
     });
 
     let content;
-    if (jadlodajnie.length > 0) {
-        content =
-            <FlatList
-                scrollEnabled={expanded ? false : true}
-                data={jadlodajnie} renderItem={({ item, index }) =>
-                    <Jadlodajnia title={item.title} containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} navigation={navigation} jadlodajnia={item} ></Jadlodajnia>}
-                keyExtractor={itemData => itemData.id}
-            />
+    if (isLoading) {
+        content = <CustomLoadingComponent />
     }
     else {
-        content = <PlaceHolder text={"Ups, nie ma \ntakich restauracji"} src={require('../src/images/plate_v2.png')} />
+        if (jadlodajnie.length > 0) {
+            content =
+                <FlatList
+                    scrollEnabled={expanded ? false : true}
+                    data={jadlodajnie} renderItem={({ item, index }) =>
+                        <Jadlodajnia title={item.title} containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} navigation={navigation} jadlodajnia={item} ></Jadlodajnia>}
+                    keyExtractor={itemData => itemData.id}
+                />
+        }
+        else {
+            content = <PlaceHolder text={"Ups, nie ma \ntakich restauracji"} src={require('../src/images/plate_v2.png')} />
+        }
     }
-
-    useEffect(() => {
-    }, jadlodajnie);
-
     function applyFilter(text) {
         setSearchViewValue(text);
         if (text !== "") {
@@ -300,7 +322,7 @@ function JadlodajnieScreen({ navigation, route }) {
                         </View>
                     </View>
                     <Text style={styles.title}>Tagi</Text>
-                    <CustomMultiSelect placeHolder="Wybierz tagi (max 3)" items={multiSelectItems} 
+                    <CustomMultiSelect placeHolder="Wybierz tagi (max 3)" items={multiSelectItems}
                     // onAddItem={(item) => {
                     //     setChosenItems(currentItems => [...currentItems, { id: item.id, name: item.name, selected: !item.selected }]);
                     // }} onRemoveItem={(item) => {
@@ -336,51 +358,26 @@ function JadlodajnieScreen({ navigation, route }) {
 }
 
 const Jadlodajnie = props => {
-
-    const [isLoading, setIsLoading] = useState(true);
-    const [dataSource, setDataSource] = useState([]);
     const forFade = ({ current, closing }) => ({
         cardStyle: {
-          opacity: current.progress,
+            opacity: current.progress,
         },
-      });
-    async function fetchData() {
-        if (isLoading) {
-            setTimeout(async function () {
-                const res = await Connection.getJadlodajnie();
-                res
-                    .json()
-                    .then(res => {
-                        setDataSource(res.jadlodajnie);
-                        setIsLoading(false);
-                    })
-                    .catch(err => console.log(err + 'blad'));
-            }, 3000);
-        }
-    }
-    useEffect(() => {
-        fetchData();
-    }, isLoading);
-    const Stack = createStackNavigator();
-    if (isLoading) {
-        return <CustomLoadingComponent />
-    }
-    else {
-        return (
-            <Stack.Navigator initialRouteName="Jadlodajnie" screenOptions={ScreenStyle}>
-                <Stack.Screen name="Jadlodajnie" component={JadlodajnieScreen} initialParams={{ jadlodajnie: dataSource, drawerNavigation: props.navigation }} />
-                <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
-                    options={{
-                        headerStyle: {
-                            opacity: 0, height: 0
-                        },
-                        cardStyleInterpolator: forFade
-                    }}
-                />
-            </Stack.Navigator>
-        );
-    }
+    });
 
+    const Stack = createStackNavigator();
+    return (
+        <Stack.Navigator initialRouteName="Jadlodajnie" screenOptions={ScreenStyle}>
+            <Stack.Screen name="Jadlodajnie" component={JadlodajnieScreen} initialParams={{ drawerNavigation: props.navigation }} />
+            <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
+                options={{
+                    headerStyle: {
+                        opacity: 0, height: 0
+                    },
+                    cardStyleInterpolator: forFade
+                }}
+            />
+        </Stack.Navigator>
+    );
 }
 const styles = StyleSheet.create({
     container: {
