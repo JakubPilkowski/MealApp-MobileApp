@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, ActivityIndicator, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid } from 'react-native';
+import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView,FlatList, ActivityIndicator, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
 import Strings from "../src/themes/strings";
@@ -7,17 +7,13 @@ const HEADER_EXPANDED_HEIGHT = 225;
 const HEADER_COLLAPSED_HEIGHT = 56;
 import { Ionicons, FontAwesome, Feather } from '@expo/vector-icons';
 import Connection from '../service/Connection';
-import { FlatList } from 'react-native-gesture-handler';
 import Zestaw from '../components/Zestaw';
 import InformacjeOgolneJadlodajnia from '../components/InformacjeOgolneJadlodajnia';
 import IconWithAction from '../components/IconWithAction';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
-import { Divider } from 'react-native-elements';
 const { width, height } = Dimensions.get('window');
 
 const JadlodajnieWiecej = props => {
-
-    const szczegoly = [];
 
     const [isLoading, setIsLoading] = useState(true);
     const [dataSource, setDataSource] = useState([]);
@@ -43,7 +39,7 @@ const JadlodajnieWiecej = props => {
 
     useEffect(() => {
         fetchData();
-    }, isLoading);
+    }, [isLoading]);
     let content;
 
     if (isLoading) {
@@ -52,19 +48,14 @@ const JadlodajnieWiecej = props => {
     else {
         let currentWidth = 0;
         const szczegoly = dataSource;
-        const zestawRange = szczegoly.zestawy.length;
-        const { jadlodajniaId } = props.route.params;
+        // const zestawRange = szczegoly.zestawy.length;
+        // const { jadlodajniaId } = props.route.params;
         const headerHeight = scrollY.interpolate(
             {
                 inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
                 outputRange: [HEADER_EXPANDED_HEIGHT, HEADER_COLLAPSED_HEIGHT],
                 extrapolate: 'clamp'
             })
-        const headerTitleOpacity = scrollY.interpolate({
-            inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
-            outputRange: [0, 1],
-            extrapolate: 'clamp'
-        });
         const heroTitleOpacity = scrollY.interpolate({
             inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
             outputRange: [1, 0],
@@ -161,7 +152,7 @@ const JadlodajnieWiecej = props => {
                                     </View>
 
                                 }
-                                keyExtractor={itemData => itemData.zestaw_id}
+                                keyExtractor={item => item.zestaw_id}
                             />
                         </ScrollView>
                         <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: "center", width: 50 }}>

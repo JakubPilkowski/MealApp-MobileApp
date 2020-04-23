@@ -17,17 +17,18 @@ const Jadlodajnia = props => {
     if (Platform.OS === 'ios') {
         moreButton =
             <IosButton onClick={() => {
-                props.navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: jadlodajnia.id });
+                props.onMoreClick(jadlodajnia.id);
             }} text={Strings.more} />
     }
     if (Platform.OS === 'android') {
         moreButton =
             <AndroidButton onClick={() => {
-                props.navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: jadlodajnia.id });
+                props.onMoreClick(jadlodajnia.id)
+                // props.navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: jadlodajnia.id });
             }} text={Strings.more} containerStyle={styles.androidButtonView} buttonStyle={styles.buttonStyle} />
     }
     return (
-        <View style={[styles.container, props.containerStyle]}>
+        <View key={jadlodajnia.id} style={[styles.container, props.containerStyle]}>
             <View style={styles.avatarContainer}>
                 <Image style={styles.image} source={{ uri: jadlodajnia.iconUrl }} ></Image>
                 <View style={{ flexDirection: 'column', flex: 1, justifyContent: "center" }}>

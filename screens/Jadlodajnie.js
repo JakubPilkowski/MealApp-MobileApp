@@ -8,8 +8,6 @@ import IconWithAction from "../components/IconWithAction";
 import ScreenStyle from "../src/themes/screenStyle";
 import Jadlodajnia from "../components/Jadlodajnia";
 import Connection from '../service/Connection';
-import Switch from 'react-native-customisable-switch';
-import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import {
     AntDesign,
     Feather, Ionicons,
@@ -22,8 +20,6 @@ import { Dimensions } from 'react-native';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import PlaceHolder from '../components/PlaceHolder';
 import { Slider, SearchBar } from 'react-native-elements';
-import MultiSelect from 'react-native-multiple-select';
-import SectionedMultiSelect from 'react-native-sectioned-multi-select';
 import CustomMultiSelect from '../components/CustomMultiSelect';
 const { width, height } = Dimensions.get("screen");
 
@@ -43,7 +39,7 @@ function JadlodajnieScreen({ navigation, route }) {
     const multiSelect = useRef(null);
     const [chosenItems, setChosenItems] = useState([]);
     const colors = ['crimson', 'darkgreen', 'slateGray', 'darkmagenta', 'darkorange', 'darkturquoise', 'hotpink'];
-    const {drawerNavigation } = route.params;
+    const { drawerNavigation } = route.params;
     const [isLoading, setIsLoading] = useState(true);
     const [jadlodajnie, setJadlodajnie] = useState([]);
     async function fetchData() {
@@ -62,7 +58,7 @@ function JadlodajnieScreen({ navigation, route }) {
     }
     useEffect(() => {
         fetchData();
-    }, isLoading);
+    },[isLoading]);
 
 
 
@@ -211,8 +207,8 @@ function JadlodajnieScreen({ navigation, route }) {
                 <FlatList
                     scrollEnabled={expanded ? false : true}
                     data={jadlodajnie} renderItem={({ item, index }) =>
-                        <Jadlodajnia title={item.title} containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} navigation={navigation} jadlodajnia={item} ></Jadlodajnia>}
-                    keyExtractor={itemData => itemData.id}
+                        <Jadlodajnia title={item.title} containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} onMoreClick={(jadlodajniaId)=>{navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: jadlodajniaId });}} jadlodajnia={item} ></Jadlodajnia>}
+                    keyExtractor={item => item.id}
                 />
         }
         else {

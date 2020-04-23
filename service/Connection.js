@@ -1,4 +1,4 @@
-const API_URL = "http://www.mocky.io/v2/5e6fcae033000065f1f07c22";
+const API_URL = "http://www.mocky.io/v2/5ea1ce4d310000f7611eee1d";
 export default class Connection {
   
     static getJadlodajnie(){
