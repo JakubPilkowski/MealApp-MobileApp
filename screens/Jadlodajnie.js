@@ -12,7 +12,8 @@ import Switch from 'react-native-customisable-switch';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import {
     AntDesign,
-    Feather, Ionicons
+    Feather, Ionicons,
+    MaterialIcons, MaterialCommunityIcons
 } from 'react-native-vector-icons';
 import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
@@ -40,6 +41,8 @@ function JadlodajnieScreen({ navigation, route }) {
     const [indicatorValue, setIndicatorValue] = useState(12.5 + ((sliderValue - 1) * 75 / 54) + '%');
     const [enabled, setEnabled] = useState(false);
     const multiSelect = useRef(null);
+    const [chosenItems, setChosenItems] = useState([]);
+    const colors = ['crimson', 'darkgreen','slateGray', 'darkmagenta', 'darkorange', 'darkturquoise', 'hotpink'];
 
     const { jadlodajnie, drawerNavigation } = route.params;
     const HomeButtonHandler = () => {
@@ -98,43 +101,53 @@ function JadlodajnieScreen({ navigation, route }) {
     multiSelectItems = [{
         id: '92iij',
         name: 'Pierogi',
-        selected: false
+        selected: false,
+        color: 'black'
     }, {
         id: 'a0s0a8ssbsds',
         name: 'Kapustka',
-        selected: false
+        selected: false,
+        color: 'black'
     }, {
         id: '16hbajsabsds',
         name: 'Kotlet',
-        selected: false
+        selected: false,
+        color: 'black'
     }, {
         id: 'nahs75a5sgs',
         name: 'Brokuły',
-        selected: false
+        selected: false,
+        color: 'black'
     }, {
         id: '667atsas',
         name: 'Ciasto',
-        selected: false
+        selected: false,
+        color: 'black'
     }, {
         id: 'hsyasajss',
         name: 'Kurczak',
-        selected: false
+        selected: false,
+        color: 'black'
     }, {
         id: 'djsjudksjds',
         name: 'Pierwsze danie',
-        selected: false
+        selected: false,
+        color: 'black'
     }, {
         id: 'sdhyaysdjs',
         name: 'Śniadanie',
-        selected: false
+        selected: false,
+        color: 'black'
     }, {
         id: 'suudydjsjds',
         name: 'Obiad',
-        selected: false
+        selected: false,
+        color: 'black'
     }, {
         id: 'suudydjsjdss',
         name: 'Kolacja',
-        selected: false
+        selected: false,
+        color: 'black'
     }
 
     ];
@@ -183,9 +196,7 @@ function JadlodajnieScreen({ navigation, route }) {
 
     useEffect(() => {
     }, jadlodajnie);
-    const onSelectedItemsChange = selectedItems => {
-        setSelectedItems(selectedItems);
-    };
+
     function applyFilter(text) {
         setSearchViewValue(text);
         if (text !== "") {
@@ -289,7 +300,30 @@ function JadlodajnieScreen({ navigation, route }) {
                         </View>
                     </View>
                     <Text style={styles.title}>Tagi</Text>
-                    <CustomMultiSelect placeHolder="Wybierz tagi (max 3)" items={multiSelectItems}/>
+                    <CustomMultiSelect placeHolder="Wybierz tagi (max 3)" items={multiSelectItems} 
+                    // onAddItem={(item) => {
+                    //     setChosenItems(currentItems => [...currentItems, { id: item.id, name: item.name, selected: !item.selected }]);
+                    // }} onRemoveItem={(item) => {
+                    //     setChosenItems(currentItems => {
+                    //         return currentItems.filter((chosenItem) => chosenItem.id !== item.id);
+                    //     });
+                    // }} 
+                    />
+                    {/* <View style={{ marginTop: 6, height: chosenItems.length < 3 ? chosenItems.length * 46 : 138 }}>
+                        <FlatList
+                            data={chosenItems}
+                            renderItem={(itemData) => {
+                                let index = Math.floor(Math.random() * (Math.floor(7) - Math.ceil(0))) + Math.ceil(0);
+                                return (
+                                    <View style={{ height: 40, flexDirection: 'row', marginBottom: 6, borderRadius: 20, paddingHorizontal: 18, alignItems: 'center', justifyContent: 'space-between', paddingVertical: 3, borderColor: colors[index], borderWidth: 2 }}>
+                                        <MaterialCommunityIcons name="food-variant" size={24} color={colors[index]} />
+                                        <Text style={{ fontSize: 16, color: colors[index], textAlign: 'center' }}>{itemData.item.name}</Text>
+                                        <MaterialIcons size={24} color={colors[index]} name="cancel" />
+                                    </View>
+                                )
+                            }}
+                        />
+                    </View> */}
                 </View>
                 {searchButton}
             </View>
