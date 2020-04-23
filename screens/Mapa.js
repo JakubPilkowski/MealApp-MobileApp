@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button, ActivityIndicator, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Button, ActivityIndicator, FlatList, ImageBackground } from 'react-native';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import { createStackNavigator } from '@react-navigation/stack';
 import Colors from "../src/themes/colors";
@@ -17,11 +17,27 @@ import CustomLoadingComponent from '../components/CustomLoadingComponent';
 
 
 function MapaScreen({ navigation, route }) {
-    const { punkty } = route.params;
-    const points = [];
-    punkty.map((punkt) => {
-        points.push(punkt);
-    });
+
+    const [isLoading, setIsLoading] = useState(true);
+    const [dataSource, setDataSource] = useState([]);
+    async function fetchData() {
+        if (isLoading) {
+            setTimeout(async function () {
+                const res = await Connection.getMapy();
+                res
+                    .json()
+                    .then(res => {
+                        setDataSource(res.punkty);
+                        setIsLoading(false);
+                    })
+                    .catch(err => console.log(err + 'blad'));
+            }, 500);
+        }
+    }
+
+    useEffect(() => {
+        fetchData();
+    }, isLoading);
 
     const HomeButtonHandler = () => {
         navigation.openDrawer();
@@ -31,18 +47,27 @@ function MapaScreen({ navigation, route }) {
             <IconWithAction content={<Feather name="menu" size={26} color={Colors.colorTextWhite} />} onClick={HomeButtonHandler} />
         )
     });
-    return (
-        <View style={styles.container}>
-            <MapView provider={PROVIDER_GOOGLE} style={{ flex: 1 }} initialRegion={{
-                latitude: 53.77020960646819,
-                longitude: 20.4703061185026,
-                longitudeDelta: 0.3,
-                latitudeDelta: 0.3
-            }}  >
-                {points.map(point => renderMarker(point, navigation))}
-            </MapView>
-        </View>
-    );
+    if (isLoading) {
+        return (
+            <ImageBackground source={require('../src/images/lokalizacja.jpg')} style={{ flex: 1, backgroundColor: Colors.backgroundColor }} imageStyle={{ opacity: 0.3 }}>
+                <CustomLoadingComponent />
+            </ImageBackground>
+        );
+    }
+    else {
+        return (
+            <View style={styles.container}>
+                <MapView provider={PROVIDER_GOOGLE} style={{ flex: 1 }} initialRegion={{
+                    latitude: 53.77020960646819,
+                    longitude: 20.4703061185026,
+                    longitudeDelta: 0.3,
+                    latitudeDelta: 0.3
+                }}  >
+                    {dataSource.map(point => renderMarker(point, navigation))}
+                </MapView>
+            </View>
+        );
+    }
 }
 function renderMarker(point, navigation) {
     const contentText = "Kliknij by przejść" + '\n' + "do jadłodajni";
@@ -64,7 +89,7 @@ function renderMarker(point, navigation) {
                         borderColor: Colors.accent,
                         borderWidth: 0,
                     }}
-                    cardStyle={{ borderRadius: dimensions.defaultHugeBorderRadius, borderColor:colors.accent, borderWidth: dimensions.defaultBorderWidth,}}
+                    cardStyle={{ borderRadius: dimensions.defaultHugeBorderRadius, borderColor: colors.accent, borderWidth: dimensions.defaultBorderWidth, }}
                     content={
                         <View style={{ alignItems: 'center' }}>
                             <Text style={{ fontSize: 12 }}>{point.title}</Text>
@@ -79,61 +104,34 @@ function renderMarker(point, navigation) {
 }
 const Mapa = props => {
 
-    const [isLoading, setIsLoading] = useState(true);
-    const [dataSource, setDataSource] = useState([]);
     const forFade = ({ current, closing }) => ({
         cardStyle: {
-          opacity: current.progress,
+            opacity: current.progress,
         },
-      });
-    async function fetchData() {
-        if (isLoading) {
-            setTimeout(async function(){
-                const res = await Connection.getMapy();
-                res
-                    .json()
-                    .then(res => {
-                        setDataSource(res.punkty);
-                        setIsLoading(false);
-                    })
-                    .catch(err => console.log(err + 'blad'));
-            },500);
-        }
-    }
-
-    useEffect(() => {
-        fetchData();
-    }, isLoading);
+    });
 
     const Stack = createStackNavigator();
-    if (isLoading) {
-        return (
-            <CustomLoadingComponent />
-        );
-    }
-    else{
-        return (
-            <Stack.Navigator initialRouteName="Mapa" screenOptions={ScreenStyle}>
-                <Stack.Screen name="Mapa" component={MapaScreen} options={{
-                    headerTitle: Strings.mapa,
-                }} initialParams={{ punkty: dataSource }} />
-                <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
-                    options={{
-                        headerStyle: {
-                            opacity: 0, height: 0
-                        },
-                        cardStyleInterpolator: forFade
-                    }}
-                />
-            </Stack.Navigator>
-        );
-    }
+
+    return (
+        <Stack.Navigator initialRouteName="Mapa" screenOptions={ScreenStyle}>
+            <Stack.Screen name="Mapa" component={MapaScreen} options={{
+                headerTitle: Strings.mapa,
+            }} initialParams={{}} />
+            <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
+                options={{
+                    headerStyle: {
+                        opacity: 0, height: 0
+                    },
+                    cardStyleInterpolator: forFade
+                }}
+            />
+        </Stack.Navigator>
+    );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-
     }
 })
 

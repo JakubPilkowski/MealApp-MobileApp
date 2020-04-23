@@ -19,18 +19,19 @@ import Validation from '../service/Validation';
 import CustomPicker from '../components/CustomPicker';
 import PickerItem from '../models/PickerItem';
 function EdytujScreen({ navigation, route }) {
-
-    const { uzytkownik, wojewodztwo, miasto } = route.params;
+    
+    const [isLoading, setIsLoading] = useState(true);
+    const { uzytkownik } = route.params;
     const [selectedImage, setSelectedImage] = useState(uzytkownik.avatar);
     const [loginField, setLoginField] = useState(uzytkownik.login);
     const [emailField, setEmailField] = useState(uzytkownik.email);
-    const [wojewodztwoField, setWojewodztwoField] = useState(wojewodztwo);
-    const [isLoading, setIsLoading] = useState(false);
-    const [miastoField, setMiastoField] = useState(miasto);
+    const [wojewodztwoField, setWojewodztwoField] = useState('default');
+    const [isFieldLoading, setIsFieldLoading] = useState(false);
+    const [miastoField, setMiastoField] = useState('default');
     const [miastoEnabled, setMiastoEnabled] = useState(miastoField !== "default" ? true : false);
     const [errorMessage, setErrorMessage] = useState("");
     const scrollY = useRef(null);
-
+    
     const wojewodztwa = [
         new PickerItem('Wybierz województwo...', 'default'),
         new PickerItem('Kujawsko-Pomorskie', 'kuj-pom'),
@@ -44,6 +45,28 @@ function EdytujScreen({ navigation, route }) {
         new PickerItem('Braniewo', 'braniewo'),
         new PickerItem('Szczytno', 'szczytno'),
         new PickerItem('Barczewo', 'braniewo')];
+
+    useEffect(() => {
+        fetchStorage();
+    }, isLoading);
+    async function fetchStorage() {
+        if (isLoading) {
+            setTimeout(async function () {
+                try {
+                    const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
+                    const miastoValue = await AsyncStorage.getItem("miasto");
+                    setWojewodztwoField(wojewodztwoValue);
+                    setMiastoField(miastoValue);
+                    setIsLoading(false);
+                    setMiastoEnabled(true);
+                }
+                catch (error) {
+                    console.log(error);
+                }
+            }, 500);
+        }
+
+    }
 
 
     let image;
@@ -93,7 +116,7 @@ function EdytujScreen({ navigation, route }) {
             Validation.wojewodztwoVerification(wojewodztwoField) +
             Validation.miastoVerification(miastoField);
         if (message.length === 0) {
-            setIsLoading(true);
+            setIsFieldLoading(true);
             verifyFields();
         }
         else {
@@ -102,7 +125,7 @@ function EdytujScreen({ navigation, route }) {
     }
     async function verifyFields() {
         setTimeout(async function () {
-            setIsLoading(false);
+            setIsFieldLoading(false);
             navigation.goBack();
             navigation.openDrawer();
         }, 1000);
@@ -137,7 +160,7 @@ function EdytujScreen({ navigation, route }) {
     const onWojewodztwoChangedHandler = (wojewodztwo) => {
         setWojewodztwoField(wojewodztwo);
         if (wojewodztwo !== "default") {
-            setIsLoading(true);
+            setIsFieldLoading(true);
             setMiastoEnabled(false);
             changeCities();
         }
@@ -152,137 +175,112 @@ function EdytujScreen({ navigation, route }) {
 
     async function changeCities() {
         setTimeout(async function () {
-            setIsLoading(false);
+            setIsFieldLoading(false);
             setMiastoEnabled(true);
         }, 500)
+    }
+
+    if (isLoading) {
+        content = <CustomLoadingComponent />
+    }
+    else {
+        content =
+            <KeyboardAwareScrollView
+                style={{ width: '100%' }}
+                contentContainerStyle={{ alignItems: 'center' }}
+                ref={scrollY}
+            >
+                <View style={{
+                    alignItems: 'center',
+                    marginVertical: dimensions.defaultHugeMargin
+                }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                        <GradientDivider startColor={colors.accent} endColor={colors.primary}
+                            from="left" locationEnd={1} />
+                        {image}
+                        <GradientDivider startColor={colors.accent} endColor={colors.primary}
+                            from="right" locationEnd={1} />
+                    </View>
+
+                    <GradientDivider startColor={colors.primary} endColor={colors.accent}
+                        from="up" dividerStyle={{ flex: 0, height: 50, width: 2 }} />
+                    {addImageButton}
+                </View>
+                <Text style={styles.title}>Login</Text>
+                <TextInput style={styles.input}
+                    returnKeyType="next"
+                    value={loginField}
+                    onChangeText={(value) => setLoginField(value)}
+                    onEndEditing={
+                        () =>
+                            scrollY.current.scrollToEnd()
+                    }
+                />
+                <Text style={styles.title}>Email</Text>
+                <TextInput style={styles.input}
+                    returnKeyType="next"
+                    value={emailField}
+                    onChangeText={(value) => setEmailField(value)}
+                    onEndEditing={() =>
+                        scrollY.current.scrollToEnd()
+                    }
+                />
+                <Text style={styles.title}>Województwo</Text>
+                <CustomPicker
+                    selectedValue={wojewodztwoField}
+                    pickerItems={wojewodztwa}
+                    onPickerChange={(wojewodztwo) => onWojewodztwoChangedHandler(wojewodztwo)}
+                />
+
+                <Text style={styles.title}>Miasto</Text>
+                <CustomPicker containerStyle={{ opacity: miastoEnabled ? 1 : 0.5 }}
+                    enabled={miastoEnabled}
+                    pickerItems={miasta} selectedValue={miastoField}
+                    onPickerChange={(miasto) => {
+                        onMiastoChangedHandler(miasto);
+                        scrollY.current.scrollToEnd();
+                    }}
+                />
+                <Text style={{
+                    color: 'red',
+                    fontSize: 14,
+                    width: "75%",
+                    marginTop: 6,
+                }} >{errorMessage}</Text>
+                <ActivityIndicator size="large" color={colors.primary} animating={isFieldLoading} />
+                <View style={{ flexDirection: "row", alignItems: 'center', marginTop: 50, marginBottom: 16 }}>
+                    <GradientDivider startColor={colors.primary} endColor={colors.accent}
+                        from="left" locationEnd={0.7} />
+                    {saveSettingsButton}
+                    <GradientDivider startColor={colors.primary} endColor={colors.accent}
+                        from="right" locationEnd={0.7} />
+                </View>
+            </KeyboardAwareScrollView>
     }
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <ImageBackground source={require('../src/images/sniadanko.jpg')} style={styles.imageBackground} imageStyle={styles.imageStyle}>
-                <KeyboardAwareScrollView
-                    style={{ width: '100%' }}
-                    contentContainerStyle={{ alignItems: 'center' }}
-                    ref={scrollY}
-                >
-                    <View style={{
-                        alignItems: 'center',
-                        marginVertical: dimensions.defaultHugeMargin
-                    }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                            <GradientDivider startColor={colors.accent} endColor={colors.primary}
-                                from="left" locationEnd={1} />
-                            {image}
-                            <GradientDivider startColor={colors.accent} endColor={colors.primary}
-                                from="right" locationEnd={1} />
-                        </View>
-
-                        <GradientDivider startColor={colors.primary} endColor={colors.accent}
-                            from="up" dividerStyle={{ flex: 0, height: 50, width: 2 }} />
-                        {addImageButton}
-                    </View>
-                    <Text style={styles.title}>Login</Text>
-                    <TextInput style={styles.input}
-                        returnKeyType="next"
-                        value={loginField}
-                        onChangeText={(value) => setLoginField(value)}
-                        onEndEditing={
-                            () =>
-                                scrollY.current.scrollToEnd()
-                        }
-                    />
-                    <Text style={styles.title}>Email</Text>
-                    <TextInput style={styles.input}
-                        returnKeyType="next"
-                        value={emailField}
-                        onChangeText={(value) => setEmailField(value)}
-                        onEndEditing={() =>
-                            scrollY.current.scrollToEnd()
-                        }
-                    />
-                    <Text style={styles.title}>Województwo</Text>
-                    <CustomPicker
-                        selectedValue={wojewodztwoField}
-                        pickerItems={wojewodztwa}
-                        onPickerChange={(wojewodztwo) => onWojewodztwoChangedHandler(wojewodztwo)}
-                    />
-
-                    <Text style={styles.title}>Miasto</Text>
-                    <CustomPicker containerStyle={{ opacity: miastoEnabled ? 1 : 0.5 }}
-                        enabled={miastoEnabled}
-                        pickerItems={miasta} selectedValue={miastoField}
-                        onPickerChange={(miasto) => {
-                            onMiastoChangedHandler(miasto);
-                            scrollY.current.scrollToEnd();
-                        }}
-                    />
-                    <Text style={{
-                        color: 'red',
-                        fontSize: 14,
-                        width: "75%",
-                        marginTop: 6,
-                    }} >{errorMessage}</Text>
-                    <ActivityIndicator size="large" color={colors.primary} animating={isLoading} />
-                    <View style={{ flexDirection: "row", alignItems: 'center', marginTop: 50, marginBottom: 16 }}>
-                        <GradientDivider startColor={colors.primary} endColor={colors.accent}
-                            from="left" locationEnd={0.7} />
-                        {saveSettingsButton}
-                        <GradientDivider startColor={colors.primary} endColor={colors.accent}
-                            from="right" locationEnd={0.7} />
-                    </View>
-                </KeyboardAwareScrollView>
+                {content}
             </ImageBackground>
         </SafeAreaView>
-    );
-
+    )
 }
 
 
 const EdytujProfil = props => {
 
     const { uzytkownik } = props.route.params;
-    const [isLoading, setIsLoading] = useState(true);
-    const [wojewodztwo, setWojewodztwo] = useState("default");
-    const [miasto, setMiasto] = useState("default");
     const Stack = createStackNavigator();
-    useEffect(async () => {
-        await fetchStorage();
-    }, isLoading);
-    async function fetchStorage() {
-        if (isLoading) {
-            setTimeout(async function () {
-                try {
-
-                    const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
-                    const miastoValue = await AsyncStorage.getItem("miasto");
-                    setWojewodztwo(wojewodztwoValue);
-                    setMiasto(miastoValue);
-                    setIsLoading(false);
-
+    return (
+        <Stack.Navigator initialRouteName="EdytujProfil" screenOptions={ScreenStyle}>
+            <Stack.Screen name="EdytujProfil" component={EdytujScreen} options={
+                {
+                    title: "Edytuj profil"
                 }
-                catch (error) {
-                    console.log(error);
-                }
-            }, 500);
-        }
+            } initialParams={{ uzytkownik: uzytkownik }} />
 
-    }
-    if (isLoading) {
-        return (
-            <CustomLoadingComponent />
-        )
-    }
-    else {
-        return (
-            <Stack.Navigator initialRouteName="EdytujProfil" screenOptions={ScreenStyle}>
-                <Stack.Screen name="EdytujProfil" component={EdytujScreen} options={
-                    {
-                        title: "Edytuj profil"
-                    }
-                } initialParams={{ uzytkownik: uzytkownik, wojewodztwo: wojewodztwo, miasto: miasto }} />
-
-            </Stack.Navigator>
-        );
-    }
+        </Stack.Navigator>
+    );
 }
 const styles = StyleSheet.create({
 
