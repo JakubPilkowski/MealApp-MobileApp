@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, ImageBackground, Text, Easing, LayoutAnimation, TextInput, Platform, Picker, Modal, Animated } from "react-native";
+import React, { useState, useEffect, useRef } from 'react';
+import { View, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, ImageBackground, Text, Easing, LayoutAnimation, TextInput, Platform, Picker, Modal, Animated, Image, ScrollView, TouchableOpacity, TouchableNativeFeedback, Keyboard } from "react-native";
 import Strings from "../src/themes/strings";
 import Colors from "../src/themes/colors";
 import { createStackNavigator, HeaderTitle } from '@react-navigation/stack';
@@ -12,7 +12,8 @@ import Switch from 'react-native-customisable-switch';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import {
     AntDesign,
-    Feather, Ionicons
+    Feather, Ionicons,
+    MaterialIcons, MaterialCommunityIcons
 } from 'react-native-vector-icons';
 import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
@@ -20,31 +21,142 @@ import IosButton from '../components/IosButton';
 import { Dimensions } from 'react-native';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import PlaceHolder from '../components/PlaceHolder';
-
+import { Slider, SearchBar } from 'react-native-elements';
+import MultiSelect from 'react-native-multiple-select';
+import SectionedMultiSelect from 'react-native-sectioned-multi-select';
+import CustomMultiSelect from '../components/CustomMultiSelect';
 const { width, height } = Dimensions.get("screen");
 
 
 function JadlodajnieScreen({ navigation, route }) {
 
-    const [selectedValue, setSelectedValue] = useState("wszystko");
+    const [selectedValue, setSelectedValue] = useState("default");
     const [expanded, setExpanded] = useState(false);
-    const [firstThumbValue, setFirstThumbValue] = useState(5);
-    const [secondThumbValue, setSecondThumbValue] = useState(30);
+    const [detailedSearchExpanded, setDetailedSearchExpanded] = useState(false);
+    const [sliderValue, setSliderValue] = useState(25);
+    const [searchResults, setSearchResults] = useState([]);
+    const [sliderOpacity, setSliderOpacity] = useState(0);
+    const [searchViewValue, setSearchViewValue] = useState('');
+    const [selectedItems, setSelectedItems] = useState([]);
+    const [indicatorValue, setIndicatorValue] = useState(12.5 + ((sliderValue - 1) * 75 / 54) + '%');
     const [enabled, setEnabled] = useState(false);
+    const multiSelect = useRef(null);
+    const [chosenItems, setChosenItems] = useState([]);
+    const colors = ['crimson', 'darkgreen','slateGray', 'darkmagenta', 'darkorange', 'darkturquoise', 'hotpink'];
+
     const { jadlodajnie, drawerNavigation } = route.params;
     const HomeButtonHandler = () => {
         navigation.openDrawer();
     }
-    const toggleView = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    const toggleSearchView = () => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeIn);
+        setDetailedSearchExpanded(false);
+        setSliderOpacity(0);
         setExpanded(!expanded);
     }
+    const toggleDetailedSearchView = () => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeIn);
+        setDetailedSearchExpanded(!detailedSearchExpanded);
+    }
+    const toggleSlider = () => {
+        if (sliderOpacity === 0) {
+            setTimeout(function () {
+                setSliderOpacity(1);
+            }, 150);
+        }
+        else {
+            setSliderOpacity(0);
+        }
+    }
+
+    items = [{
+        id: '92iijs7yta',
+        name: 'Pełny gar',
+    }, {
+        id: 'a0s0a8ssbsd',
+        name: 'Stołówka warmińska',
+    }, {
+        id: '16hbajsabsd',
+        name: 'Bistro-Kociołek',
+    }, {
+        id: 'nahs75a5sg',
+        name: 'Bar Kąsek',
+    }, {
+        id: '667atsas',
+        name: 'Bar u Sióstr',
+    }, {
+        id: 'hsyasajs',
+        name: 'Bistro Kopernika',
+    }, {
+        id: 'djsjudksjd',
+        name: 'Kuźnia smaków',
+    }, {
+        id: 'sdhyaysdj',
+        name: 'Kwadrans',
+    }, {
+        id: 'suudydjsjd',
+        name: 'Feta',
+    }];
+
+    multiSelectItems = [{
+        id: '92iij',
+        name: 'Pierogi',
+        selected: false,
+        color: 'black'
+    }, {
+        id: 'a0s0a8ssbsds',
+        name: 'Kapustka',
+        selected: false,
+        color: 'black'
+    }, {
+        id: '16hbajsabsds',
+        name: 'Kotlet',
+        selected: false,
+        color: 'black'
+    }, {
+        id: 'nahs75a5sgs',
+        name: 'Brokuły',
+        selected: false,
+        color: 'black'
+    }, {
+        id: '667atsas',
+        name: 'Ciasto',
+        selected: false,
+        color: 'black'
+    }, {
+        id: 'hsyasajss',
+        name: 'Kurczak',
+        selected: false,
+        color: 'black'
+    }, {
+        id: 'djsjudksjds',
+        name: 'Pierwsze danie',
+        selected: false,
+        color: 'black'
+    }, {
+        id: 'sdhyaysdjs',
+        name: 'Śniadanie',
+        selected: false,
+        color: 'black'
+    }, {
+        id: 'suudydjsjds',
+        name: 'Obiad',
+        selected: false,
+        color: 'black'
+    }, {
+        id: 'suudydjsjdss',
+        name: 'Kolacja',
+        selected: false,
+        color: 'black'
+    }
+
+    ];
 
     let searchButton;
     if (Platform.OS === "android")
-        searchButton = <AndroidButton text="Wyszukaj" containerStyle={{ width: '60%', alignSelf: 'center', marginTop: 12 }} onClick={toggleView} />
+        searchButton = <AndroidButton text="Wyszukaj" containerStyle={{ width: '60%', alignSelf: 'center', marginTop: 12 }} onClick={toggleSearchView} />
     if (Platform.OS === "ios")
-        searchButton = <IosButton text="Wyszukaj" onClick={toggleView} />
+        searchButton = <IosButton text="Wyszukaj" onClick={toggleSearchView} />
 
 
     navigation.setOptions({
@@ -52,10 +164,10 @@ function JadlodajnieScreen({ navigation, route }) {
             return expanded ?
                 <IconWithAction
                     content={<AntDesign name="close" size={26} color={Colors.colorTextWhite} />}
-                    onClick={toggleView} /> :
+                    onClick={toggleSearchView} /> :
                 <IconWithAction
                     content={<Ionicons name="md-search" size={26} color={Colors.colorTextWhite} />}
-                    onClick={toggleView} />;
+                    onClick={toggleSearchView} />;
         },
         headerLeft: () => {
             return expanded ?
@@ -70,7 +182,7 @@ function JadlodajnieScreen({ navigation, route }) {
 
     let content;
     if (jadlodajnie.length > 0) {
-        content = 
+        content =
             <FlatList
                 scrollEnabled={expanded ? false : true}
                 data={jadlodajnie} renderItem={({ item, index }) =>
@@ -79,12 +191,28 @@ function JadlodajnieScreen({ navigation, route }) {
             />
     }
     else {
-        content = <PlaceHolder text={"Ups, nie ma \ntakich restauracji"} src={require('../src/images/plate_v2.png')}/>
+        content = <PlaceHolder text={"Ups, nie ma \ntakich restauracji"} src={require('../src/images/plate_v2.png')} />
     }
 
-    useEffect(()=>{
+    useEffect(() => {
+    }, jadlodajnie);
 
-    },jadlodajnie);
+    function applyFilter(text) {
+        setSearchViewValue(text);
+        if (text !== "") {
+            const filterResults = items.filter(item => {
+                const itemData = item.name.toLowerCase();
+                const searchResult = text.toLowerCase();
+                return itemData.indexOf(searchResult) > -1;
+            });
+            setSearchResults(filterResults);
+        }
+        else {
+            setSearchResults([]);
+        }
+    }
+
+
     return (
         <View style={styles.container} >
             <View style={{
@@ -94,83 +222,113 @@ function JadlodajnieScreen({ navigation, route }) {
                 alignItems: 'center',
                 borderColor: Colors.primary, borderBottomLeftRadius: 16, borderBottomRightRadius: 16
             }}>
-                <Text style={{ textAlign: 'center' }}>Rodzaj potrawy</Text>
-                <View style={{
-                    backgroundColor: Colors.colorTextWhite,
-                    borderRadius: 6,
-                    borderColor: Colors.accent,
-                    borderWidth: 2,
-                    marginTop: dimensions.defaultSmallMargin
-                }}>
-                    <Picker
-                        selectedValue={selectedValue}
-                        style={{ height: 40, width: 250 }}
-                        onValueChange={(itemValue, itemIndex) => setSelectedValue(itemValue)}
-                    >
-                        <Picker.Item label="Wszystko" value="wszystko" />
-                        <Picker.Item label="Desery" value="deser" />
-                        <Picker.Item label="Fast-foody" value="fast-food" />
-                        <Picker.Item label="Potrawy mięsne" value="miesne" />
-                        <Picker.Item label="Potrawy warzywne" value="warzywne" />
-                        <Picker.Item label="Potrawy rybne" value="ryby" />
-                        <Picker.Item label="Chińskie" value="chinskie" />
-                        <Picker.Item label="Włoskie" value="wloskie" />
-                        <Picker.Item label="Śniadanie" value="sniadanie" />
-                    </Picker>
+
+                <Text style={{ fontSize: 16, marginTop: 6, marginBottom: 6 }}>Nazwa Jadłodajnii</Text>
+                <View style={{ width: '85%', alignItems: 'center' }}>
+                    <SearchBar
+                        onCancel={() => { setSearchResults([]); }}
+                        placeholder="Wyszukaj jadłodajnie..."
+                        platform="android"
+                        inputStyle={{ fontSize: 16 }}
+                        onFocus={() => { applyFilter(searchViewValue) }}
+                        onSubmitEditing={() => { setSearchResults([]) }}
+                        containerStyle={{ borderRadius: dimensions.defaultBorderRadius }}
+                        onChangeText={(text) => applyFilter(text)}
+                        value={searchViewValue}
+                    />
+                    <FlatList
+                        keyboardShouldPersistTaps='handled'
+                        style={{
+                            height: searchResults.length * 40 <= 160 ? searchResults.length * 40 : 160,
+                        }}
+                        data={searchResults} renderItem={({ item, index }) => {
+                            return (
+                                <TouchableNativeFeedback onPress={() => {
+                                    setSearchViewValue(item.name)
+                                    setSearchResults([]);
+                                    Keyboard.dismiss();
+                                }}
+                                >
+                                    <View style={{ height: 40, width: 85 * width / 100, alignItems: 'center', justifyContent: 'center', }}>
+                                        <Text style={{ fontSize: 16 }}>{item.name}</Text>
+                                    </View>
+                                </TouchableNativeFeedback>
+                            )
+                        }}
+                    />
+                    <TouchableOpacity onPress={() => {
+                        setSearchResults([]);
+                        Keyboard.dismiss();
+                        toggleDetailedSearchView();
+                        toggleSlider();
+                    }}>
+                        <Text style={{ fontSize: 16, color: Colors.accent, marginTop: 12 }}>{!detailedSearchExpanded ? "Zaawansowane" : "Schowaj zaawansowane"}</Text>
+                    </TouchableOpacity>
                 </View>
-
-
-                <Text style={{ textAlign: 'center', marginTop: dimensions.defaultMargin, marginBottom: -dimensions.defaultSmallMargin }}>Przedział cenowy</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={{ width: 35, textAlign: 'center' }}>5zł</Text>
-                    <View style={{ flex: 1, alignItems: 'center', }}>
-                        <MultiSlider
-                            trackStyle={{
-                                height: 5,
-                            }}
-                            selectedStyle={{
-                                backgroundColor: Colors.accent,
-                            }}
-                            unselectedStyle={{
-                                backgroundColor: 'silver',
-                            }}
-                            sliderLength={width - (2 * 35) - 30}
-                            values={[firstThumbValue, secondThumbValue]}
-                            min={5}
-                            max={30}
-                            step={1}
-                            enabledOne={true}
-                            enabledTwo={true}
-                            onValuesChange={(values) => {
-                                setFirstThumbValue(values[0]);
-                                setSecondThumbValue(values[1]);
-                            }}
-                            allowOverlap={false}
-                            customMarker={() => {
+                <View style={{
+                    height: detailedSearchExpanded ? null : 0,
+                    display: detailedSearchExpanded ? 'flex' : 'none', overflow: 'hidden',
+                    paddingVertical: 12,
+                    width: '100%',
+                    alignItems: 'center',
+                }}>
+                    <Text style={{ fontSize: 16, marginTop: dimensions.defaultMargin, marginBottom: Dimensions.defaultSmallMargin }}>Odległość od lokalizacji</Text>
+                    <View style={{ justifyContent: 'center', }}>
+                        <View style={{ width: "100%", flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                            <Text style={{ textAlign: 'center', flex: 1 }}>1km</Text>
+                            <Slider
+                                style={{ width: "75%", height: 40, opacity: sliderOpacity }}
+                                animateTransitions={false}
+                                minimumValue={1}
+                                maximumValue={50}
+                                value={25}
+                                onValueChange={(value) => {
+                                    setSliderValue(value)
+                                    setIndicatorValue(12.5 + ((value - 1) * 75 / 54) + '%')
+                                }}
+                                step={1}
+                                minimumTrackTintColor={Colors.primary}
+                                trackStyle={{ height: 6 }}
+                                thumbStyle={{
+                                    height: 24, width: 24, borderColor: Colors.primary, backgroundColor: Colors.accent, borderWidth: 6, borderRadius: 12
+                                }}
+                            />
+                            <Text style={{ textAlign: 'center', flex: 1 }}>50km</Text>
+                        </View>
+                        <View style={{ width: 24, justifyContent: 'center', borderRadius: 6, borderWidth: 1, borderColor: Colors.accent, backgroundColor: Colors.colorTextWhite, height: 24, left: indicatorValue }}>
+                            <Text style={{ textAlign: 'center' }}>{sliderValue}</Text>
+                        </View>
+                    </View>
+                    <Text style={styles.title}>Tagi</Text>
+                    <CustomMultiSelect placeHolder="Wybierz tagi (max 3)" items={multiSelectItems} 
+                    // onAddItem={(item) => {
+                    //     setChosenItems(currentItems => [...currentItems, { id: item.id, name: item.name, selected: !item.selected }]);
+                    // }} onRemoveItem={(item) => {
+                    //     setChosenItems(currentItems => {
+                    //         return currentItems.filter((chosenItem) => chosenItem.id !== item.id);
+                    //     });
+                    // }} 
+                    />
+                    {/* <View style={{ marginTop: 6, height: chosenItems.length < 3 ? chosenItems.length * 46 : 138 }}>
+                        <FlatList
+                            data={chosenItems}
+                            renderItem={(itemData) => {
+                                let index = Math.floor(Math.random() * (Math.floor(7) - Math.ceil(0))) + Math.ceil(0);
                                 return (
-                                    <View style={{
-                                        backgroundColor: Colors.primary, borderWidth: 4, borderColor: Colors.accent
-                                        , width: 24, height: 24, borderRadius: 12
-                                    }} />
+                                    <View style={{ height: 40, flexDirection: 'row', marginBottom: 6, borderRadius: 20, paddingHorizontal: 18, alignItems: 'center', justifyContent: 'space-between', paddingVertical: 3, borderColor: colors[index], borderWidth: 2 }}>
+                                        <MaterialCommunityIcons name="food-variant" size={24} color={colors[index]} />
+                                        <Text style={{ fontSize: 16, color: colors[index], textAlign: 'center' }}>{itemData.item.name}</Text>
+                                        <MaterialIcons size={24} color={colors[index]} name="cancel" />
+                                    </View>
                                 )
                             }}
-                            valuePrefix={"prefix"}
-                            valueSuffix={"suffix"}
-                            minMarkerOverlapDistance={40}
                         />
-                    </View>
-                    <Text style={{ width: 35, textAlign: 'center' }}>30zł</Text>
+                    </View> */}
                 </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={{ flex: 1, marginHorizontal: dimensions.defaultSmallMargin, textAlign: 'left' }}>Min wartość: {firstThumbValue}zł</Text>
-                    <Text style={{ flex: 1, marginHorizontal: dimensions.defaultSmallMargin, textAlign: 'right' }}>Max wartość: {secondThumbValue}zł</Text>
-                </View>
-                <Text style={styles.title}>Fraza</Text>
-                <TextInput style={styles.input} />
                 {searchButton}
             </View>
-            <ImageBackground source={require('../src/images/pancakes.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>               
-                    {content}
+            <ImageBackground source={require('../src/images/pancakes.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>
+                {content}
             </ImageBackground>
         </View>
     );

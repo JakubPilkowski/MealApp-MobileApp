@@ -16,6 +16,8 @@ import { AntDesign } from 'react-native-vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import Validation from '../service/Validation';
+import CustomPicker from '../components/CustomPicker';
+import PickerItem from '../models/PickerItem';
 function EdytujScreen({ navigation, route }) {
 
     const { uzytkownik, wojewodztwo, miasto } = route.params;
@@ -28,6 +30,20 @@ function EdytujScreen({ navigation, route }) {
     const [miastoEnabled, setMiastoEnabled] = useState(miastoField !== "default" ? true : false);
     const [errorMessage, setErrorMessage] = useState("");
     const scrollY = useRef(null);
+
+    const wojewodztwa = [
+        new PickerItem('Wybierz województwo...', 'default'),
+        new PickerItem('Kujawsko-Pomorskie', 'kuj-pom'),
+        new PickerItem('Dolnośląskie', 'dol'),
+        new PickerItem('Warmińsko-Mazurskie', 'war-maz'),
+        new PickerItem('Wielkopolskie', 'wiel')];
+    const miasta = [
+        new PickerItem('Wybierz miasto...', 'default'),
+        new PickerItem('Olsztyn', 'olsztyn'),
+        new PickerItem('Ełk', 'ełk'),
+        new PickerItem('Braniewo', 'braniewo'),
+        new PickerItem('Szczytno', 'szczytno'),
+        new PickerItem('Barczewo', 'braniewo')];
 
 
     let image;
@@ -45,9 +61,9 @@ function EdytujScreen({ navigation, route }) {
             return;
         }
         setSelectedImage(pickerResult.uri);
-        setTimeout(()=>{
+        setTimeout(() => {
             scrollY.current.scrollToEnd();
-        },1000);
+        }, 1000);
     }
     if (selectedImage === "") {
         image = <Image style={[styles.logo, { backgroundColor: colors.backgroundColor, }]}></Image>
@@ -84,12 +100,12 @@ function EdytujScreen({ navigation, route }) {
             setErrorMessage(message);
         }
     }
-    async function verifyFields(){
-        setTimeout(async function(){
+    async function verifyFields() {
+        setTimeout(async function () {
             setIsLoading(false);
             navigation.goBack();
             navigation.openDrawer();
-        },1000);
+        }, 1000);
     }
     let addImageButton;
     let saveSettingsButton;
@@ -120,8 +136,7 @@ function EdytujScreen({ navigation, route }) {
     }
     const onWojewodztwoChangedHandler = (wojewodztwo) => {
         setWojewodztwoField(wojewodztwo);
-        if (wojewodztwo !== "default")
-        {   
+        if (wojewodztwo !== "default") {
             setIsLoading(true);
             setMiastoEnabled(false);
             changeCities();
@@ -135,11 +150,11 @@ function EdytujScreen({ navigation, route }) {
         setMiastoField(miasto);
     }
 
-    async function changeCities(){
-        setTimeout(async function(){
+    async function changeCities() {
+        setTimeout(async function () {
             setIsLoading(false);
             setMiastoEnabled(true);
-        },500)
+        }, 500)
     }
     return (
         <SafeAreaView style={{ flex: 1 }}>
@@ -185,41 +200,21 @@ function EdytujScreen({ navigation, route }) {
                         }
                     />
                     <Text style={styles.title}>Województwo</Text>
-                    <View style={{ width: "75%", borderWidth: 2, marginTop: 3, backgroundColor: colors.colorTextWhite, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}>
-                        <Picker
-                            mode="dialog"
-                            selectedValue={wojewodztwoField}
-                            style={{ height: 45, width: "100%", backgroundColor: 'transparent' }}
-                            onValueChange={(itemValue, itemIndex) => onWojewodztwoChangedHandler(itemValue)}>
-                            <Picker.Item label="Wybierz województwo..." value="default" color={wojewodztwoField === "default" ? colors.primary : colors.colorTextDark} />
-                            <Picker.Item label="Mazowieckie" value="mazowieckie" color={wojewodztwoField === "mazowieckie" ? colors.primary : colors.colorTextDark} />
-                            <Picker.Item label="Kujawsko-Pomorskie" value="kujawsko-pomorskie" color={wojewodztwoField === "kujawsko-pomorskie" ? colors.primary : colors.colorTextDark} />
-                            <Picker.Item label="Warmińsko-Mazurskie" value="warmińsko-mazurskie" color={wojewodztwoField === "warmińsko-mazurskie" ? colors.primary : colors.colorTextDark} />
-                        </Picker>
-                        <View style={{ position: 'absolute', alignSelf: 'flex-end', right: 10 }}>
-                            <AntDesign name="downcircle" color={colors.accent} size={24} />
-                        </View>
-                    </View>
+                    <CustomPicker
+                        selectedValue={wojewodztwoField}
+                        pickerItems={wojewodztwa}
+                        onPickerChange={(wojewodztwo) => onWojewodztwoChangedHandler(wojewodztwo)}
+                    />
+
                     <Text style={styles.title}>Miasto</Text>
-                    <View style={{ width: "75%", borderWidth: 2, marginTop: 3, opacity: miastoEnabled ? 1 : 0.5, backgroundColor: colors.colorTextWhite, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center', borderRadius: 6 }}>
-                        <Picker
-                            enabled={miastoEnabled}
-                            selectedValue={miastoField}
-                            style={{ height: 45, width: "100%", backgroundColor: 'transparent' }}
-                            onValueChange={(itemValue, itemIndex) => {
-                                onMiastoChangedHandler(itemValue);
-                                scrollY.current.scrollToEnd();
-                            }}>
-                            <Picker.Item label="Wybierz miasto..." value="default" color={miastoField === "default" ? colors.primary : colors.colorTextDark} />
-                            <Picker.Item label="Olsztyn" value="Olsztyn" color={miastoField === "Olsztyn" ? colors.primary : colors.colorTextDark} />
-                            <Picker.Item label="Ełk" value="Elk" color={miastoField === "Elk" ? colors.primary : colors.colorTextDark} />
-                            <Picker.Item label="Braniewo" value="Braniewo" color={miastoField === "Braniewo" ? colors.primary : colors.colorTextDark} />
-                            <Picker.Item label="Szczytno" value="Szczytno" color={miastoField === "Szczytno" ? colors.primary : colors.colorTextDark} />
-                        </Picker>
-                        <View style={{ position: 'absolute', alignSelf: 'flex-end', right: 10 }}>
-                            <AntDesign name="downcircle" color={colors.accent} size={24} />
-                        </View>
-                    </View>
+                    <CustomPicker containerStyle={{ opacity: miastoEnabled ? 1 : 0.5 }}
+                        enabled={miastoEnabled}
+                        pickerItems={miasta} selectedValue={miastoField}
+                        onPickerChange={(miasto) => {
+                            onMiastoChangedHandler(miasto);
+                            scrollY.current.scrollToEnd();
+                        }}
+                    />
                     <Text style={{
                         color: 'red',
                         fontSize: 14,
@@ -254,20 +249,20 @@ const EdytujProfil = props => {
     }, isLoading);
     async function fetchStorage() {
         if (isLoading) {
-            setTimeout(async function(){
+            setTimeout(async function () {
                 try {
-                
+
                     const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
                     const miastoValue = await AsyncStorage.getItem("miasto");
                     setWojewodztwo(wojewodztwoValue);
                     setMiasto(miastoValue);
                     setIsLoading(false);
-                
+
                 }
                 catch (error) {
                     console.log(error);
                 }
-            },500);
+            }, 500);
         }
 
     }
