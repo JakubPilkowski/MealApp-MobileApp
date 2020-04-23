@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ImageBackground, Text, TextInput, Dimensions, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ImageBackground, Text, TextInput, TouchableOpacity, Dimensions, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import colors from '../src/themes/colors';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
 import dimensions from '../src/themes/dimensions';
 import Validation from '../service/Validation';
 import Hashing from '../service/Hashing';
+import { Ionicons } from 'react-native-vector-icons';
 
 
 const { width, height } = Dimensions.get("screen");
@@ -97,6 +98,19 @@ const Rejestracja = props => {
         <KeyboardAvoidingView style={styles.container}
             behavior="height">
             <ImageBackground source={require('../src/images/cutlery.jpg')} style={styles.imageBackground} imageStyle={styles.imageStyle}>
+                <View style={{ height: 56, backgroundColor: colors.primary, width: '100%',flexDirection:'row', alignItems:'center', justifyContent: 'center', }}>
+                    <View style={[styles.backButtonContainer, { left: 0 }]}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                props.navigation.goBack();
+                            }}>
+                            <Ionicons name="ios-arrow-round-back" size={36} color={colors.colorTextWhite}></Ionicons>
+                        </TouchableOpacity>
+                    </View>
+                    <Text style={{ color: colors.colorTextWhite, fontSize:20, fontWeight:'bold' }}>Rejestracja</Text>
+                </View>
+
+
                 <Text style={[styles.title, { marginTop: dimensions.defaultHugeMargin }]}>Login</Text>
                 <TextInput style={styles.input}
                     returnKeyType="next"
@@ -161,6 +175,17 @@ const styles = StyleSheet.create({
         flex: 1,
         color: colors.backgroundColor,
         alignItems: 'center'
+    },
+    backButtonContainer: {
+        left: 0,
+        top: 0,
+        position: 'absolute',
+        height: 56,
+        width: 56,
+        alignItems: "center",
+        justifyContent: 'center',
+        opacity: 1,
+        zIndex: 9999
     },
     input: {
         backgroundColor: colors.colorTextWhite,
