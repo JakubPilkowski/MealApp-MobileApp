@@ -178,12 +178,32 @@ function LogowanieScreen({ navigation }) {
 
 
 const Logowanie = props => {
+    const forFade = ({ current, closing }) => ({
+        cardStyle: {
+          opacity: current.progress,
+        },
+      });
     const Stack = createStackNavigator();
     return (
         <Stack.Navigator initialRouteName="Logowanie" screenOptions={ScreenStyle}>
             <Stack.Screen name="Logowanie" component={LogowanieScreen} />
-            <Stack.Screen name="Rejestracja" component={Rejestracja} />
-            <Stack.Screen name="ZapomnialemHasla" component={ZapomnialemHasla} />
+            <Stack.Screen name="Rejestracja" component={Rejestracja} 
+                options={{
+                    headerStyle: {
+                        opacity: 0, height: 0
+                    },
+                    cardStyleInterpolator: forFade
+                }}
+            />
+            <Stack.Screen name="ZapomnialemHasla" component={ZapomnialemHasla} 
+                options = {{
+                    headerStyle: {
+                        opacity: 0, height: 0
+                    },
+                    cardStyleInterpolator: forFade
+                }}
+                
+            />
         </Stack.Navigator>
     );
 }

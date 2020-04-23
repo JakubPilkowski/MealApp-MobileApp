@@ -106,6 +106,11 @@ const RightActions = ({ progress, dragX, index, length, onPress }) => {
 const Ulubione = props => {
     const [isLoading, setIsLoading] = useState(true);
     const [dataSource, setDataSource] = useState([]);
+    const forFade = ({ current, closing }) => ({
+        cardStyle: {
+          opacity: current.progress,
+        },
+      });
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function(){
@@ -140,7 +145,8 @@ const Ulubione = props => {
                     options={{
                         headerStyle: {
                             opacity: 0, height: 0
-                        }
+                        },
+                        cardStyleInterpolator: forFade
                     }}
                 />
             </Stack.Navigator>

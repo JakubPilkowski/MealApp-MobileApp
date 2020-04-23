@@ -26,6 +26,12 @@ export default function App() {
   const [isStorageLoading, setIsStorageLoading] = useState(true);
   const [dataSource, setDataSource] = useState([]);
   const [firstUse, setFirstUse] = useState();
+  const forFade = ({ current, closing }) => ({
+    cardStyle: {
+      opacity: current.progress,
+    },
+  });
+
   let uzytkownicy = [];
   let pobranyUzytkownik;
   useEffect(() => {
@@ -115,22 +121,25 @@ export default function App() {
                 options={
                   {
                     drawerIcon: ({ color }) => <MaterialCommunityIcons name="food-fork-drink" size={24} color={color} />,
-
+                    cardStyleInterpolator: forFade
                   }
                 } />
               <Drawer.Screen name="Ulubione" component={Ulubione} options={
                 {
                   drawerIcon: ({ color }) => <Ionicons name="md-star" size={30} color={color} />,
+                  cardStyleInterpolator: forFade
                 }
               } />
               <Drawer.Screen name="Powiadomienia" component={Powiadomienia} options={
                 {
                   drawerIcon: ({ color }) => <Ionicons name="md-notifications" size={33} color={color} />,
+                  cardStyleInterpolator: forFade
                 }
               } />
               <Drawer.Screen name="Mapa" component={Mapa} options={
                 {
                   drawerIcon: ({ color }) => <Foundation name="map" size={27} color={color} />,
+                  cardStyleInterpolator: forFade
                 }
               } />
               <Drawer.Screen name="Logowanie" component={Logowanie}
@@ -138,13 +147,15 @@ export default function App() {
                 options={
                   {
                     title: "Logowanie",
-                    gestureEnabled: false
+                    gestureEnabled: false,
+                    cardStyleInterpolator: forFade
                   }
                 } />
               <Drawer.Screen name="EdytujProfil" component={EdytujProfil} options={
                 {
                   title: "EdytujProfil",
-                  gestureEnabled: false
+                  gestureEnabled: false,
+                  cardStyleInterpolator: forFade
                 }
               } />
             </Drawer.Navigator>

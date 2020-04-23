@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, ImageBackground, Text, Easing, LayoutAnimation, TextInput, Platform, Picker, Modal, Animated, Image, ScrollView, TouchableOpacity, TouchableNativeFeedback, Keyboard } from "react-native";
 import Strings from "../src/themes/strings";
 import Colors from "../src/themes/colors";
-import { createStackNavigator, HeaderTitle } from '@react-navigation/stack';
+import { createStackNavigator, HeaderTitle, CardStyleInterpolators } from '@react-navigation/stack';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import IconWithAction from "../components/IconWithAction";
 import ScreenStyle from "../src/themes/screenStyle";
@@ -339,6 +339,11 @@ const Jadlodajnie = props => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [dataSource, setDataSource] = useState([]);
+    const forFade = ({ current, closing }) => ({
+        cardStyle: {
+          opacity: current.progress,
+        },
+      });
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
@@ -368,7 +373,8 @@ const Jadlodajnie = props => {
                     options={{
                         headerStyle: {
                             opacity: 0, height: 0
-                        }
+                        },
+                        cardStyleInterpolator: forFade
                     }}
                 />
             </Stack.Navigator>
