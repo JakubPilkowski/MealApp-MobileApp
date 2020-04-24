@@ -208,7 +208,7 @@ function JadlodajnieScreen({ navigation, route }) {
                     scrollEnabled={expanded ? false : true}
                     data={jadlodajnie} renderItem={({ item, index }) =>
                         <Jadlodajnia title={item.title} containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} onMoreClick={(jadlodajniaId)=>{navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: jadlodajniaId });}} jadlodajnia={item} ></Jadlodajnia>}
-                    keyExtractor={item => item.id}
+                    keyExtractor={item => item.id.toString()}
                 />
         }
         else {

@@ -21,6 +21,8 @@ const JadlodajnieWiecej = props => {
     const scrollRef = useRef(null);
     const [iconColor, setIconColor] = useState("white");
     const [isFavourite, setIsFavourite] = useState(false);
+    const [scrollIndex, setScrollIndex] = useState(0);
+
 
     async function fetchData() {
         if (isLoading) {
@@ -120,45 +122,48 @@ const JadlodajnieWiecej = props => {
                     <View style={{ flex: 1, flexDirection: 'row', marginBottom: dimensions.defaultMarginBetweenItems }}>
                         <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 50 }}>
                             <TouchableOpacity onPress={() => {
-                                if (currentWidth === 0) {
-                                    return;
-                                }
-                                else {
-                                    currentWidth = currentWidth - (width - 100);
-                                    scrollRef.current.scrollTo({ x: currentWidth });
+                                console.log(scrollIndex);
+                                if(scrollIndex!==0){
+                                    let index = scrollIndex - 1;
+                                    setScrollIndex(index);
+                                    scrollRef.current.scrollToIndex({animated:true, index:index});
                                 }
                             }}>
                                 <Feather name="arrow-left-circle" color={Colors.primary} size={36}></Feather>
                             </TouchableOpacity>
                         </View>
-                        <ScrollView
-                            horizontal={true}
-                            scrollEnabled={false}
-                            showsHorizontalScrollIndicator={false}
-                            ref={scrollRef}
-                        >
                             <FlatList data={szczegoly.zestawy}
                                 horizontal={true}
+                                scrollEnabled={false}
+                                getItemLayout={(data,index)=>(
+                                 {length: width-100,offset: (width-100)*index, index}    
+                                )
+                                }
+                                initialScrollIndex={0}
+                                showsHorizontalScrollIndicator={false}
+                                ref={scrollRef}
                                 renderItem={itemData =>
-                                    <View style={{ flexDirection: 'column' }}>
+                                    <View style={{ flexDirection: 'column',width:width-100}}>
                                         <Zestaw date={itemData.item.data} name={itemData.item.nazwa} price={itemData.item.cena}></Zestaw>
 
                                         <Text style={{ textAlign: 'center', fontSize: 20, marginVertical: dimensions.defaultHugeMargin }}>
                                             Menu główne
                                             </Text>
-                                        <View style={{ width: width - 100 }}>
+                                        <View style={{}}>
                                             <Text>UWAGA! Do odwołania nasze lokale pracują w godzinach 11:00 - 16:30.{'\n'}Obowiązuje zakaz spożywania posiłków na miejscu!{'\n'}Nadal funkcjonuje sprzedaż posiłków na wynos oraz z dowozem!{'\n'}Uprzejmie prosimy o zastosowanie zasady podchodzenia do bufetu pojedynczo oraz wchodzenia do lokalu nie więcej niż trzech osób w jednym momencie.{'\n'}Dostawy w zależności od odległości realizujemy za dodatkową opłatą.{'\n'}W ofercie stałej:{'\n'}codziennie, od godziny 11{'\n'}1. pierogi{'\n'}- z kapustą i grzybami 8 szt. cena 10,99 zł{'\n'}- z mięsem 8 szt. cena 10,99 zł{'\n'}- ruskie 8 szt. cena 10,99 zł{'\n'}{'\n'}2. duża zupa \"Pełny Gar\" cena 6,99 zł{'\n'}zupa codzienna cena 5,50 zł{'\n'}3. kotlet schabowy + zupa dnia + surówka cena 14,99 zł{'\n'}{'\n'}4. kompot cena 1,50 zł</Text>
                                         </View>
                                     </View>
 
                                 }
-                                keyExtractor={item => item.zestaw_id}
+                                keyExtractor={item => item.zestaw_id.toString()}
                             />
-                        </ScrollView>
                         <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: "center", width: 50 }}>
                             <TouchableOpacity onPress={() => {
-                                currentWidth = currentWidth + width - 100;
-                                scrollRef.current.scrollTo({ x: currentWidth });
+                                if(scrollIndex<2){
+                                    let index = scrollIndex+1;
+                                    setScrollIndex(index);
+                                    scrollRef.current.scrollToIndex({index:index});
+                                }
                             }}>
                                 <Feather name="arrow-right-circle" color={Colors.primary} size={36}></Feather>
                             </TouchableOpacity>
