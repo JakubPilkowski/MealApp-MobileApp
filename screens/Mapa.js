@@ -37,7 +37,7 @@ function MapaScreen({ navigation, route }) {
 
     useEffect(() => {
         fetchData();
-    }, isLoading);
+    },[isLoading]);
 
     const HomeButtonHandler = () => {
         navigation.openDrawer();

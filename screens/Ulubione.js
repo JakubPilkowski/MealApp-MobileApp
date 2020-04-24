@@ -86,7 +86,7 @@ function UlubioneScreen({ navigation, route }) {
                                     } />
                             } />
                     }
-                    keyExtractor={item => item.id}
+                    keyExtractor={item => item.id.toString()}
                 />;
         }
         else {

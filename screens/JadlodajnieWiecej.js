@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, ActivityIndicator, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid } from 'react-native';
+import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView,FlatList, ActivityIndicator, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
 import Strings from "../src/themes/strings";
@@ -7,17 +7,13 @@ const HEADER_EXPANDED_HEIGHT = 225;
 const HEADER_COLLAPSED_HEIGHT = 56;
 import { Ionicons, FontAwesome, Feather } from '@expo/vector-icons';
 import Connection from '../service/Connection';
-import { FlatList } from 'react-native-gesture-handler';
 import Zestaw from '../components/Zestaw';
 import InformacjeOgolneJadlodajnia from '../components/InformacjeOgolneJadlodajnia';
 import IconWithAction from '../components/IconWithAction';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
-import { Divider } from 'react-native-elements';
 const { width, height } = Dimensions.get('window');
 
 const JadlodajnieWiecej = props => {
-
-    const szczegoly = [];
 
     const [isLoading, setIsLoading] = useState(true);
     const [dataSource, setDataSource] = useState([]);
@@ -25,6 +21,8 @@ const JadlodajnieWiecej = props => {
     const scrollRef = useRef(null);
     const [iconColor, setIconColor] = useState("white");
     const [isFavourite, setIsFavourite] = useState(false);
+    const [scrollIndex, setScrollIndex] = useState(0);
+
 
     async function fetchData() {
         if (isLoading) {
@@ -43,7 +41,7 @@ const JadlodajnieWiecej = props => {
 
     useEffect(() => {
         fetchData();
-    }, isLoading);
+    }, [isLoading]);
     let content;
 
     if (isLoading) {
@@ -52,19 +50,14 @@ const JadlodajnieWiecej = props => {
     else {
         let currentWidth = 0;
         const szczegoly = dataSource;
-        const zestawRange = szczegoly.zestawy.length;
-        const { jadlodajniaId } = props.route.params;
+        // const zestawRange = szczegoly.zestawy.length;
+        // const { jadlodajniaId } = props.route.params;
         const headerHeight = scrollY.interpolate(
             {
                 inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
                 outputRange: [HEADER_EXPANDED_HEIGHT, HEADER_COLLAPSED_HEIGHT],
                 extrapolate: 'clamp'
             })
-        const headerTitleOpacity = scrollY.interpolate({
-            inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
-            outputRange: [0, 1],
-            extrapolate: 'clamp'
-        });
         const heroTitleOpacity = scrollY.interpolate({
             inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
             outputRange: [1, 0],
@@ -129,45 +122,48 @@ const JadlodajnieWiecej = props => {
                     <View style={{ flex: 1, flexDirection: 'row', marginBottom: dimensions.defaultMarginBetweenItems }}>
                         <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 50 }}>
                             <TouchableOpacity onPress={() => {
-                                if (currentWidth === 0) {
-                                    return;
-                                }
-                                else {
-                                    currentWidth = currentWidth - (width - 100);
-                                    scrollRef.current.scrollTo({ x: currentWidth });
+                                console.log(scrollIndex);
+                                if(scrollIndex!==0){
+                                    let index = scrollIndex - 1;
+                                    setScrollIndex(index);
+                                    scrollRef.current.scrollToIndex({animated:true, index:index});
                                 }
                             }}>
                                 <Feather name="arrow-left-circle" color={Colors.primary} size={36}></Feather>
                             </TouchableOpacity>
                         </View>
-                        <ScrollView
-                            horizontal={true}
-                            scrollEnabled={false}
-                            showsHorizontalScrollIndicator={false}
-                            ref={scrollRef}
-                        >
                             <FlatList data={szczegoly.zestawy}
                                 horizontal={true}
+                                scrollEnabled={false}
+                                getItemLayout={(data,index)=>(
+                                 {length: width-100,offset: (width-100)*index, index}    
+                                )
+                                }
+                                initialScrollIndex={0}
+                                showsHorizontalScrollIndicator={false}
+                                ref={scrollRef}
                                 renderItem={itemData =>
-                                    <View style={{ flexDirection: 'column' }}>
+                                    <View style={{ flexDirection: 'column',width:width-100}}>
                                         <Zestaw date={itemData.item.data} name={itemData.item.nazwa} price={itemData.item.cena}></Zestaw>
 
                                         <Text style={{ textAlign: 'center', fontSize: 20, marginVertical: dimensions.defaultHugeMargin }}>
                                             Menu główne
                                             </Text>
-                                        <View style={{ width: width - 100 }}>
+                                        <View style={{}}>
                                             <Text>UWAGA! Do odwołania nasze lokale pracują w godzinach 11:00 - 16:30.{'\n'}Obowiązuje zakaz spożywania posiłków na miejscu!{'\n'}Nadal funkcjonuje sprzedaż posiłków na wynos oraz z dowozem!{'\n'}Uprzejmie prosimy o zastosowanie zasady podchodzenia do bufetu pojedynczo oraz wchodzenia do lokalu nie więcej niż trzech osób w jednym momencie.{'\n'}Dostawy w zależności od odległości realizujemy za dodatkową opłatą.{'\n'}W ofercie stałej:{'\n'}codziennie, od godziny 11{'\n'}1. pierogi{'\n'}- z kapustą i grzybami 8 szt. cena 10,99 zł{'\n'}- z mięsem 8 szt. cena 10,99 zł{'\n'}- ruskie 8 szt. cena 10,99 zł{'\n'}{'\n'}2. duża zupa \"Pełny Gar\" cena 6,99 zł{'\n'}zupa codzienna cena 5,50 zł{'\n'}3. kotlet schabowy + zupa dnia + surówka cena 14,99 zł{'\n'}{'\n'}4. kompot cena 1,50 zł</Text>
                                         </View>
                                     </View>
 
                                 }
-                                keyExtractor={itemData => itemData.zestaw_id}
+                                keyExtractor={item => item.zestaw_id.toString()}
                             />
-                        </ScrollView>
                         <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: "center", width: 50 }}>
                             <TouchableOpacity onPress={() => {
-                                currentWidth = currentWidth + width - 100;
-                                scrollRef.current.scrollTo({ x: currentWidth });
+                                if(scrollIndex<2){
+                                    let index = scrollIndex+1;
+                                    setScrollIndex(index);
+                                    scrollRef.current.scrollToIndex({index:index});
+                                }
                             }}>
                                 <Feather name="arrow-right-circle" color={Colors.primary} size={36}></Feather>
                             </TouchableOpacity>

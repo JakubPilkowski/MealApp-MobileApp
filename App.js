@@ -74,6 +74,7 @@ export default function App() {
     else {
       async function fetchData() {
         if (isLoading) {
+          setTimeout(async function(){
           await AsyncStorage.removeItem("firstUse");
           const res = await Connection.getUserOptions();
           res
@@ -92,8 +93,9 @@ export default function App() {
               setIsLoading(false);
             })
             .catch(err => console.log(err));
-        }
-      }
+      },3000);
+    }
+    }
       fetchData();
       if (isLoading) {
         return (

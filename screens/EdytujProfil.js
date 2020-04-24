@@ -48,7 +48,7 @@ function EdytujScreen({ navigation, route }) {
 
     useEffect(() => {
         fetchStorage();
-    }, isLoading);
+    }, [isLoading]);
     async function fetchStorage() {
         if (isLoading) {
             setTimeout(async function () {
