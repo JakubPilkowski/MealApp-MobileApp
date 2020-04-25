@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Modal, TouchableNativeFeedback } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Modal, TouchableNativeFeedback, Platform } from 'react-native';
 import colors from '../src/themes/colors';
 import dimensions from '../src/themes/dimensions';
 import IosButton from './IosButton';
@@ -10,15 +10,15 @@ import AndroidButton from './AndroidButton';
 const CustomAlert = props => {
     let cancelButton;
     let okButton;
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21)) {
         cancelButton =
-            <IosButton containerStyle={{flex:1}} onClick={props.onNegativeClick} text="Nie"/>
+            <IosButton containerStyle={{ flex: 1 }} onClick={props.onNegativeClick} text="Nie" />
         okButton =
-            <IosButton containerStyle={{flex:1}} onClick={props.onPositiveClick} text="Tak"/>
+            <IosButton containerStyle={{ flex: 1 }} onClick={props.onPositiveClick} text="Tak" />
     }
-    if (Platform.OS === "android") {
+    if (Platform.OS === "android" && Platform.Version >=21) {
         cancelButton =
-            <AndroidButton onClick={props.onNegativeClick} text="Nie"/>
+            <AndroidButton onClick={props.onNegativeClick} text="Nie" />
         okButton =
             <AndroidButton onClick={props.onPositiveClick} text="Tak" />
     }

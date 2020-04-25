@@ -15,9 +15,14 @@ const CustomMultiSelect = props => {
     const [items, setItems] = useState(props.items);
     const [searchResults, setSearchResults] = useState(items);
     const [errorEnabled, setErrorEnabled] = useState(false);
-    const [chosenItems, setChosenItems] = useState([]);
     const [chosenColors, setChosenColors] = useState([]);
     const colors = ['crimson', 'darkgreen', 'slategray', 'darkmagenta', 'darkorange', 'darkturquoise', 'hotpink'];
+    let count = 0;
+    items.map((item) => {
+        if (item.selected === true) {
+            count++;
+        }
+    });
     const onAddItemHandler = (item, index) => {
         if (item.selected === true) {
             count--;
@@ -30,9 +35,7 @@ const CustomMultiSelect = props => {
             })
             newArray[arrayIndex].selected = !item.selected;
             setSearchResults(newArray);
-            setChosenItems(currentItems => {
-                return currentItems.filter((chosenItem) => chosenItem.id !== item.id);
-            });
+            props.onRemoveItem(item);
             setChosenColors(currentColors => {
                 return currentColors.filter((chosenColor) => chosenColor.id !== item.id);
             });
@@ -48,7 +51,7 @@ const CustomMultiSelect = props => {
                 });
                 newArray[arrayIndex].selected = !item.selected;
                 setSearchResults(newArray);
-                setChosenItems(currentItems => [...currentItems, { id: item.id, name: item.name, selected: !item.selected, color: item.color }]);
+                props.onAddItem(item);
             }
             else {
                 setSearchViewValue('');
@@ -61,13 +64,6 @@ const CustomMultiSelect = props => {
         }
 
     }
-    let count = 0;
-    let selectedItems = items.map((item) => {
-        if (item.selected === true) {
-            count++;
-        }
-    });
-
     function applyFilter(text) {
         setSearchViewValue(text);
         if (text !== "") {
@@ -85,7 +81,6 @@ const CustomMultiSelect = props => {
 
     let input;
     let multiSelect =
-
         <Modal
             visible={visibility}
             transparent={true}
@@ -99,7 +94,7 @@ const CustomMultiSelect = props => {
                     inputStyle={{ fontSize: 16 }}
                     onFocus={() => { applyFilter(searchViewValue) }}
                     onSubmitEditing={() => { setSearchResults(items) }}
-                    containerStyle={{ borderTopLeftRadius: dimensions.defaultBorderRadius, marginBottom: 12, borderTopEndRadius: dimensions.defaultBorderRadius }}
+                    containerStyle={{ borderTopLeftRadius: dimensions.defaultBorderRadius, marginBottom: 6, borderTopEndRadius: dimensions.defaultBorderRadius }}
                     onChangeText={(text) => applyFilter(text)}
                     value={searchViewValue}
                 />
@@ -108,7 +103,8 @@ const CustomMultiSelect = props => {
                     keyboardShouldPersistTaps='handled'
                     style={{
                         height: items.length <= 4 ? items.length * 52 : 208,
-                        width: width - 36 * 2
+                        width: width - 36 * 2,
+                        marginBottom: 6
                     }}
                     data={searchResults} renderItem={({ item, index }) => {
                         return (
@@ -138,16 +134,16 @@ const CustomMultiSelect = props => {
             </View>
         </Modal>;
     let chosenItemsContent =
-        <View style={{ marginTop: 6, height: chosenItems.length < 3 ? chosenItems.length * 46 : 138 }}>
+        <View style={{ marginTop: 6, height: props.chosenItems.length < 3 ? props.chosenItems.length * 46 : 138 }}>
             <FlatList
-                data={chosenItems}
+                data={props.chosenItems}
                 renderItem={({ item, index }) => {
                     if (item.color === 'black') {
                         let colorIndex = Math.floor(Math.random() * (Math.floor(7) - Math.ceil(0))) + Math.ceil(0);
                         while (chosenColors.filter(item => { return item.color !== colors[colorIndex] }).length === chosenColors.length - 1) {
                             colorIndex = Math.floor(Math.random() * (Math.floor(7) - Math.ceil(0))) + Math.ceil(0);
                         }
-                        chosenItems[index].color = colors[colorIndex];
+                        props.chosenItems[index].color = colors[colorIndex];
                         setChosenColors(chosenColors => [...chosenColors, { id: item.id, color: colors[colorIndex] }]);
                     }
                     return (
@@ -164,9 +160,7 @@ const CustomMultiSelect = props => {
                                 })
                                 newArray[arrayIndex].selected = false;
                                 setSearchResults(newArray);
-                                setChosenItems(currentItems => {
-                                    return currentItems.filter((chosenItem) => chosenItem.id !== item.id);
-                                });
+                                props.onRemoveItem(item);
                                 setChosenColors(currentColors => {
                                     return currentColors.filter((chosenColor) => chosenColor.id !== item.id);
                                 });
@@ -178,16 +172,24 @@ const CustomMultiSelect = props => {
                 }}
             />
         </View>;
-    if (Platform.OS === "android") {
+    if (Platform.OS === "android" && Platform.Version >= 21) {
         input =
             <View>
                 <View style={[styles.mainContainer, props.inputContainer]}>
                     <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(Colors.accent, true)}
-                        onPress={() => { setVisisbility(true); }}
+                        onPress={() => {
+                            if (props.mode === "restart") {
+                                setItems(props.items);
+                                setSearchResults(props.items);
+                                count = 0;
+                                setChosenColors([]);
+                            }
+                            setVisisbility(true);
+                        }}
                         useForeground={false}>
                         <View style={styles.inputContainer}>
                             <Text style={[styles.inputPlaceHolder, props.placeHolderStyle]}>{props.placeHolder}</Text>
-                            <View style={{ height: 20, width: 20, marginStart: 10, borderColor: Colors.primary, backgroundColor: Colors.accent, borderRadius: 10, borderWidth: 4 }} />
+                            <MaterialIcons size={24} color={Colors.primary} name="add" />
                         </View>
                     </TouchableNativeFeedback>
                     {multiSelect}
@@ -195,7 +197,7 @@ const CustomMultiSelect = props => {
                 {chosenItemsContent}
             </View>
     }
-    if (Platform.OS === "ios") {
+    if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21)) {
         input =
             <View>
                 <View style={[styles.mainContainer, props.inputContainer]}>
@@ -203,7 +205,7 @@ const CustomMultiSelect = props => {
                         onPress={() => { setVisisbility(true); }}>
                         <View style={styles.inputContainer}>
                             <Text style={[styles.inputPlaceHolder, props.placeHolderStyle]}>{props.placeHolder}</Text>
-                            <View style={{ height: 20, width: 20, marginStart: 10, borderColor: Colors.primary, backgroundColor: Colors.accent, borderRadius: 10, borderWidth: 4 }} />
+                            <MaterialIcons size={24} color={Colors.primary} name="add" />
                         </View>
                     </TouchableOpacity>
                     {multiSelect}
@@ -222,6 +224,7 @@ const CustomMultiSelect = props => {
 }
 
 
+
 const styles = StyleSheet.create({
     mainContainer: {
         backgroundColor: Colors.colorTextWhite,
@@ -233,6 +236,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
         borderColor: Colors.accent,
         borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
         borderWidth: dimensions.defaultBorderWidth,
         paddingVertical: dimensions.defaultSmallPadding,
         paddingHorizontal: dimensions.defaultPadding,

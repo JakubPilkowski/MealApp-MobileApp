@@ -27,6 +27,7 @@ function LogowanieScreen({ navigation }) {
     const [verifyLoginError, setVerifyLoginError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [firstInputFocus, setFirstInputFocus] = useState(false);
+    const [buttonEnabled, setButtonEnabled] = useState(true);
     const [secondInputFocus, setSecondInputFocus] = useState(false);
     let loginButton;
     let registerButton;
@@ -44,21 +45,23 @@ function LogowanieScreen({ navigation }) {
         )
     });
 
-    if (Platform.OS === "android") {
+    if (Platform.OS === "android" && Platform.Version >= 21) {
         loginButton =
             <AndroidButton text="Zaloguj się" containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9 }}
+                enabled={buttonEnabled}
                 onClick={() => loginButtonHandler()} />
         registerButton =
             <AndroidButton text="Zarejestruj się" containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9 }}
                 onClick={() => navigation.navigate("Rejestracja")}
             />
     }
-    if (Platform.OS === "ios") {
+    if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21)) {
         loginButton =
             <IosButton text="Zaloguj się" containerStyle={{
                 width: "60%", borderColor: colors.primary,
                 borderWidth: 2, borderRadius: 6, backgroundColor: colors.colorTextWhite
             }}
+                enabled={buttonEnabled}
                 buttonStyle={{ paddingVertical: 9 }}
                 onClick={() => loginButtonHandler()}
             />
@@ -88,10 +91,13 @@ function LogowanieScreen({ navigation }) {
     const loginButtonHandler = () => {
         let loginErrorMessage = Validation.loginVerification(loginField);
         let passwordErrorMessage = Validation.passwordVerification(passwordField);
-
+        setButtonEnabled(false);
         if (loginErrorMessage.length === 0 && passwordErrorMessage.length === 0) {
             setIsLoading(true);
             verifyLogin();
+        }
+        else {
+            setButtonEnabled(true);
         }
         setLoginError(loginErrorMessage);
         setPasswordError(passwordErrorMessage);
@@ -107,6 +113,9 @@ function LogowanieScreen({ navigation }) {
                 if (errors.length === 0) {
                     setIsLoading(false);
                     navigation.navigate("Jadlodajnie");
+                    setTimeout(function () {
+                        setButtonEnabled(true);
+                    }, 100);
                 }
                 setVerifyLoginError(errors);
             }
@@ -117,7 +126,7 @@ function LogowanieScreen({ navigation }) {
         <SafeAreaView style={{ flex: 1 }}>
             <ImageBackground source={require('../src/images/cutlery.jpg')} style={styles.imageBackground} imageStyle={styles.imageStyle}>
                 <KeyboardAwareScrollView
-                    style={{ width: '100%', flex:1}}
+                    style={{ width: '100%', flex: 1 }}
                     contentContainerStyle={{ alignItems: 'center' }}
                 >
                     <Text style={[styles.title, { marginTop: dimensions.defaultHugeMargin }]}>Login</Text>
@@ -180,14 +189,14 @@ function LogowanieScreen({ navigation }) {
 const Logowanie = props => {
     const forFade = ({ current, closing }) => ({
         cardStyle: {
-          opacity: current.progress,
+            opacity: current.progress,
         },
-      });
+    });
     const Stack = createStackNavigator();
     return (
         <Stack.Navigator initialRouteName="Logowanie" screenOptions={ScreenStyle}>
             <Stack.Screen name="Logowanie" component={LogowanieScreen} />
-            <Stack.Screen name="Rejestracja" component={Rejestracja} 
+            <Stack.Screen name="Rejestracja" component={Rejestracja}
                 options={{
                     headerStyle: {
                         opacity: 0, height: 0
@@ -195,14 +204,14 @@ const Logowanie = props => {
                     cardStyleInterpolator: forFade
                 }}
             />
-            <Stack.Screen name="ZapomnialemHasla" component={ZapomnialemHasla} 
-                options = {{
+            <Stack.Screen name="ZapomnialemHasla" component={ZapomnialemHasla}
+                options={{
                     headerStyle: {
                         opacity: 0, height: 0
                     },
                     cardStyleInterpolator: forFade
                 }}
-                
+
             />
         </Stack.Navigator>
     );

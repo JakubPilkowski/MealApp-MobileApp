@@ -4,12 +4,16 @@ import colors from '../src/themes/colors';
 import dimensions from '../src/themes/dimensions';
 
 
-
 const AndroidButton = props => {
+
     return (
-        <View style={[styles.androidButtonView, props.containerStyle]}>
-            <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(colors.accent, true)}
-                onPress={props.onClick}
+        <View style={[styles.androidButtonView, { opacity: props.enabled ? 1 : 0.5 }, props.containerStyle]} >
+            <TouchableNativeFeedback background={props.enabled ? TouchableNativeFeedback.Ripple(colors.accent, true) : TouchableNativeFeedback.Ripple('transparent', true)}
+                onPress={() => {
+                    if (props.enabled) {
+                        props.onClick();
+                    }
+                }}
                 useForeground={false}>
                 <View style={{ flexDirection: 'column', width: "100%" }}>
                     <Text style={[styles.moreButtonText, props.buttonStyle]}>{props.text}</Text>
@@ -20,6 +24,9 @@ const AndroidButton = props => {
     );
 }
 
+AndroidButton.defaultProps = {
+    enabled: true
+}
 
 const styles = StyleSheet.create({
     androidButtonView: {

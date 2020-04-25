@@ -16,6 +16,7 @@ const WyborLokalizacji = props => {
 
     const [wojewodztwo, setWojewodztwo] = useState("default");
     const [miasto, setMiasto] = useState("default");
+    const [wojewodztwoEnabled, setWojewodztwoEnabled] = useState(true);
     const [miastoEnabled, setMiastoEnabled] = useState(false);
     const [errorMessage, setErrorMessage] = useState("\n");
     const [isLoading, setIsLoading] = useState(false);
@@ -35,12 +36,12 @@ const WyborLokalizacji = props => {
         new PickerItem('Barczewo', 'braniewo')];
 
     let confirmButton;
-    if (Platform.OS === "android") {
+    if (Platform.OS === "android" && Platform.Version >= 21) {
         confirmButton =
             <AndroidButton text="Przejdź dalej" containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9 }}
                 onClick={() => confirmButtonHandler()} />
     }
-    if (Platform.OS === "ios") {
+    if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21)) {
         confirmButton = <IosButton text="Przejdź dalej" containerStyle={{
             width: "60%", borderColor: colors.primary,
             borderWidth: 2, borderRadius: 6, backgroundColor: colors.colorTextWhite
@@ -53,7 +54,9 @@ const WyborLokalizacji = props => {
 
         if (wojewodztwo !== "default") {
             setIsLoading(true);
+            setWojewodztwoEnabled(false);
             setMiastoEnabled(false);
+            setMiasto("default");
             changeCities();
         }
         else {
@@ -68,6 +71,7 @@ const WyborLokalizacji = props => {
         setTimeout(async function () {
             setIsLoading(false);
             setMiastoEnabled(true);
+            setWojewodztwoEnabled(true);
         }, 500)
     }
     const confirmButtonHandler = () => {
@@ -90,7 +94,10 @@ const WyborLokalizacji = props => {
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <GradientDivider startColor={Colors.accent} endColor={Colors.primary}
                     from="left" locationEnd={1} />
-                <CustomPicker pickerItems={wojewodztwa} selectedValue={wojewodztwo}
+                <CustomPicker
+                    containerStyle={{ opacity: wojewodztwoEnabled ? 1 : 0.5 }}
+                    pickerItems={wojewodztwa} selectedValue={wojewodztwo}
+                    enabled={wojewodztwoEnabled}
                     onPickerChange={(wojewodztwo) => onWojewodztwoChangedHandler(wojewodztwo)}
                 />
                 <GradientDivider startColor={Colors.accent} endColor={Colors.primary}

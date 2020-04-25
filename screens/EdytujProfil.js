@@ -19,7 +19,7 @@ import Validation from '../service/Validation';
 import CustomPicker from '../components/CustomPicker';
 import PickerItem from '../models/PickerItem';
 function EdytujScreen({ navigation, route }) {
-    
+
     const [isLoading, setIsLoading] = useState(true);
     const { uzytkownik } = route.params;
     const [selectedImage, setSelectedImage] = useState(uzytkownik.avatar);
@@ -28,10 +28,12 @@ function EdytujScreen({ navigation, route }) {
     const [wojewodztwoField, setWojewodztwoField] = useState('default');
     const [isFieldLoading, setIsFieldLoading] = useState(false);
     const [miastoField, setMiastoField] = useState('default');
-    const [miastoEnabled, setMiastoEnabled] = useState(miastoField !== "default" ? true : false);
+    const [wojewodztwoEnabled, setWojewodztwoEnabled] = useState(true);
+    const [miastoEnabled, setMiastoEnabled] = useState(true);
+    const [saveSettingsButtonEnabled, setSaveSettingsButtonEnabled] = useState(true);
     const [errorMessage, setErrorMessage] = useState("");
     const scrollY = useRef(null);
-    
+
     const wojewodztwa = [
         new PickerItem('Wybierz województwo...', 'default'),
         new PickerItem('Kujawsko-Pomorskie', 'kuj-pom'),
@@ -58,6 +60,7 @@ function EdytujScreen({ navigation, route }) {
                     setWojewodztwoField(wojewodztwoValue);
                     setMiastoField(miastoValue);
                     setIsLoading(false);
+                    setWojewodztwoEnabled(true);
                     setMiastoEnabled(true);
                 }
                 catch (error) {
@@ -109,6 +112,7 @@ function EdytujScreen({ navigation, route }) {
     });
 
     const saveSettingHandler = () => {
+        setSaveSettingsButtonEnabled(false);
         let message = "";
         setErrorMessage('');
         message = Validation.loginVerification(loginField) +
@@ -121,6 +125,7 @@ function EdytujScreen({ navigation, route }) {
         }
         else {
             setErrorMessage(message);
+            setSaveSettingsButtonEnabled(true);
         }
     }
     async function verifyFields() {
@@ -128,6 +133,9 @@ function EdytujScreen({ navigation, route }) {
             setIsFieldLoading(false);
             navigation.goBack();
             navigation.openDrawer();
+            setTimeout(function () {
+                setSaveSettingsButtonEnabled(true);
+            }, 100);
         }, 1000);
     }
     let addImageButton;
@@ -136,7 +144,9 @@ function EdytujScreen({ navigation, route }) {
         addImageButton = <AndroidButton text="Zmień avatar" buttonStyle={{ paddingVertical: 9, paddingHorizontal: 25 }}
             onClick={openImagePickerAsync}
         />
-        saveSettingsButton = <AndroidButton text="Zapisz zmiany"
+        saveSettingsButton = <AndroidButton
+            enabled={saveSettingsButtonEnabled}
+            text="Zapisz zmiany"
             containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9 }}
             onClick={() => {
                 saveSettingHandler();
@@ -150,6 +160,7 @@ function EdytujScreen({ navigation, route }) {
                 borderRadius: dimensions.defaultBorderRadius, backgroundColor: colors.colorTextWhite
             }} buttonStyle={{ paddingVertical: 9 }} onClick={openImagePickerAsync} />
         saveSettingsButton = <IosButton text="Zapisz zmiany"
+            enabled={saveSettingsButtonEnabled}
             containerStyle={{
                 width: "60%", borderColor: colors.primary, borderWidth: dimensions.defaultBorderWidth,
                 borderRadius: dimensions.defaultBorderRadius, backgroundColor: colors.colorTextWhite
@@ -161,7 +172,9 @@ function EdytujScreen({ navigation, route }) {
         setWojewodztwoField(wojewodztwo);
         if (wojewodztwo !== "default") {
             setIsFieldLoading(true);
+            setWojewodztwoEnabled(false);
             setMiastoEnabled(false);
+            setMiastoField("default")
             changeCities();
         }
         else {
@@ -176,6 +189,7 @@ function EdytujScreen({ navigation, route }) {
     async function changeCities() {
         setTimeout(async function () {
             setIsFieldLoading(false);
+            setWojewodztwoEnabled(true);
             setMiastoEnabled(true);
         }, 500)
     }
@@ -227,6 +241,8 @@ function EdytujScreen({ navigation, route }) {
                 />
                 <Text style={styles.title}>Województwo</Text>
                 <CustomPicker
+                    containerStyle={{ opacity: wojewodztwoEnabled ? 1 : 0.5 }}
+                    enabled={wojewodztwoEnabled}
                     selectedValue={wojewodztwoField}
                     pickerItems={wojewodztwa}
                     onPickerChange={(wojewodztwo) => onWojewodztwoChangedHandler(wojewodztwo)}

@@ -13,19 +13,22 @@ const ZapomnialemHasla = props => {
     const [emailErrorMessage, setEmailErrorMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [forgetPasswordError, setForgetPasswordError] = useState('');
+    const [buttonEnabled, setButtonEnabled] = useState(true);
     let sendNewPasswordButton;
 
-    if (Platform.OS === "android") {
+    if (Platform.OS === "android" && Platform.Version >= 21) {
         sendNewPasswordButton =
             <AndroidButton text="Przejdź dalej" onClick={() => sendNewPasswordHandler()}
-                containerStyle={{ width: '60%' }}
+                enabled={buttonEnabled}    
+            containerStyle={{ width: '60%' }}
                 buttonStyle={{ paddingVertical: 9 }}
             />
     }
-    if (Platform.OS === "ios") {
+    if (Platform.OS === "ios" || (Platform.OS==="android" && Platform.Version < 21)) {
         sendNewPasswordButton =
             <IosButton tex="Przejdź dalej" onClick={
                 () => sendNewPasswordHandler()}
+                enabled={buttonEnabled}
                 containerStyle={{
                     width: "60%", borderColor: colors.primary, borderWidth: 2,
                     borderRadius: 6, backgroundColor: colors.colorTextWhite
@@ -34,11 +37,14 @@ const ZapomnialemHasla = props => {
     }
 
     const sendNewPasswordHandler = () => {
+        setButtonEnabled(false);
         let errorMessage = Validation.emailVerification(emailField);
-
         if (errorMessage.length === 0) {
             setIsLoading(true);
             verifyEmail();
+        }
+        else{
+            setButtonEnabled(true);
         }
         setEmailErrorMessage(errorMessage);
     }
