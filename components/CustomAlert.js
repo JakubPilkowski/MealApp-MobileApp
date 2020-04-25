@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Modal, TouchableNativeFeedback } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Modal, TouchableNativeFeedback, Platform } from 'react-native';
 import colors from '../src/themes/colors';
 import dimensions from '../src/themes/dimensions';
 import IosButton from './IosButton';
@@ -30,13 +30,13 @@ const CustomAlert = props => {
     }
     let cancelButton;
     let okButton;
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === "ios" || (Platform.OS==="android" && Platform.Version < 21)) {        
         cancelButton =
             <IosButton onClick={onCancelHandler} text="Anuluj"/>;
         okButton =
             <IosButton onClick={addGoalHandler} text="Ok"/>;
     }
-    if (Platform.OS === "android") {
+    if (Platform.OS === "android" && Platform.Version >=21) {
         cancelButton =
             <AndroidButton onClick={onCancelHandler} text="Anuluj" containerStyle={{marginHorizontal:dimensions.defaultHugeMargin}}/>
         okButton =
@@ -52,7 +52,7 @@ const CustomAlert = props => {
                 <View style={styles.container}>
                     <Text style={styles.title}>Dodaj powiadomienie</Text>
                     <Text style={styles.message}>Wpisz nazwe alertu:</Text>
-                    <TextInput selectionColor={colors.accent} style={styles.input} onChangeText={goalInputHandler} value={enteredGoal} />
+                    <TextInput selectionColor={colors.accent} style={styles.input} autoFocus={true} onChangeText={goalInputHandler} value={enteredGoal} />
                     <Text style={[styles.message, styles.error, {display:errorDisplay}]}>{props.errorMessage}</Text>
                     <View style={styles.buttonsContainer}>
                         {cancelButton}{okButton}

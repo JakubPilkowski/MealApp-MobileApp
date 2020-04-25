@@ -7,12 +7,22 @@ import dimensions from '../src/themes/dimensions';
 const IosButton = props => {
 
     return (
-        <View style={props.containerStyle}>
-            <TouchableOpacity onPress={props.onClick}>
+        <View style={[{ opacity: props.enabled ? 1 : 0.5 }, props.containerStyle]}>
+            <TouchableOpacity onPress={() => {
+                if (props.enabled) {
+                    props.onClick();
+                }
+            }}
+                activeOpacity={!props.enabled ? 1 : 0.2}
+            >
                 <Text style={[styles.moreButtonText, props.buttonStyle]}>{props.text}</Text>
             </TouchableOpacity>
         </View>
     );
+}
+
+IosButton.defaultProps = {
+    enabled: true
 }
 
 const styles = StyleSheet.create({

@@ -29,7 +29,7 @@ const CustomDrawer = props => {
   let nazwa = props.dataSource.login;
   let email = props.dataSource.email;
   let avatar = props.dataSource.avatar;
-  if (Platform.OS === "android") {
+  if (Platform.OS === "android" && Platform.Version >= 21) {
     loginButton = <AndroidButton text="Zaloguj się" containerStyle={{ borderRadius: dimensions.defaultHugeBorderRadius }}
       buttonStyle={{ color: Colors.accent, borderWidth: 0 }} onClick={() => {
         props.navigation.navigate("Logowanie");
@@ -37,7 +37,7 @@ const CustomDrawer = props => {
     editButton =
       <View style={{ backgroundColor: Colors.primary, position: 'absolute', right: 12 }}>
         <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(Colors.accent, true)}
-          onPress={() => { props.navigation.navigate("EdytujProfil", { uzytkownik : props.dataSource}); }}
+          onPress={() => { props.navigation.navigate("EdytujProfil", { uzytkownik: props.dataSource }); }}
           useForeground={true}>
           <View style={{ flexDirection: 'column' }}>
             <MaterialIcons name="edit" color={Colors.colorTextWhite} size={28} />
@@ -45,7 +45,7 @@ const CustomDrawer = props => {
         </TouchableNativeFeedback>
       </View>
   }
-  if (Platform.OS === "ios") {
+  if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21)) {
     loginButton = <IosButton text="Zaloguj się" buttonStyle={{ color: Colors.colorTextWhite }} />
   }
 
@@ -101,7 +101,7 @@ const CustomDrawer = props => {
                   activeBackgroundColor={props.activeBackgroundColor}
                   inactiveBackgroundColor={props.inactiveBackgroundColor}
                   labelStyle={props.labelStyle}
-                  style={{paddingLeft:dimensions.defaultSmallPadding}}
+                  style={{ paddingLeft: dimensions.defaultSmallPadding }}
                   onPress={() => {
                     props.navigation.dispatch({
                       ...(focused

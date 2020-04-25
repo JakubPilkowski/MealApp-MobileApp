@@ -11,7 +11,6 @@ import { Ionicons } from 'react-native-vector-icons';
 
 const { width, height } = Dimensions.get("screen");
 const Rejestracja = props => {
-    // const {drawerNavigation } = props.route.params;
     const [loginField, setLoginField] = useState('');
     const [emailField, setEmailField] = useState('');
     const [passwordField, setPasswordField] = useState('');
@@ -23,6 +22,7 @@ const Rejestracja = props => {
     const [thirdInputFocus, setThirdInputFocus] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [registerError, setRegisterError] = useState('');
+    const [buttonEnabled, setButtonEnabled] = useState(true);
     const onFirstInputFocus = () => {
         setSecondInputFocus(false);
         setThirdInputFocus(false);
@@ -46,12 +46,16 @@ const Rejestracja = props => {
 
 
     const registerButtonHandler = () => {
+        setButtonEnabled(false);
         let loginErrorMessage = Validation.loginVerification(loginField);
         let emailErrorMessage = Validation.emailVerification(emailField);
         let passwordErrorMessage = Validation.passwordVerification(passwordField);
         if (loginErrorMessage.length === 0 && emailErrorMessage.length === 0 && passwordErrorMessage.length === 0) {
             setIsLoading(true);
             hashPassword();
+        }
+        else {
+            setButtonEnabled(true);
         }
         setLoginError(loginErrorMessage);
         setEmailError(emailErrorMessage);
@@ -78,14 +82,16 @@ const Rejestracja = props => {
     }
 
     let registerButton;
-    if (Platform.OS === "android") {
+    if (Platform.OS === "android" && Platform.Version >= 21) {
         registerButton =
             <AndroidButton text="Zarejestruj się" containerStyle={{ width: "60%" }}
+                enabled={buttonEnabled}
                 buttonStyle={{ paddingVertical: 9 }} onClick={() => registerButtonHandler()} />
     }
-    if (Platform.OS === "ios") {
+    if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21)) {
         registerButton =
             <IosButton text="Zarejestruj się"
+                enabled={buttonEnabled}
                 containerStyle={{ width: "60%", borderColor: colors.primary, borderWidth: 2, borderRadius: 6, backgroundColor: colors.colorTextWhite }}
                 buttonStyle={{ fontSize: 24 }} onClick={() => registerButtonHandler()} />
     }
@@ -98,7 +104,7 @@ const Rejestracja = props => {
         <KeyboardAvoidingView style={styles.container}
             behavior="height">
             <ImageBackground source={require('../src/images/cutlery.jpg')} style={styles.imageBackground} imageStyle={styles.imageStyle}>
-                <View style={{ height: 56, backgroundColor: colors.primary, width: '100%',flexDirection:'row', alignItems:'center', justifyContent: 'center', }}>
+                <View style={{ height: 56, backgroundColor: colors.primary, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
                     <View style={[styles.backButtonContainer, { left: 0 }]}>
                         <TouchableOpacity
                             onPress={() => {
@@ -107,7 +113,7 @@ const Rejestracja = props => {
                             <Ionicons name="ios-arrow-round-back" size={36} color={colors.colorTextWhite}></Ionicons>
                         </TouchableOpacity>
                     </View>
-                    <Text style={{ color: colors.colorTextWhite, fontSize:20, fontWeight:'bold' }}>Rejestracja</Text>
+                    <Text style={{ color: colors.colorTextWhite, fontSize: 20, fontWeight: 'bold' }}>Rejestracja</Text>
                 </View>
 
 
@@ -156,7 +162,6 @@ const Rejestracja = props => {
                 {registerButton}
                 <Text style={{ fontSize: 14, color: 'red', width: "75%" }}>{registerError}</Text>
                 <ActivityIndicator size="large" color={colors.primary} animating={isLoading} />
-                {/* <CustomSmallLoadingComponent text={"Sprawdzam dane"} visibility={isLoading} /> */}
             </ImageBackground>
         </KeyboardAvoidingView>
     );

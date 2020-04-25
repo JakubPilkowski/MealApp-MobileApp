@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button, ImageBackground, Image,ToastAndroid, FlatList, Platform, TouchableOpacity, TouchableNativeFeedback, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Button, ImageBackground, Image, ToastAndroid, FlatList, Platform, TouchableOpacity, TouchableNativeFeedback, Dimensions } from 'react-native';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import { createStackNavigator } from '@react-navigation/stack';
 import Colors from "../src/themes/colors";
@@ -34,6 +34,7 @@ function PowiadomieniaScreen({ navigation }) {
         content = <FlatList
             containerStyle={{ flex: 1 }}
             data={powiadomienia}
+
             renderItem={({ item, index }) =>
                 <Card
                     pressEnabled={true}
@@ -49,7 +50,9 @@ function PowiadomieniaScreen({ navigation }) {
                             <Switcher />
                         </View>
                     }
-                />} />
+                />}
+            keyExtractor={item => item.id.toString()}
+        />
     }
     else {
         content =
@@ -57,9 +60,9 @@ function PowiadomieniaScreen({ navigation }) {
     }
 
 
-    useEffect(() => { }, powiadomienia);
+    useEffect(() => { }, [powiadomienia.length]);
     let addPowiadomienieButton;
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21)) {
         navigation.setOptions({
             headerRight: () => (
                 <IconWithAction src={require('../src/images/dodaj_bialy_m.png')} onClick={() => {
@@ -69,7 +72,7 @@ function PowiadomieniaScreen({ navigation }) {
         })
         addPowiadomienieButton = null;
     }
-    if (Platform.OS === "android") {
+    if (Platform.OS === "android" && Platform.Version >=21) {
         addPowiadomienieButton =
             <AndroidButton onClick={() => {
                 if (powiadomienia.length < 10) {

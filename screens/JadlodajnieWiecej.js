@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView,FlatList, ActivityIndicator, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid } from 'react-native';
+import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, FlatList, ActivityIndicator, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
 import Strings from "../src/themes/strings";
@@ -11,6 +11,7 @@ import Zestaw from '../components/Zestaw';
 import InformacjeOgolneJadlodajnia from '../components/InformacjeOgolneJadlodajnia';
 import IconWithAction from '../components/IconWithAction';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
+import { setAutoFocusEnabled } from 'expo/build/AR';
 const { width, height } = Dimensions.get('window');
 
 const JadlodajnieWiecej = props => {
@@ -22,7 +23,7 @@ const JadlodajnieWiecej = props => {
     const [iconColor, setIconColor] = useState("white");
     const [isFavourite, setIsFavourite] = useState(false);
     const [scrollIndex, setScrollIndex] = useState(0);
-
+    const [favouriteButtonEnabled, setFavouriteButtonEnabled] = useState(true);
 
     async function fetchData() {
         if (isLoading) {
@@ -50,8 +51,6 @@ const JadlodajnieWiecej = props => {
     else {
         let currentWidth = 0;
         const szczegoly = dataSource;
-        // const zestawRange = szczegoly.zestawy.length;
-        // const { jadlodajniaId } = props.route.params;
         const headerHeight = scrollY.interpolate(
             {
                 inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
@@ -94,15 +93,25 @@ const JadlodajnieWiecej = props => {
                 </View>
                 <View style={[styles.backButtonContainer, { right: 0 }]}>
                     <IconWithAction content={<FontAwesome name="star" color={iconColor} size={24} />} onClick={() => {
-                        if (isFavourite) {
-                            ToastAndroid.show("Usunięto z ulubionych !!!", ToastAndroid.SHORT);
-                            setIsFavourite(!isFavourite);
-                            setIconColor("white");
-                        }
-                        else {
-                            ToastAndroid.show("Dodano do ulubionych !!!", ToastAndroid.SHORT);
-                            setIsFavourite(!isFavourite);
-                            setIconColor("gold");
+                        if (favouriteButtonEnabled) {
+                            if (isFavourite) {
+                                ToastAndroid.show("Usunięto z ulubionych !!!", ToastAndroid.SHORT);
+                                setFavouriteButtonEnabled(false);
+                                setIsFavourite(!isFavourite);
+                                setIconColor("white");
+                                setTimeout(function () {
+                                    setFavouriteButtonEnabled(true);
+                                }, 2000);
+                            }
+                            else {
+                                ToastAndroid.show("Dodano do ulubionych !!!", ToastAndroid.SHORT);
+                                setFavouriteButtonEnabled(false);
+                                setIsFavourite(!isFavourite);
+                                setIconColor("gold");
+                                setTimeout(function () {
+                                    setFavouriteButtonEnabled(true);
+                                }, 2000);
+                            }
                         }
                     }} />
                 </View>
@@ -123,46 +132,46 @@ const JadlodajnieWiecej = props => {
                         <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 50 }}>
                             <TouchableOpacity onPress={() => {
                                 console.log(scrollIndex);
-                                if(scrollIndex!==0){
+                                if (scrollIndex !== 0) {
                                     let index = scrollIndex - 1;
                                     setScrollIndex(index);
-                                    scrollRef.current.scrollToIndex({animated:true, index:index});
+                                    scrollRef.current.scrollToIndex({ animated: true, index: index });
                                 }
                             }}>
                                 <Feather name="arrow-left-circle" color={Colors.primary} size={36}></Feather>
                             </TouchableOpacity>
                         </View>
-                            <FlatList data={szczegoly.zestawy}
-                                horizontal={true}
-                                scrollEnabled={false}
-                                getItemLayout={(data,index)=>(
-                                 {length: width-100,offset: (width-100)*index, index}    
-                                )
-                                }
-                                initialScrollIndex={0}
-                                showsHorizontalScrollIndicator={false}
-                                ref={scrollRef}
-                                renderItem={itemData =>
-                                    <View style={{ flexDirection: 'column',width:width-100}}>
-                                        <Zestaw date={itemData.item.data} name={itemData.item.nazwa} price={itemData.item.cena}></Zestaw>
+                        <FlatList data={szczegoly.zestawy}
+                            horizontal={true}
+                            scrollEnabled={false}
+                            getItemLayout={(data, index) => (
+                                { length: width - 100, offset: (width - 100) * index, index }
+                            )
+                            }
+                            initialScrollIndex={0}
+                            showsHorizontalScrollIndicator={false}
+                            ref={scrollRef}
+                            renderItem={itemData =>
+                                <View style={{ flexDirection: 'column', width: width - 100 }}>
+                                    <Zestaw date={itemData.item.data} name={itemData.item.nazwa} price={itemData.item.cena}></Zestaw>
 
-                                        <Text style={{ textAlign: 'center', fontSize: 20, marginVertical: dimensions.defaultHugeMargin }}>
-                                            Menu główne
+                                    <Text style={{ textAlign: 'center', fontSize: 20, marginVertical: dimensions.defaultHugeMargin }}>
+                                        Menu główne
                                             </Text>
-                                        <View style={{}}>
-                                            <Text>UWAGA! Do odwołania nasze lokale pracują w godzinach 11:00 - 16:30.{'\n'}Obowiązuje zakaz spożywania posiłków na miejscu!{'\n'}Nadal funkcjonuje sprzedaż posiłków na wynos oraz z dowozem!{'\n'}Uprzejmie prosimy o zastosowanie zasady podchodzenia do bufetu pojedynczo oraz wchodzenia do lokalu nie więcej niż trzech osób w jednym momencie.{'\n'}Dostawy w zależności od odległości realizujemy za dodatkową opłatą.{'\n'}W ofercie stałej:{'\n'}codziennie, od godziny 11{'\n'}1. pierogi{'\n'}- z kapustą i grzybami 8 szt. cena 10,99 zł{'\n'}- z mięsem 8 szt. cena 10,99 zł{'\n'}- ruskie 8 szt. cena 10,99 zł{'\n'}{'\n'}2. duża zupa \"Pełny Gar\" cena 6,99 zł{'\n'}zupa codzienna cena 5,50 zł{'\n'}3. kotlet schabowy + zupa dnia + surówka cena 14,99 zł{'\n'}{'\n'}4. kompot cena 1,50 zł</Text>
-                                        </View>
+                                    <View style={{}}>
+                                        <Text>UWAGA! Do odwołania nasze lokale pracują w godzinach 11:00 - 16:30.{'\n'}Obowiązuje zakaz spożywania posiłków na miejscu!{'\n'}Nadal funkcjonuje sprzedaż posiłków na wynos oraz z dowozem!{'\n'}Uprzejmie prosimy o zastosowanie zasady podchodzenia do bufetu pojedynczo oraz wchodzenia do lokalu nie więcej niż trzech osób w jednym momencie.{'\n'}Dostawy w zależności od odległości realizujemy za dodatkową opłatą.{'\n'}W ofercie stałej:{'\n'}codziennie, od godziny 11{'\n'}1. pierogi{'\n'}- z kapustą i grzybami 8 szt. cena 10,99 zł{'\n'}- z mięsem 8 szt. cena 10,99 zł{'\n'}- ruskie 8 szt. cena 10,99 zł{'\n'}{'\n'}2. duża zupa \"Pełny Gar\" cena 6,99 zł{'\n'}zupa codzienna cena 5,50 zł{'\n'}3. kotlet schabowy + zupa dnia + surówka cena 14,99 zł{'\n'}{'\n'}4. kompot cena 1,50 zł</Text>
                                     </View>
+                                </View>
 
-                                }
-                                keyExtractor={item => item.zestaw_id.toString()}
-                            />
+                            }
+                            keyExtractor={item => item.zestaw_id.toString()}
+                        />
                         <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: "center", width: 50 }}>
                             <TouchableOpacity onPress={() => {
-                                if(scrollIndex<2){
-                                    let index = scrollIndex+1;
+                                if (scrollIndex < 2) {
+                                    let index = scrollIndex + 1;
                                     setScrollIndex(index);
-                                    scrollRef.current.scrollToIndex({index:index});
+                                    scrollRef.current.scrollToIndex({ index: index });
                                 }
                             }}>
                                 <Feather name="arrow-right-circle" color={Colors.primary} size={36}></Feather>

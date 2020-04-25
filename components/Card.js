@@ -15,13 +15,13 @@ const Card = props => {
         </View>;
     let touchableView;
     if (props.pressEnabled) {
-        if (Platform.OS === "ios") {
+        if (Platform.OS === "ios" || (Platform.OS==="android" && Platform.Version < 21)) {
             touchableView =
                 <TouchableOpacity onPress={props.onCardPress} onLongPress={props.onLongCardPress}>
                     {cardView}
                 </TouchableOpacity>
         }
-        if (Platform.OS === "android") {
+        if (Platform.OS === "android" && Platform.Version >= 21) {
             touchableView =
                 <TouchableNativeFeedback onPress={props.onCardPress} onLongPress={props.onLongCardPress} background={TouchableNativeFeedback.Ripple(Colors.primary, false)}
                     useForeground={false}>

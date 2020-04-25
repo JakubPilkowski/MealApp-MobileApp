@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, ImageBackground, Text, Easing, LayoutAnimation, TextInput, Platform, Picker, Modal, Animated, Image, ScrollView, TouchableOpacity, TouchableNativeFeedback, Keyboard } from "react-native";
+import React, { useState, useEffect} from 'react';
+import { View, StyleSheet, FlatList, ImageBackground, Text, LayoutAnimation, Platform, TouchableOpacity, TouchableNativeFeedback, Keyboard } from "react-native";
 import Strings from "../src/themes/strings";
 import Colors from "../src/themes/colors";
-import { createStackNavigator, HeaderTitle, CardStyleInterpolators } from '@react-navigation/stack';
+import { createStackNavigator} from '@react-navigation/stack';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import IconWithAction from "../components/IconWithAction";
 import ScreenStyle from "../src/themes/screenStyle";
@@ -11,7 +11,6 @@ import Connection from '../service/Connection';
 import {
     AntDesign,
     Feather, Ionicons,
-    MaterialIcons, MaterialCommunityIcons
 } from 'react-native-vector-icons';
 import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
@@ -25,23 +24,18 @@ const { width, height } = Dimensions.get("screen");
 
 
 function JadlodajnieScreen({ navigation, route }) {
-
-    const [selectedValue, setSelectedValue] = useState("default");
     const [expanded, setExpanded] = useState(false);
     const [detailedSearchExpanded, setDetailedSearchExpanded] = useState(false);
     const [sliderValue, setSliderValue] = useState(25);
     const [searchResults, setSearchResults] = useState([]);
     const [sliderOpacity, setSliderOpacity] = useState(0);
     const [searchViewValue, setSearchViewValue] = useState('');
-    const [selectedItems, setSelectedItems] = useState([]);
     const [indicatorValue, setIndicatorValue] = useState(12.5 + ((sliderValue - 1) * 75 / 54) + '%');
-    const [enabled, setEnabled] = useState(false);
-    const multiSelect = useRef(null);
     const [chosenItems, setChosenItems] = useState([]);
-    const colors = ['crimson', 'darkgreen', 'slateGray', 'darkmagenta', 'darkorange', 'darkturquoise', 'hotpink'];
     const { drawerNavigation } = route.params;
     const [isLoading, setIsLoading] = useState(true);
     const [jadlodajnie, setJadlodajnie] = useState([]);
+    const [mode, setMode] = useState('default');
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
@@ -58,8 +52,61 @@ function JadlodajnieScreen({ navigation, route }) {
     }
     useEffect(() => {
         fetchData();
-    },[isLoading]);
+    }, [isLoading]);
 
+    const multiSelectItems = [{
+        id: '92iij',
+        name: 'Pierogi',
+        selected: false,
+        color: 'black'
+    }, {
+        id: 'a0s0a8ssbsds',
+        name: 'Kapustka',
+        selected: false,
+        color: 'black'
+    }, {
+        id: '16hbajsabsds',
+        name: 'Kotlet',
+        selected: false,
+        color: 'black'
+    }, {
+        id: 'nahs75a5sgs',
+        name: 'Brokuły',
+        selected: false,
+        color: 'black'
+    }, {
+        id: '667atsas',
+        name: 'Ciasto',
+        selected: false,
+        color: 'black'
+    }, {
+        id: 'hsyasajss',
+        name: 'Kurczak',
+        selected: false,
+        color: 'black'
+    }, {
+        id: 'djsjudksjds',
+        name: 'Pierwsze danie',
+        selected: false,
+        color: 'black'
+    }, {
+        id: 'sdhyaysdjs',
+        name: 'Śniadanie',
+        selected: false,
+        color: 'black'
+    }, {
+        id: 'suudydjsjds',
+        name: 'Obiad',
+        selected: false,
+        color: 'black'
+    }, {
+        id: 'suudydjsjdss',
+        name: 'Kolacja',
+        selected: false,
+        color: 'black'
+    }
+
+    ];
 
 
     const HomeButtonHandler = () => {
@@ -115,64 +162,12 @@ function JadlodajnieScreen({ navigation, route }) {
         name: 'Feta',
     }];
 
-    multiSelectItems = [{
-        id: '92iij',
-        name: 'Pierogi',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'a0s0a8ssbsds',
-        name: 'Kapustka',
-        selected: false,
-        color: 'black'
-    }, {
-        id: '16hbajsabsds',
-        name: 'Kotlet',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'nahs75a5sgs',
-        name: 'Brokuły',
-        selected: false,
-        color: 'black'
-    }, {
-        id: '667atsas',
-        name: 'Ciasto',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'hsyasajss',
-        name: 'Kurczak',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'djsjudksjds',
-        name: 'Pierwsze danie',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'sdhyaysdjs',
-        name: 'Śniadanie',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'suudydjsjds',
-        name: 'Obiad',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'suudydjsjdss',
-        name: 'Kolacja',
-        selected: false,
-        color: 'black'
-    }
 
-    ];
 
     let searchButton;
-    if (Platform.OS === "android")
+    if (Platform.OS === "android" && Platform.Version >= 21)
         searchButton = <AndroidButton text="Wyszukaj" containerStyle={{ width: '60%', alignSelf: 'center', marginTop: 12 }} onClick={toggleSearchView} />
-    if (Platform.OS === "ios")
+    if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21))
         searchButton = <IosButton text="Wyszukaj" onClick={toggleSearchView} />
 
 
@@ -207,7 +202,7 @@ function JadlodajnieScreen({ navigation, route }) {
                 <FlatList
                     scrollEnabled={expanded ? false : true}
                     data={jadlodajnie} renderItem={({ item, index }) =>
-                        <Jadlodajnia title={item.title} containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} onMoreClick={(jadlodajniaId)=>{navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: jadlodajniaId });}} jadlodajnia={item} ></Jadlodajnia>}
+                        <Jadlodajnia title={item.title} containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} onMoreClick={(jadlodajniaId) => { navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: jadlodajniaId }); }} jadlodajnia={item} ></Jadlodajnia>}
                     keyExtractor={item => item.id.toString()}
                 />
         }
@@ -296,10 +291,10 @@ function JadlodajnieScreen({ navigation, route }) {
                             <Text style={{ textAlign: 'center', flex: 1 }}>1km</Text>
                             <Slider
                                 style={{ width: "75%", height: 40, opacity: sliderOpacity }}
-                                animateTransitions={false}
+                                animateTransitions={true}
                                 minimumValue={1}
                                 maximumValue={50}
-                                value={25}
+                                value={sliderValue}
                                 onValueChange={(value) => {
                                     setSliderValue(value)
                                     setIndicatorValue(12.5 + ((value - 1) * 75 / 54) + '%')
@@ -318,14 +313,15 @@ function JadlodajnieScreen({ navigation, route }) {
                         </View>
                     </View>
                     <Text style={styles.title}>Tagi</Text>
-                    <CustomMultiSelect placeHolder="Wybierz tagi (max 3)" items={multiSelectItems}
-                    // onAddItem={(item) => {
-                    //     setChosenItems(currentItems => [...currentItems, { id: item.id, name: item.name, selected: !item.selected }]);
-                    // }} onRemoveItem={(item) => {
-                    //     setChosenItems(currentItems => {
-                    //         return currentItems.filter((chosenItem) => chosenItem.id !== item.id);
-                    //     });
-                    // }} 
+                    <CustomMultiSelect placeHolder="Wybierz tagi (max 3)" items={multiSelectItems} chosenItems={chosenItems} mode={mode}
+                        onAddItem={(item) => {
+                            setMode("defualt");
+                            setChosenItems(currentItems => [...currentItems, { id: item.id, name: item.name, selected: !item.selected, color: 'black' }]);
+                        }} onRemoveItem={(item) => {
+                            setChosenItems(currentItems => {
+                                return currentItems.filter((chosenItem) => chosenItem.id !== item.id);
+                            });
+                        }}
                     />
                     {/* <View style={{ marginTop: 6, height: chosenItems.length < 3 ? chosenItems.length * 46 : 138 }}>
                         <FlatList
@@ -344,6 +340,15 @@ function JadlodajnieScreen({ navigation, route }) {
                     </View> */}
                 </View>
                 {searchButton}
+                <TouchableOpacity onPress={() => {
+                    setSearchViewValue("");
+                    setSliderValue(25);
+                    setIndicatorValue(12.5 + ((25 - 1) * 75 / 54) + '%');
+                    setChosenItems([]);
+                    setMode("restart");
+                }}>
+                    <Text style={{ fontSize: 16, color: Colors.accent, marginTop: 6 }}>Przywróć domyślne</Text>
+                </TouchableOpacity>
             </View>
             <ImageBackground source={require('../src/images/pancakes.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>
                 {content}
