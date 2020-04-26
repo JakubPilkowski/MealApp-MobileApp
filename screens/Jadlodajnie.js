@@ -47,7 +47,7 @@ function JadlodajnieScreen({ navigation, route }) {
                         setIsLoading(false);
                     })
                     .catch(err => console.log(err + 'blad'));
-            }, 500);
+            }, 2000);
         }
     }
     useEffect(() => {
