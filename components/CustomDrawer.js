@@ -1,10 +1,9 @@
-import React, { useState } from "react";
-import { View, StyleSheet, Text, Platform, TouchableNativeFeedback, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, Text, Platform, TouchableNativeFeedback, AsyncStorage} from 'react-native';
 import { Divider, Avatar } from 'react-native-elements';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
   DrawerContentScrollView,
-  DrawerItemList,
   DrawerItem
 } from '@react-navigation/drawer';
 import {
@@ -15,13 +14,11 @@ import Colors from '../src/themes/colors';
 import Dimensions from '../src/themes/dimensions';
 import AndroidButton from './AndroidButton';
 import IosButton from './IosButton';
-import { createStackNavigator } from '@react-navigation/stack';
 import dimensions from "../src/themes/dimensions";
 
 import {
   MaterialIcons
 } from '@expo/vector-icons';
-import Logowanie from "../screens/Logowanie";
 
 const CustomDrawer = props => {
   let loginButton;
@@ -29,6 +26,10 @@ const CustomDrawer = props => {
   let nazwa = props.dataSource.login;
   let email = props.dataSource.email;
   let avatar = props.dataSource.avatar;
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+
   if (Platform.OS === "android" && Platform.Version >= 21) {
     loginButton = <AndroidButton text="Zaloguj się" containerStyle={{ borderRadius: dimensions.defaultHugeBorderRadius }}
       buttonStyle={{ color: Colors.accent, borderWidth: 0 }} onClick={() => {
@@ -49,6 +50,10 @@ const CustomDrawer = props => {
     loginButton = <IosButton text="Zaloguj się" buttonStyle={{ color: Colors.colorTextWhite }} />
   }
 
+  function returnLog(){
+    console.log("pozdrowienia z drawera");
+  }
+  
   return (
     <LinearGradient
       style={styles.container}

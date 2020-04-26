@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ImageBackground, TextInput, Dimensions, ScrollView, Platform, TouchableNativeFeedback, TouchableOpacity, TouchableHighlight, ActivityIndicator, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet,AsyncStorage, ImageBackground, TextInput, Dimensions, ScrollView, Platform, TouchableNativeFeedback, TouchableOpacity, TouchableHighlight, ActivityIndicator, SafeAreaView } from 'react-native';
 import colors from '../src/themes/colors';
 import { createStackNavigator } from '@react-navigation/stack';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -10,11 +10,16 @@ import {
     FontAwesome,
     Ionicons
 } from "react-native-vector-icons";
+import {
+    CommonActions,
+  } from '@react-navigation/native';
 import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
 import ZapomnialemHasla from './ZapomnialemHasla';
 import Validation from '../service/Validation';
+import * as Google from "expo-google-app-auth";
+
 
 const { width, height } = Dimensions.get("screen");
 function LogowanieScreen({ navigation }) {
@@ -112,7 +117,8 @@ function LogowanieScreen({ navigation }) {
                 }
                 if (errors.length === 0) {
                     setIsLoading(false);
-                    navigation.navigate("Jadlodajnie");
+                    // navigation.navigate("Jadlodajnie");
+                    // navigator.reset();  
                     setTimeout(function () {
                         setButtonEnabled(true);
                     }, 100);
@@ -121,7 +127,33 @@ function LogowanieScreen({ navigation }) {
             }
         }, 1000);
     }
-
+    async function googleLogin() {
+        try {
+            const result = await Google.logInAsync({
+                androidClientId: "428437687512-gvdpebuorj5jhiuba1jhtk0uube7eus8.apps.googleusercontent.com",
+                scopes: ["profile", "email"]
+            })
+            if (result.type === "success") {
+                await AsyncStorage.setItem('authToken', result.accessToken);
+                await AsyncStorage.setItem('login', result.user.name);
+                await AsyncStorage.setItem('email', result.user.email);
+                await AsyncStorage.setItem('avatar', result.user.photoUrl);
+                navigation.dispatch({
+                    ...CommonActions.reset({
+                        index:1,
+                        routes : [
+                           {name: "Home"}, 
+                        ]
+                    }),
+                  });
+                // console.log(result);
+            } else {
+                console.log("cancelled")
+            }
+        } catch (e) {
+            console.log("error", e)
+        }
+    }
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <ImageBackground source={require('../src/images/cutlery.jpg')} style={styles.imageBackground} imageStyle={styles.imageStyle}>
@@ -162,7 +194,7 @@ function LogowanieScreen({ navigation }) {
                             </TouchableOpacity>
                         </View>
                         <View style={{ marginHorizontal: 20 }}>
-                            <TouchableOpacity onPress={() => console.log("kilkniecie")}>
+                            <TouchableOpacity onPress={() => { googleLogin() }}>
                                 <FontAwesome name='google-plus' size={50} color="red" />
                             </TouchableOpacity>
                         </View>

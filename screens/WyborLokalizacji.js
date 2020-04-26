@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Platform, Picker, Image, TouchableNativeFeedback, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Platform, Picker,AsyncStorage, Image, TouchableNativeFeedback, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Colors from '../src/themes/colors';
 import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
@@ -79,12 +79,25 @@ const WyborLokalizacji = props => {
         message = message + Validation.wojewodztwoVerification(wojewodztwo) +
             Validation.miastoVerification(miasto);
         if (message.length === 0) {
-            props.onConfirm(wojewodztwo, miasto);
+            saveFields();
         }
         else {
             setErrorMessage(message);
         }
     }
+
+    async function saveFields() {
+        try {
+            await AsyncStorage.setItem('firstUse', 'false');
+            await AsyncStorage.setItem('wojewodztwo', wojewodztwo);
+            await AsyncStorage.setItem('miasto', miasto);
+            props.navigation.navigate('Home');
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+
 
     return (
         <ImageBackground source={require('../src/images/lokalizacja.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor, alignItems: 'center', justifyContent: 'center' }}>
