@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Text, Platform, TouchableNativeFeedback, AsyncStorage} from 'react-native';
+import { View, StyleSheet, Text, Platform, TouchableNativeFeedback,Image, AsyncStorage} from 'react-native';
 import { Divider, Avatar } from 'react-native-elements';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -23,22 +23,19 @@ import {
 const CustomDrawer = props => {
   let loginButton;
   let editButton;
-  let nazwa = props.dataSource.login;
-  let email = props.dataSource.email;
-  let avatar = props.dataSource.avatar;
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
+  let loginStatus = props.dataSource.loginStatus;
+  const [nazwa, setNazwa] = useState(props.dataSource.login);
+  const [email, setEmail] = useState(props.dataSource.email);
+  const [avatar, setAvatar] = useState(props.dataSource.avatar);
+  const [isLoggedIn, setIsLoggedIn] = useState(loginStatus);
 
   if (Platform.OS === "android" && Platform.Version >= 21) {
-    loginButton = <AndroidButton text="Zaloguj się" containerStyle={{ borderRadius: dimensions.defaultHugeBorderRadius }}
-      buttonStyle={{ color: Colors.accent, borderWidth: 0 }} onClick={() => {
-        props.navigation.navigate("Logowanie");
-      }} />
+    loginButton = <AndroidButton text={isLoggedIn ? "Wyloguj się" : "Zaloguj się"} containerStyle={{ borderRadius: dimensions.defaultHugeBorderRadius }}
+      buttonStyle={{ color: Colors.accent, borderWidth: 0 }} onClick={()=>loginClick()} />
     editButton =
       <View style={{ backgroundColor: Colors.primary, position: 'absolute', right: 12 }}>
         <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(Colors.accent, true)}
-          onPress={() => { props.navigation.navigate("EdytujProfil", { uzytkownik: props.dataSource }); }}
+          onPress={() => { props.navigation.navigate("EdytujProfil"); }}
           useForeground={true}>
           <View style={{ flexDirection: 'column' }}>
             <MaterialIcons name="edit" color={Colors.colorTextWhite} size={28} />
@@ -50,10 +47,27 @@ const CustomDrawer = props => {
     loginButton = <IosButton text="Zaloguj się" buttonStyle={{ color: Colors.colorTextWhite }} />
   }
 
-  function returnLog(){
-    console.log("pozdrowienia z drawera");
+  useEffect(()=>{
+
+  },[isLoggedIn])
+
+  async function loginClick(){
+    if(isLoggedIn){
+      setNazwa("");
+      setEmail("");
+      setAvatar("");
+      await AsyncStorage.setItem("authToken", "");
+      await AsyncStorage.setItem("login", "");
+      await AsyncStorage.setItem("email", "");
+      await AsyncStorage.setItem("avatar", "");
+      setIsLoggedIn(false);
+      props.navigation.closeDrawer();
+    }
+    else{
+      props.navigation.navigate("Logowanie");
+    }
   }
-  
+
   return (
     <LinearGradient
       style={styles.container}
@@ -66,17 +80,15 @@ const CustomDrawer = props => {
           {editButton}
         </View>
         <View style={styles.drawerUserInfoContainer}>
-          <Avatar rounded size="large" containerStyle={styles.drawerAvatar} source={{
-            uri:
-              avatar,
-          }} />
+
+          <Image style={styles.drawerAvatar} source={avatar.length>0 ? {uri:avatar} : require("../src/images/image_default.png") } />
           <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', }}>
-            <Text style={styles.drawerUserInfo}>
-              {email}
+            <Text style={[styles.drawerUserInfo, {fontSize: email.length-1 > 20 ? 14:16}]}>
+              {email.length >0 ? email : "Brak maila"}
             </Text>
             <Divider style={styles.divider}></Divider>
-            <Text style={styles.drawerUserInfo}>
-              {nazwa}
+            <Text style={[styles.drawerUserInfo, {fontSize: nazwa.length-1 > 20 ? 14:16}]}>
+              {nazwa.length >0 ? nazwa : "Brak loginu"}
             </Text>
           </View>
         </View>
@@ -145,21 +157,24 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     marginVertical: Dimensions.defaultSmallMargin,
-    marginHorizontal: Dimensions.defaultHugeMargin
+    marginHorizontal: 9
   },
   drawerAvatar: {
+    height:65,
+    width:65,
+    borderRadius:45,
     borderWidth: Dimensions.defaultBorderWidth,
     borderColor: Colors.colorTextWhite,
   },
   drawerUserInfo: {
     color: Colors.colorTextWhite,
-    fontSize: 16,
     marginHorizontal: Dimensions.defaultSmallPadding
   },
   drawerLoginContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: "center"
+    alignItems: "center",
+    marginVertical: 6
   },
   drawerLoginView: {
     backgroundColor: Colors.colorTextWhite,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, AsyncStorage, View, Text } from 'react-native';
+import {AsyncStorage} from 'react-native';
 import Jadlodajnie from "../screens/Jadlodajnie";
 import Ulubione from "../screens/Ulubione";
 import Powiadomienia from '../screens/Powiadomienia';
@@ -35,27 +35,29 @@ const Home = props => {
                     const login = await AsyncStorage.getItem("login");
                     const email = await AsyncStorage.getItem("email");
                     const avatar = await AsyncStorage.getItem("avatar");
-                    setDataSource({ login: login, email: email, avatar: avatar });
+                    setDataSource({ login: login, email: email, avatar: avatar, loginStatus: true });
                     setIsLoading(false);
                 }
                 else {
-                    const res = await Connection.getUserOptions();
-                    res
-                        .json()
-                        .then(res => {
-                            res.uzytkownicy.map((uzytkownik) => {
-                                uzytkownicy.push(uzytkownik);
-                            });
-                            uzytkownicy.map((uzytkownik, index) => {
-                                if (index === 0) {
-                                    pobranyUzytkownik = uzytkownik;
-                                }
-                            });
+                    setDataSource({ login: "", email: "", avatar: "", loginStatus: false });
+                    setIsLoading(false);
+                    // const res = await Connection.getUserOptions();
+                    // res
+                    //     .json()
+                    //     .then(res => {
+                    //         res.uzytkownicy.map((uzytkownik) => {
+                    //             uzytkownicy.push(uzytkownik);
+                    //         });
+                    //         uzytkownicy.map((uzytkownik, index) => {
+                    //             if (index === 0) {
+                    //                 pobranyUzytkownik = uzytkownik;
+                    //             }
+                    //         });
 
-                            setDataSource(pobranyUzytkownik);
-                            setIsLoading(false);
-                        })
-                        .catch(err => console.log(err));
+                    //         setDataSource(pobranyUzytkownik);
+                    //         setIsLoading(false);
+                    //     })
+                    //     .catch(err => console.log(err));
                 }
             }, 1000);
         }
@@ -75,6 +77,7 @@ const Home = props => {
                     <CustomDrawer {...props} dataSource={dataSource} />
                 )
             }}
+                drawerStyle={{width:'80%'}}
                 drawerContentOptions={{
                     activeTintColor: Colors.accent,
                     activeBackgroundColor: Colors.colorTextWhite,

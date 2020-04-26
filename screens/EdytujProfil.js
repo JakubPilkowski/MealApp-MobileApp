@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Platform, Picker, AsyncStorage, TextInput, Image, TouchableOpacity, Dimensions, KeyboardAvoidingView, SafeAreaView, ActivityIndicator } from 'react-native';
 import { Divider } from 'react-native-elements';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -19,12 +19,10 @@ import Validation from '../service/Validation';
 import CustomPicker from '../components/CustomPicker';
 import PickerItem from '../models/PickerItem';
 function EdytujScreen({ navigation, route }) {
-
     const [isLoading, setIsLoading] = useState(true);
-    const { uzytkownik } = route.params;
-    const [selectedImage, setSelectedImage] = useState(uzytkownik.avatar);
-    const [loginField, setLoginField] = useState(uzytkownik.login);
-    const [emailField, setEmailField] = useState(uzytkownik.email);
+    const [selectedImage, setSelectedImage] = useState("");
+    const [loginField, setLoginField] = useState("");
+    const [emailField, setEmailField] = useState("");
     const [wojewodztwoField, setWojewodztwoField] = useState('default');
     const [isFieldLoading, setIsFieldLoading] = useState(false);
     const [miastoField, setMiastoField] = useState('default');
@@ -52,16 +50,25 @@ function EdytujScreen({ navigation, route }) {
         fetchStorage();
     }, [isLoading]);
     async function fetchStorage() {
+        
         if (isLoading) {
             setTimeout(async function () {
                 try {
                     const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
                     const miastoValue = await AsyncStorage.getItem("miasto");
+                    const selectedImage = await AsyncStorage.getItem("avatar");
+                    const loginValue = await AsyncStorage.getItem("login"); 
+                    const emailValue = await AsyncStorage.getItem("email")
+                    
                     setWojewodztwoField(wojewodztwoValue);
                     setMiastoField(miastoValue);
+                    setSelectedImage(selectedImage);
+                    setLoginField(loginValue);
+                    setEmailField(emailValue);
                     setIsLoading(false);
                     setWojewodztwoEnabled(true);
                     setMiastoEnabled(true);
+                    console.log(selectedImage);
                 }
                 catch (error) {
                     console.log(error);
@@ -91,12 +98,7 @@ function EdytujScreen({ navigation, route }) {
             scrollY.current.scrollToEnd();
         }, 1000);
     }
-    if (selectedImage === "") {
-        image = <Image style={[styles.logo, { backgroundColor: colors.backgroundColor, }]}></Image>
-    }
-    else {
-        image = <Image style={[styles.logo]} source={{ uri: selectedImage }} cover></Image>
-    }
+   
     navigation.setOptions({
         headerLeft: () => (
             <View style={styles.backButtonContainer}>
@@ -110,11 +112,15 @@ function EdytujScreen({ navigation, route }) {
             </View>
         )
     });
-
+    navigation.addListener("focus", ()=>{
+        setIsLoading(true);   
+    })
     const saveSettingHandler = () => {
         setSaveSettingsButtonEnabled(false);
         let message = "";
         setErrorMessage('');
+        console.log(loginField);
+
         message = Validation.loginVerification(loginField) +
             Validation.emailVerification(emailField) +
             Validation.wojewodztwoVerification(wojewodztwoField) +
@@ -141,7 +147,9 @@ function EdytujScreen({ navigation, route }) {
     let addImageButton;
     let saveSettingsButton;
     if (Platform.OS === "android") {
-        addImageButton = <AndroidButton text="Zmień avatar" buttonStyle={{ paddingVertical: 9, paddingHorizontal: 25 }}
+        addImageButton = <AndroidButton text="Zmień avatar" 
+            enabled={selectedImage === null ? false : true}
+        buttonStyle={{ paddingVertical: 9, paddingHorizontal: 25 }}
             onClick={openImagePickerAsync}
         />
         saveSettingsButton = <AndroidButton
@@ -155,6 +163,7 @@ function EdytujScreen({ navigation, route }) {
     }
     if (Platform.OS === 'ios') {
         addImageButton = <IosButton text="Zmień Avatar"
+            
             containerStyle={{
                 borderColor: colors.primary, borderWidth: dimensions.defaultBorderWidth,
                 borderRadius: dimensions.defaultBorderRadius, backgroundColor: colors.colorTextWhite
@@ -211,7 +220,7 @@ function EdytujScreen({ navigation, route }) {
                     <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                         <GradientDivider startColor={colors.accent} endColor={colors.primary}
                             from="left" locationEnd={1} />
-                        {image}
+                        <Image style={[styles.logo]} source={selectedImage === null ? require("../src/images/image_default.png") : { uri: selectedImage }} cover></Image>
                         <GradientDivider startColor={colors.accent} endColor={colors.primary}
                             from="right" locationEnd={1} />
                     </View>
@@ -220,9 +229,11 @@ function EdytujScreen({ navigation, route }) {
                         from="up" dividerStyle={{ flex: 0, height: 50, width: 2 }} />
                     {addImageButton}
                 </View>
+                <Text style={{color:'red', textAlign:'center', fontSize:16, display: emailField === null ? "flex" : "none"}}>Musisz być zalogowany by edytować dane użytkownika</Text>
                 <Text style={styles.title}>Login</Text>
-                <TextInput style={styles.input}
+                <TextInput style={[styles.input, {opacity: loginField === null ? 0.5 : 1}]}
                     returnKeyType="next"
+                    editable={loginField === null ? false : true}
                     value={loginField}
                     onChangeText={(value) => setLoginField(value)}
                     onEndEditing={
@@ -231,9 +242,10 @@ function EdytujScreen({ navigation, route }) {
                     }
                 />
                 <Text style={styles.title}>Email</Text>
-                <TextInput style={styles.input}
+                <TextInput style={[styles.input, {opacity: emailField=== null ? 0.5 : 1}]}
                     returnKeyType="next"
                     value={emailField}
+                    editable={emailField === null ? false : true}
                     onChangeText={(value) => setEmailField(value)}
                     onEndEditing={() =>
                         scrollY.current.scrollToEnd()
@@ -285,7 +297,6 @@ function EdytujScreen({ navigation, route }) {
 
 const EdytujProfil = props => {
 
-    const { uzytkownik } = props.route.params;
     const Stack = createStackNavigator();
     return (
         <Stack.Navigator initialRouteName="EdytujProfil" screenOptions={ScreenStyle}>
@@ -293,7 +304,7 @@ const EdytujProfil = props => {
                 {
                     title: "Edytuj profil"
                 }
-            } initialParams={{ uzytkownik: uzytkownik }} />
+            }/>
 
         </Stack.Navigator>
     );
