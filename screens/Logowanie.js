@@ -19,7 +19,7 @@ import IosButton from '../components/IosButton';
 import ZapomnialemHasla from './ZapomnialemHasla';
 import Validation from '../service/Validation';
 import * as Google from "expo-google-app-auth";
-
+import * as Facebook from "expo-facebook";
 
 const { width, height } = Dimensions.get("screen");
 function LogowanieScreen({ navigation }) {
@@ -146,7 +146,6 @@ function LogowanieScreen({ navigation }) {
                         ]
                     }),
                   });
-                // console.log(result);
             } else {
                 console.log("cancelled")
             }
@@ -154,6 +153,45 @@ function LogowanieScreen({ navigation }) {
             console.log("error", e)
         }
     }
+
+async function facebookLogin() {
+  try {
+    await Facebook.initializeAsync('3264853026882904');
+    const {
+      type,
+      token,
+      expires,
+      permissions,
+      declinedPermissions,
+    } = await Facebook.logInWithReadPermissionsAsync({
+      permissions: ['public_profile', 'email'],
+    });
+    if (type === 'success') {
+      // Get the user's name using Facebook's Graph API
+      const response = await fetch(`https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${token}`);
+      const data = await response.json();
+    
+      await AsyncStorage.setItem('authToken', token);
+    await AsyncStorage.setItem('facebookId', data.id);
+    await AsyncStorage.setItem('login', data.name);
+    await AsyncStorage.setItem('email', data.email);
+    await AsyncStorage.setItem('avatar', data.picture.data.url);
+ navigation.dispatch({
+                    ...CommonActions.reset({
+                        index:1,
+                        routes : [
+                           {name: "Home"}, 
+                        ]
+                    }),
+                  });
+    } else {
+      // type === 'cancel'
+    }
+  } catch ({ message }) {
+    alert(`Facebook Login Error: ${message}`);
+  }
+}
+
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <ImageBackground source={require('../src/images/cutlery.jpg')} style={styles.imageBackground} imageStyle={styles.imageStyle}>
@@ -189,7 +227,7 @@ function LogowanieScreen({ navigation }) {
                     <Text style={{ textAlign: 'center', color: colors.colorTextDark, fontSize: 16, marginVertical: dimensions.defaultHugeMargin }}>Inne opcje logowania</Text>
                     <View style={{ flexDirection: 'row', marginHorizontal: 20, marginBottom: 30 }}>
                         <View style={{ marginHorizontal: 20 }}>
-                            <TouchableOpacity >
+                            <TouchableOpacity onPress={()=> {facebookLogin()}}>
                                 <FontAwesome name="facebook-official" size={50} color="blue" />
                             </TouchableOpacity>
                         </View>
