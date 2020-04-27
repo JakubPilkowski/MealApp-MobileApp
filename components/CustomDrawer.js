@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Text, Platform, TouchableNativeFeedback,Image, AsyncStorage} from 'react-native';
+import { View, StyleSheet, Text, Platform, TouchableNativeFeedback, Image, AsyncStorage, ActivityIndicator } from 'react-native';
 import { Divider, Avatar } from 'react-native-elements';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -24,14 +24,18 @@ const CustomDrawer = props => {
   let loginButton;
   let editButton;
   let loginStatus = props.dataSource.loginStatus;
+  const [loginButtonEnabled, setLoginButtonEnabled] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [nazwa, setNazwa] = useState(props.dataSource.login);
   const [email, setEmail] = useState(props.dataSource.email);
   const [avatar, setAvatar] = useState(props.dataSource.avatar);
   const [isLoggedIn, setIsLoggedIn] = useState(loginStatus);
 
   if (Platform.OS === "android" && Platform.Version >= 21) {
-    loginButton = <AndroidButton text={isLoggedIn ? "Wyloguj się" : "Zaloguj się"} containerStyle={{ borderRadius: dimensions.defaultHugeBorderRadius }}
-      buttonStyle={{ color: Colors.accent, borderWidth: 0 }} onClick={()=>loginClick()} />
+    loginButton = <AndroidButton text={isLoggedIn ? "Wyloguj się" : "Zaloguj się"}
+      enabled={loginButtonEnabled}
+      containerStyle={{ borderRadius: dimensions.defaultHugeBorderRadius }}
+      buttonStyle={{ color: Colors.accent, borderWidth: 0 }} onClick={() => loginClick()} />
     editButton =
       <View style={{ backgroundColor: Colors.primary, position: 'absolute', right: 12 }}>
         <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(Colors.accent, true)}
@@ -44,26 +48,40 @@ const CustomDrawer = props => {
       </View>
   }
   if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21)) {
-    loginButton = <IosButton text="Zaloguj się" buttonStyle={{ color: Colors.colorTextWhite }} />
+    loginButton = <IosButton text={isLoggedIn ? "Wyloguj się" : "Zaloguj się"} buttonStyle={{ color: Colors.colorTextWhite }}
+    enabled={loginButtonEnabled}
+    onClick={() => loginClick()}/>
   }
 
-  useEffect(()=>{
+  useEffect(() => {
 
-  },[isLoggedIn])
+  }, [isLoggedIn])
 
-  async function loginClick(){
-    if(isLoggedIn){
+  async function loginClick() {
+    if (isLoggedIn) {
+      setLoginButtonEnabled(false);
+      setIsLoading(true);
       setNazwa("");
       setEmail("");
       setAvatar("");
-      await AsyncStorage.setItem("authToken", "");
       await AsyncStorage.setItem("login", "");
       await AsyncStorage.setItem("email", "");
       await AsyncStorage.setItem("avatar", "");
-      setIsLoggedIn(false);
+      const facebookId = await AsyncStorage.getItem("facebookId");
+      console.log(facebookId);
+      const authToken = await AsyncStorage.getItem("authToken");
+      if (facebookId !== "") {
+        const token = `access_token=${authToken}`;
+        await fetch(`https://graph.facebook.com/${facebookId}/permissions`, { method: "DELETE", body: token })
+        await AsyncStorage.setItem("facebookId", "");
+      }
       props.navigation.closeDrawer();
+      await AsyncStorage.setItem("authToken", "");
+      setIsLoading(false);
+      setLoginButtonEnabled(true);
+      setIsLoggedIn(false);
     }
-    else{
+    else {
       props.navigation.navigate("Logowanie");
     }
   }
@@ -81,19 +99,24 @@ const CustomDrawer = props => {
         </View>
         <View style={styles.drawerUserInfoContainer}>
 
-          <Image style={styles.drawerAvatar} source={avatar.length>0 ? {uri:avatar} : require("../src/images/image_default.png") } />
+          <Image style={styles.drawerAvatar} source={avatar.length > 0 ? { uri: avatar } : require("../src/images/image_default.png")} />
           <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', }}>
-            <Text style={[styles.drawerUserInfo, {fontSize: email.length-1 > 20 ? 14:16}]}>
-              {email.length >0 ? email : "Brak maila"}
+            <Text style={[styles.drawerUserInfo, { fontSize: email.length - 1 > 20 ? 14 : 16 }]}>
+              {email.length > 0 ? email : "Brak maila"}
             </Text>
             <Divider style={styles.divider}></Divider>
-            <Text style={[styles.drawerUserInfo, {fontSize: nazwa.length-1 > 20 ? 14:16}]}>
-              {nazwa.length >0 ? nazwa : "Brak loginu"}
+            <Text style={[styles.drawerUserInfo, { fontSize: nazwa.length - 1 > 20 ? 14 : 16 }]}>
+              {nazwa.length > 0 ? nazwa : "Brak loginu"}
             </Text>
           </View>
         </View>
         <View style={styles.drawerLoginContainer} >
-          {loginButton}
+          <View style={{ flexDirection: 'row' }} >
+            <View style={{position:'absolute', width:'100%' }}>
+              <ActivityIndicator size="large" color={Colors.colorTextWhite} animating={isLoading} />
+            </View>
+            {loginButton}
+          </View>
         </View>
         <Divider style={styles.divider}></Divider>
         {
@@ -160,9 +183,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 9
   },
   drawerAvatar: {
-    height:65,
-    width:65,
-    borderRadius:45,
+    height: 65,
+    width: 65,
+    borderRadius: 45,
     borderWidth: Dimensions.defaultBorderWidth,
     borderColor: Colors.colorTextWhite,
   },
