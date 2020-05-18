@@ -156,7 +156,7 @@ function LogowanieScreen({ navigation }) {
 
 async function facebookLogin() {
   try {
-    await Facebook.initializeAsync('3264853026882904');
+    await Facebook.initializeAsync('2731653760400277');
     const {
       type,
       token,
@@ -168,7 +168,7 @@ async function facebookLogin() {
     });
     if (type === 'success') {
       // Get the user's name using Facebook's Graph API
-      const response = await fetch(`https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${token}`);
+      const response = await fetch(`https://graph.facebook.com/me?fields=id,name,email,picture.height(512)&access_token=${token}`);
       const data = await response.json();
     
       await AsyncStorage.setItem('authToken', token);
