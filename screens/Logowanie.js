@@ -130,7 +130,7 @@ function LogowanieScreen({ navigation }) {
     async function googleLogin() {
         try {
             const result = await Google.logInAsync({
-                androidClientId: "428437687512-gvdpebuorj5jhiuba1jhtk0uube7eus8.apps.googleusercontent.com",
+                androidClientId: "134031631231-ov7jv072it55at4jpqp4a32bg0gi3ctk.apps.googleusercontent.com",
                 scopes: ["profile", "email"]
             })
             if (result.type === "success") {
