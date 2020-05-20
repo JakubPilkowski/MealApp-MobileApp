@@ -1,18 +1,15 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Platform, Picker, AsyncStorage, TextInput, Image, TouchableOpacity, Dimensions, KeyboardAvoidingView, SafeAreaView, ActivityIndicator } from 'react-native';
-import { Divider } from 'react-native-elements';
+import React, { useState, useEffect, useRef} from 'react';
+import { View, Text, StyleSheet, ImageBackground, Platform, AsyncStorage, TextInput, Image, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import AndroidButton from '../components/AndroidButton';
 import colors from "../src/themes/colors";
-import { LinearGradient } from 'expo-linear-gradient';
 import dimensions from '../src/themes/dimensions';
 import { createStackNavigator } from '@react-navigation/stack';
 import ScreenStyle from "../src/themes/screenStyle";
 import { Ionicons } from "react-native-vector-icons";
 import IosButton from '../components/IosButton';
 import GradientDivider from '../components/GradientDivider';
-const { width, height } = Dimensions.get("screen");
-import { AntDesign } from 'react-native-vector-icons';
+import Connection from "../service/Connection";
 import * as ImagePicker from 'expo-image-picker';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import Validation from '../service/Validation';
@@ -31,22 +28,12 @@ function EdytujScreen({ navigation, route }) {
     const [saveSettingsButtonEnabled, setSaveSettingsButtonEnabled] = useState(true);
     const [errorMessage, setErrorMessage] = useState("");
     const scrollY = useRef(null);
-
-    const wojewodztwa = [
-        new PickerItem('Wybierz województwo...', 'default'),
-        new PickerItem('Kujawsko-Pomorskie', 'kuj-pom'),
-        new PickerItem('Dolnośląskie', 'dol'),
-        new PickerItem('Warmińsko-Mazurskie', 'war-maz'),
-        new PickerItem('Wielkopolskie', 'wiel')];
-    const miasta = [
-        new PickerItem('Wybierz miasto...', 'default'),
-        new PickerItem('Olsztyn', 'olsztyn'),
-        new PickerItem('Ełk', 'ełk'),
-        new PickerItem('Braniewo', 'braniewo'),
-        new PickerItem('Szczytno', 'szczytno'),
-        new PickerItem('Barczewo', 'braniewo')];
+    const [wojewodztwa, setWojewodztwa] = useState([new PickerItem('Wybierz województwo...', 'default')]);
+    const [miasta, setMiasta] = useState([new PickerItem('Wybierz miasto...', 'default')]);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
+        getWojewodztwa();
         fetchStorage();
     }, [isLoading]);
     async function fetchStorage() {
@@ -59,16 +46,19 @@ function EdytujScreen({ navigation, route }) {
                     const selectedImage = await AsyncStorage.getItem("avatar");
                     const loginValue = await AsyncStorage.getItem("login"); 
                     const emailValue = await AsyncStorage.getItem("email")
-                    
+                    getMiastaForWojewodztwo(wojewodztwoValue);
                     setWojewodztwoField(wojewodztwoValue);
                     setMiastoField(miastoValue);
+                    if(selectedImage !==null && loginValue !== null && emailValue !== null){
+                        setIsLoggedIn(true);
+                    }
                     setSelectedImage(selectedImage);
                     setLoginField(loginValue);
                     setEmailField(emailValue);
                     setIsLoading(false);
                     setWojewodztwoEnabled(true);
                     setMiastoEnabled(true);
-                    console.log(selectedImage);
+                    
                 }
                 catch (error) {
                     console.log(error);
@@ -77,9 +67,6 @@ function EdytujScreen({ navigation, route }) {
         }
 
     }
-
-
-    let image;
 
     let openImagePickerAsync = async () => {
         let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
@@ -115,16 +102,56 @@ function EdytujScreen({ navigation, route }) {
     navigation.addListener("focus", ()=>{
         setIsLoading(true);   
     })
+
+    async function getWojewodztwa() {
+        if (isLoading && wojewodztwa.length ==1 ) {
+                const res = await Connection.getWojewodztwa();
+                res
+                    .json()
+                    .then(res => {
+                        res.map((item) => {
+                            setWojewodztwa(wojewodztwa =>[...wojewodztwa, new PickerItem(item.name, item.slug)]);
+                        });
+                    
+                        setIsLoading(false);
+                        
+                    })
+                    .catch(err => console.log(err + 'blad'));
+            
+        }
+    }
+
+    async function getMiastaForWojewodztwo(wojewodztwo) {
+                const res = await Connection.getMiastaForWojewodztwo(wojewodztwo);
+                res
+                    .json()
+                    .then(res => {
+                        setMiasta([new PickerItem("Wybierz miasto...", "default")]);
+                        res.map((item) => {
+                            setMiasta(miasta => [...miasta,new PickerItem(item.name, item.slug) ]);
+                        }); 
+                        setIsLoading(false);
+                        setIsFieldLoading(false);
+                        setWojewodztwoEnabled(true);
+                        setMiastoEnabled(true);
+                    })
+                    .catch(err => console.log(err + 'blad'));
+    }
+
     const saveSettingHandler = () => {
         setSaveSettingsButtonEnabled(false);
         let message = "";
         setErrorMessage('');
-        console.log(loginField);
-
-        message = Validation.loginVerification(loginField) +
-            Validation.emailVerification(emailField) +
-            Validation.wojewodztwoVerification(wojewodztwoField) +
+        if(!isLoggedIn){
+            message = Validation.wojewodztwoVerification(wojewodztwoField) +
             Validation.miastoVerification(miastoField);
+        }
+        else{
+            message = Validation.loginVerification(loginField) +
+                Validation.emailVerification(emailField) +
+                Validation.wojewodztwoVerification(wojewodztwoField) +
+                Validation.miastoVerification(miastoField);
+        }
         if (message.length === 0) {
             setIsFieldLoading(true);
             verifyFields();
@@ -136,6 +163,8 @@ function EdytujScreen({ navigation, route }) {
     }
     async function verifyFields() {
         setTimeout(async function () {
+            await AsyncStorage.setItem('wojewodztwo', wojewodztwoField);
+            await AsyncStorage.setItem('miasto', miastoField);
             setIsFieldLoading(false);
             navigation.goBack();
             navigation.openDrawer();
@@ -184,7 +213,7 @@ function EdytujScreen({ navigation, route }) {
             setWojewodztwoEnabled(false);
             setMiastoEnabled(false);
             setMiastoField("default")
-            changeCities();
+            getMiastaForWojewodztwo(wojewodztwo);
         }
         else {
             setMiastoField("default");
@@ -195,13 +224,6 @@ function EdytujScreen({ navigation, route }) {
         setMiastoField(miasto);
     }
 
-    async function changeCities() {
-        setTimeout(async function () {
-            setIsFieldLoading(false);
-            setWojewodztwoEnabled(true);
-            setMiastoEnabled(true);
-        }, 500)
-    }
 
     if (isLoading) {
         content = <CustomLoadingComponent />
@@ -220,7 +242,7 @@ function EdytujScreen({ navigation, route }) {
                     <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                         <GradientDivider startColor={colors.accent} endColor={colors.primary}
                             from="left" locationEnd={1} />
-                        <Image style={[styles.logo]} source={selectedImage === null ? require("../src/images/image_default.png") : { uri: selectedImage }} cover></Image>
+                        <Image style={[styles.logo]} source={isLoggedIn === false ? require("../src/images/image_default.png") : { uri: selectedImage }} cover></Image>
                         <GradientDivider startColor={colors.accent} endColor={colors.primary}
                             from="right" locationEnd={1} />
                     </View>
@@ -229,11 +251,11 @@ function EdytujScreen({ navigation, route }) {
                         from="up" dividerStyle={{ flex: 0, height: 50, width: 2 }} />
                     {addImageButton}
                 </View>
-                <Text style={{color:'red', textAlign:'center', fontSize:16, display: emailField === null ? "flex" : "none"}}>Musisz być zalogowany by edytować dane użytkownika</Text>
+                <Text style={{color:'red', textAlign:'center', fontSize:16, display: isLoggedIn === false ? "flex" : "none"}}>Musisz być zalogowany by edytować dane użytkownika</Text>
                 <Text style={styles.title}>Login</Text>
-                <TextInput style={[styles.input, {opacity: loginField === null ? 0.5 : 1}]}
+                <TextInput style={[styles.input, {opacity: isLoggedIn === false ? 0.5 : 1}]}
                     returnKeyType="next"
-                    editable={loginField === null ? false : true}
+                    editable={isLoggedIn}
                     value={loginField}
                     onChangeText={(value) => setLoginField(value)}
                     onEndEditing={
@@ -242,10 +264,10 @@ function EdytujScreen({ navigation, route }) {
                     }
                 />
                 <Text style={styles.title}>Email</Text>
-                <TextInput style={[styles.input, {opacity: emailField=== null ? 0.5 : 1}]}
+                <TextInput style={[styles.input, {opacity: isLoggedIn=== false ? 0.5 : 1}]}
                     returnKeyType="next"
                     value={emailField}
-                    editable={emailField === null ? false : true}
+                    editable={isLoggedIn}
                     onChangeText={(value) => setEmailField(value)}
                     onEndEditing={() =>
                         scrollY.current.scrollToEnd()
@@ -263,7 +285,8 @@ function EdytujScreen({ navigation, route }) {
                 <Text style={styles.title}>Miasto</Text>
                 <CustomPicker containerStyle={{ opacity: miastoEnabled ? 1 : 0.5 }}
                     enabled={miastoEnabled}
-                    pickerItems={miasta} selectedValue={miastoField}
+                    pickerItems={miasta}
+                    selectedValue={miastoField}
                     onPickerChange={(miasto) => {
                         onMiastoChangedHandler(miasto);
                         scrollY.current.scrollToEnd();

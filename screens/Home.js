@@ -30,7 +30,6 @@ const Home = props => {
             setTimeout(async function () {
                 await AsyncStorage.removeItem("firstUse");
                 const token = await AsyncStorage.getItem("authToken");
-                console.log(token);
                 if (token !== null) {
                     const login = await AsyncStorage.getItem("login");
                     const email = await AsyncStorage.getItem("email");
