@@ -61,9 +61,6 @@ const CustomDrawer = props => {
     if (isLoggedIn) {
       setLoginButtonEnabled(false);
       setIsLoading(true);
-      setNazwa("");
-      setEmail("");
-      setAvatar("");
       await AsyncStorage.setItem("login", "");
       await AsyncStorage.setItem("email", "");
       await AsyncStorage.setItem("avatar", "");
@@ -77,6 +74,9 @@ const CustomDrawer = props => {
       }
       props.navigation.closeDrawer();
       await AsyncStorage.setItem("authToken", "");
+      setNazwa("");
+      setEmail("");
+      setAvatar("");
       setIsLoading(false);
       setLoginButtonEnabled(true);
       setIsLoggedIn(false);

@@ -1,8 +1,16 @@
-const API_URL = "http://www.mocky.io/v2/5ea1ce4d310000f7611eee1d";
+const API_URL = "http://u2f38n4o.ddns.net:22222/";
+
 export default class Connection {
   
+    static getWojewodztwa(){
+        return fetch(`${API_URL}voivodeships/slugs`);
+    }
+    static getMiastaForWojewodztwo(wojewodztwo){
+        return fetch(`${API_URL}voivodeships/${wojewodztwo}/places`);
+    }
+
     static getJadlodajnie(){
-        return fetch(`${API_URL}`);
+        return fetch('http://www.mocky.io/v2/5ea1ce4d310000f7611eee1d');
     }
     static getSzczegolyJadlodajnia(){
         return fetch('http://www.mocky.io/v2/5e73641c300000d5512e64d0');

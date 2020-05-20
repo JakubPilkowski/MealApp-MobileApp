@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Platform, Picker,AsyncStorage, Image, TouchableNativeFeedback, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ImageBackground, Platform, Picker, AsyncStorage, Image, TouchableNativeFeedback, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Colors from '../src/themes/colors';
 import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
-import { AntDesign } from 'react-native-vector-icons';
+import Connection from '../service/Connection';
 import GradientDivider from '../components/GradientDivider';
 import Validation from '../service/Validation';
 import PickerItem from '../models/PickerItem';
@@ -19,21 +19,9 @@ const WyborLokalizacji = props => {
     const [wojewodztwoEnabled, setWojewodztwoEnabled] = useState(true);
     const [miastoEnabled, setMiastoEnabled] = useState(false);
     const [errorMessage, setErrorMessage] = useState("\n");
-    const [isLoading, setIsLoading] = useState(false);
-
-    const wojewodztwa = [
-        new PickerItem('Wybierz województwo...', 'default'),
-        new PickerItem('Kujawsko-Pomorskie', 'kuj-pom'),
-        new PickerItem('Dolnośląskie', 'dol'),
-        new PickerItem('Warmińsko-Mazurskie', 'war-maz'),
-        new PickerItem('Wielkopolskie', 'wiel')];
-    const miasta = [
-        new PickerItem('Wybierz miasto...', 'default'),
-        new PickerItem('Olsztyn', 'olsztyn'),
-        new PickerItem('Ełk', 'ełk'),
-        new PickerItem('Braniewo', 'braniewo'),
-        new PickerItem('Szczytno', 'szczytno'),
-        new PickerItem('Barczewo', 'braniewo')];
+    const [isLoading, setIsLoading] = useState(true);
+    const [wojewodztwa, setWojewodztwa] = useState([new PickerItem('Wybierz województwo...', 'default')]);
+    const [miasta, setMiasta] = useState([new PickerItem('Wybierz miasto...', 'default')]);
 
     let confirmButton;
     if (Platform.OS === "android" && Platform.Version >= 21) {
@@ -57,7 +45,7 @@ const WyborLokalizacji = props => {
             setWojewodztwoEnabled(false);
             setMiastoEnabled(false);
             setMiasto("default");
-            changeCities();
+            getMiastaForWojewodztwo(wojewodztwo);
         }
         else {
             setMiasto("default");
@@ -67,13 +55,7 @@ const WyborLokalizacji = props => {
     const onMiastoChangedHandler = (miasto) => {
         setMiasto(miasto);
     }
-    async function changeCities() {
-        setTimeout(async function () {
-            setIsLoading(false);
-            setMiastoEnabled(true);
-            setWojewodztwoEnabled(true);
-        }, 500)
-    }
+
     const confirmButtonHandler = () => {
         let message = "";
         message = message + Validation.wojewodztwoVerification(wojewodztwo) +
@@ -98,7 +80,38 @@ const WyborLokalizacji = props => {
         }
     }
 
+    async function getWojewodztwa() {
+        if (isLoading && wojewodztwa.length == 1) {
+            const res = await Connection.getWojewodztwa();
+            res
+                .json()
+                .then(res => {
+                    res.map((item) => {
+                        setWojewodztwa(wojewodztwa => [...wojewodztwa, new PickerItem(item.name, item.slug)]);
+                    });
 
+                    setIsLoading(false);
+                })
+                .catch(err => console.log(err + 'blad'));
+        }
+    }
+
+    async function getMiastaForWojewodztwo(wojewodztwo) {
+        const res = await Connection.getMiastaForWojewodztwo(wojewodztwo);
+        res
+            .json()
+            .then(res => {
+                setMiasta([new PickerItem("Wybierz miasto...", "default")]);
+                res.map((item) => {
+                    setMiasta(miasta => [...miasta, new PickerItem(item.name, item.slug)]);
+                });
+                setIsLoading(false);
+                setWojewodztwoEnabled(true);
+                setMiastoEnabled(true);
+            })
+            .catch(err => console.log(err + 'blad'));
+    }
+    getWojewodztwa();
     return (
         <ImageBackground source={require('../src/images/lokalizacja.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor, alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ textAlign: 'center', fontSize: 22, marginBottom: 15, color: Colors.primary }}>Zanim zaczniemy... {'\n'} wybierz lokalizacje domyślną</Text>
@@ -141,14 +154,5 @@ const WyborLokalizacji = props => {
     );
 
 }
-
-const styles = StyleSheet.create({
-
-    container: {
-        flex: 1
-    }
-});
-
-
 
 export default WyborLokalizacji;
