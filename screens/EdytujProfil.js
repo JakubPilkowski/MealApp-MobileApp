@@ -28,9 +28,13 @@ function EdytujScreen({ navigation, route }) {
     const [saveSettingsButtonEnabled, setSaveSettingsButtonEnabled] = useState(true);
     const [errorMessage, setErrorMessage] = useState("");
     const scrollY = useRef(null);
-    const [wojewodztwa, setWojewodztwa] = useState([new PickerItem('Wybierz województwo...', 'default')]);
-    const [miasta, setMiasta] = useState([new PickerItem('Wybierz miasto...', 'default')]);
+    const [wojewodztwa, setWojewodztwa] = useState([new PickerItem('Wybierz województwo...', 'default',0,0,0)]);
+    const [miasta, setMiasta] = useState([new PickerItem('Wybierz miasto...', 'default',0,0,0)]);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [latitude, setLatitude] = useState(0);
+    const [longitude, setLongitude] = useState(0);
+    const [zoom, setZoom] = useState(0);
+
 
     useEffect(() => {
         getWojewodztwa();
@@ -45,11 +49,20 @@ function EdytujScreen({ navigation, route }) {
                     const miastoValue = await AsyncStorage.getItem("miasto");
                     const selectedImage = await AsyncStorage.getItem("avatar");
                     const loginValue = await AsyncStorage.getItem("login"); 
-                    const emailValue = await AsyncStorage.getItem("email")
+                    const emailValue = await AsyncStorage.getItem("email");
+                    const latitudeValue = await AsyncStorage.getItem('latitude');
+                    const longitudeValue = await AsyncStorage.getItem('longitude');
+                    const zoomValue = await AsyncStorage.getItem('zoom');
+                    const authToken = await AsyncStorage.getItem('authToken');
+
+
                     getMiastaForWojewodztwo(wojewodztwoValue);
                     setWojewodztwoField(wojewodztwoValue);
                     setMiastoField(miastoValue);
-                    if(selectedImage !==null && loginValue !== null && emailValue !== null){
+                    setLatitude(latitudeValue);
+                    setLongitude(longitudeValue);
+                    setZoom(zoomValue);
+                    if(authToken !== null){
                         setIsLoggedIn(true);
                     }
                     setSelectedImage(selectedImage);
@@ -110,7 +123,7 @@ function EdytujScreen({ navigation, route }) {
                     .json()
                     .then(res => {
                         res.map((item) => {
-                            setWojewodztwa(wojewodztwa =>[...wojewodztwa, new PickerItem(item.name, item.slug)]);
+                            setWojewodztwa(wojewodztwa =>[...wojewodztwa, new PickerItem(item.name, item.slug,0,0,0)]);
                         });
                     
                         setIsLoading(false);
@@ -126,9 +139,9 @@ function EdytujScreen({ navigation, route }) {
                 res
                     .json()
                     .then(res => {
-                        setMiasta([new PickerItem("Wybierz miasto...", "default")]);
+                        setMiasta([new PickerItem("Wybierz miasto...", "default",0,0,0)]);
                         res.map((item) => {
-                            setMiasta(miasta => [...miasta,new PickerItem(item.name, item.slug) ]);
+                            setMiasta(miasta => [...miasta,new PickerItem(item.name, item.slug,item.latitude,item.longitude, item.zoom) ]);
                         }); 
                         setIsLoading(false);
                         setIsFieldLoading(false);
@@ -165,9 +178,11 @@ function EdytujScreen({ navigation, route }) {
         setTimeout(async function () {
             await AsyncStorage.setItem('wojewodztwo', wojewodztwoField);
             await AsyncStorage.setItem('miasto', miastoField);
+            await AsyncStorage.setItem('latitude', latitude.toString());
+            await AsyncStorage.setItem('longitude', longitude.toString());
+            await AsyncStorage.setItem('zoom',zoom.toString());
             setIsFieldLoading(false);
             navigation.goBack();
-            navigation.openDrawer();
             setTimeout(function () {
                 setSaveSettingsButtonEnabled(true);
             }, 100);
@@ -207,13 +222,13 @@ function EdytujScreen({ navigation, route }) {
             }} />
     }
     const onWojewodztwoChangedHandler = (wojewodztwo) => {
-        setWojewodztwoField(wojewodztwo);
-        if (wojewodztwo !== "default") {
+        setWojewodztwoField(wojewodztwo.value);
+        if (wojewodztwo.value !== "default") {
             setIsFieldLoading(true);
             setWojewodztwoEnabled(false);
             setMiastoEnabled(false);
             setMiastoField("default")
-            getMiastaForWojewodztwo(wojewodztwo);
+            getMiastaForWojewodztwo(wojewodztwo.value);
         }
         else {
             setMiastoField("default");
@@ -221,7 +236,10 @@ function EdytujScreen({ navigation, route }) {
         }
     };
     const onMiastoChangedHandler = (miasto) => {
-        setMiastoField(miasto);
+        setMiastoField(miasto.value);
+        setLatitude(miasto.latitude);
+        setLongitude(miasto.longitude);
+        setZoom(miasto.zoom);
     }
 
 
