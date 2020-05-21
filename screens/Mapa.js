@@ -35,6 +35,10 @@ function MapaScreen({ navigation, route }) {
         }
     }
 
+    navigation.addListener("focus", ()=>{
+        setIsLoading(true);   
+    })
+
     useEffect(() => {
         fetchData();
     },[isLoading]);
@@ -60,8 +64,8 @@ function MapaScreen({ navigation, route }) {
                 <MapView provider={PROVIDER_GOOGLE} style={{ flex: 1 }} initialRegion={{
                     latitude: 53.77020960646819,
                     longitude: 20.4703061185026,
-                    longitudeDelta: 0.3,
-                    latitudeDelta: 0.3
+                    longitudeDelta: 0.15,
+                    latitudeDelta: 0.15
                 }}  >
                     {dataSource.map(point => renderMarker(point, navigation))}
                 </MapView>

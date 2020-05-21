@@ -91,13 +91,17 @@ const Home = props => {
                             drawerIcon: ({ color }) => <MaterialCommunityIcons name="food-fork-drink" size={24} color={color} />,
                             cardStyleInterpolator: forFade
                         }
-                    } />
+                        
+                    } 
+                    />
                 <Drawer.Screen name="Ulubione" component={Ulubione} options={
                     {
                         drawerIcon: ({ color }) => <Ionicons name="md-star" size={30} color={color} />,
                         cardStyleInterpolator: forFade
+                        
                     }
-                } />
+                }
+                />
                 <Drawer.Screen name="Powiadomienia" component={Powiadomienia} options={
                     {
                         drawerIcon: ({ color }) => <Ionicons name="md-notifications" size={33} color={color} />,

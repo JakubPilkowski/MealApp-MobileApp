@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import {
     View, StyleSheet, Text, ImageBackground, ActivityIndicator, FlatList, Animated
-    , TouchableHighlight
+    , TouchableHighlight,
+    AsyncStorage
 } from 'react-native';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -22,10 +23,13 @@ import PlaceHolder from "../components/PlaceHolder";
 function UlubioneScreen({ navigation, route }) {
     const [isLoading, setIsLoading] = useState(true);
     const [ulubioneJadlodajnie, setUlubioneJadlodajnie] = useState([]);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
                 const res = await Connection.getUlubione();
+                const authToken = await AsyncStorage.getItem("authToken");
+                setIsLoggedIn(authToken !== null ? true : false)
                 res
                     .json()
                     .then(res => {
@@ -37,9 +41,13 @@ function UlubioneScreen({ navigation, route }) {
         }
     }
 
+    navigation.addListener("focus", ()=>{
+        setIsLoading(true);      
+    });
+
     useEffect(() => {
         fetchData();
-    },[isLoading, ulubioneJadlodajnie.length]);
+    }, [isLoading, ulubioneJadlodajnie.length]);
 
     const onUlubioneDeleteHandler = item => {
         setUlubioneJadlodajnie(currentUlubione => {
@@ -61,39 +69,44 @@ function UlubioneScreen({ navigation, route }) {
         content = <CustomLoadingComponent />
     }
     else {
-        if (ulubioneJadlodajnie.length > 0) {
-            content =
-                <FlatList data={ulubioneJadlodajnie}
-                    renderItem={({ item, index }) =>
-                        <Card
-                            pressEnabled={true}
-                            onSwipeRight={(progress, dragX) => <RightActions progress={progress} length={ulubioneJadlodajnie.length} index={index} dragX={dragX} onPress={() => { onUlubioneDeleteHandler(item.id) }}></RightActions>}
-                            containerStyle={{ marginBottom: index + 1 === ulubioneJadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }}
-                            cardStyle={{ marginTop: dimensions.defaultHugeMargin }}
-                            onCardPress={() => {
-                                navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: item.jadlodajnia_id });
-                            }}
-                            content={
-                                <LogoWithTexts title={item.title} logo={{ uri: item.iconUrl }}
-                                    subTitleContent={
-                                        <View style={{ flexDirection: 'row', marginLeft: 10, marginTop: 3 }}>
-                                            <Text>Ocena: </Text>
-                                            <Rating ratingCount={5} ratingColor={colors.primary}
+        if (isLoggedIn) {
+            if (ulubioneJadlodajnie.length > 0) {
+                content =
+                    <FlatList data={ulubioneJadlodajnie}
+                        renderItem={({ item, index }) =>
+                            <Card
+                                pressEnabled={true}
+                                onSwipeRight={(progress, dragX) => <RightActions progress={progress} length={ulubioneJadlodajnie.length} index={index} dragX={dragX} onPress={() => { onUlubioneDeleteHandler(item.id) }}></RightActions>}
+                                containerStyle={{ marginBottom: index + 1 === ulubioneJadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }}
+                                cardStyle={{ marginTop: dimensions.defaultHugeMargin }}
+                                onCardPress={() => {
+                                    navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: item.jadlodajnia_id });
+                                }}
+                                content={
+                                    <LogoWithTexts title={item.title} logo={{ uri: item.iconUrl }}
+                                        subTitleContent={
+                                            <View style={{ flexDirection: 'row', marginLeft: 10, marginTop: 3 }}>
+                                                <Text>Ocena: </Text>
+                                                <Rating ratingCount={5} ratingColor={colors.primary}
 
-                                                type="custom" startingValue={item.ocena}
-                                                imageSize={20} />
-                                        </View>
-                                    } />
-                            } />
-                    }
-                    keyExtractor={item => item.id.toString()}
-                />;
+                                                    type="custom" startingValue={item.ocena}
+                                                    imageSize={20} />
+                                            </View>
+                                        } />
+                                } />
+                        }
+                        keyExtractor={item => item.id.toString()}
+                    />;
+            }
+            else {
+                content = <PlaceHolder text={"Coś tu pusto dodaj \nulubioną jadłodajnie"} src={require("../src/images/heart_v2.png")} />
+            }
         }
         else {
-            content = <PlaceHolder text={"Coś tu pusto dodaj \nulubioną jadłodajnie"} src={require("../src/images/heart_v2.png")} />
+            content = <PlaceHolder text={"Musisz być zalogowany by dodać ulubioną jadłodajnie"} src={require("../src/images/user_m.png")} />
         }
     }
-    
+
     return (
         <View style={styles.container}>
             <ImageBackground source={require('../src/images/jedzonko.jpg')} style={{ flex: 1, backgroundColor: Colors.backgroundColor }} imageStyle={{ opacity: 0.3 }}>
