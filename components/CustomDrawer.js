@@ -80,6 +80,7 @@ const CustomDrawer = props => {
       setIsLoading(false);
       setLoginButtonEnabled(true);
       setIsLoggedIn(false);
+      props.navigation.navigate("Jadlodajnie");
     }
     else {
       props.navigation.navigate("Logowanie");
