@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button, ActivityIndicator, FlatList, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, Button, ActivityIndicator, AsyncStorage, FlatList, ImageBackground } from 'react-native';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import { createStackNavigator } from '@react-navigation/stack';
 import Colors from "../src/themes/colors";
@@ -14,34 +14,75 @@ import IosButton from "../components/IosButton";
 import MapView, { PROVIDER_GOOGLE, Marker, Callout } from 'react-native-maps';
 import colors from '../src/themes/colors';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
+import PickerItem from '../models/PickerItem';
 
 
 function MapaScreen({ navigation, route }) {
 
     const [isLoading, setIsLoading] = useState(true);
     const [dataSource, setDataSource] = useState([]);
+    const [wojewodztwa, setWojewodztwa] = useState([new PickerItem('Wybierz województwo...', 'default', 0, 0, 0)]);
+    const [miasta, setMiasta] = useState([new PickerItem('Wybierz miasto...', 'default', 0, 0, 0)]);
+    const [wojewodztwo, setWojewodztwo] = useState('default');
+    const [miasto, setMiasto] = useState('default');
+    const [latitude, setLatitude] = useState(0);
+    const [longitude, setLongitude] = useState(0);
+    const [zoom, setZoom] = useState(0);
+    const [mapLoaded, setMapLoaded] = useState(false);
+
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
-                const res = await Connection.getMapy();
-                res
-                    .json()
-                    .then(res => {
-                        setDataSource(res.punkty);
-                        setIsLoading(false);
-                    })
-                    .catch(err => console.log(err + 'blad'));
+                const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
+                const miastoValue = await AsyncStorage.getItem("miasto");
+                const latitudeValue = await AsyncStorage.getItem('latitude');
+                const longitudeValue = await AsyncStorage.getItem('longitude');
+                const zoomValue = await AsyncStorage.getItem('zoom');
+                setWojewodztwo(wojewodztwoValue);
+                setMiasto(miastoValue);
+                setLatitude(Number(latitudeValue));
+                setLongitude(Number(longitudeValue));
+                setZoom(Number(zoomValue));
+                getMapy();
+                getWojewodztwa();
+                setIsLoading(false);
             }, 500);
         }
     }
 
-    navigation.addListener("focus", ()=>{
-        setIsLoading(true);   
+    async function getWojewodztwa() {
+        if (wojewodztwa.length <= 1) {
+            const wojewodztwaResponse = await Connection.getWojewodztwa();
+            wojewodztwaResponse
+                .json()
+                .then(res => {
+                    res.map((item) => {
+                        setWojewodztwa(wojewodztwa => [...wojewodztwa, new PickerItem(item.name, item.slug, 0, 0, 0)]);
+
+                    });
+                })
+                .catch(err => console.log(err + 'blad'));
+        }
+    }
+
+    async function getMapy() {
+        const mapsResponse = await Connection.getMapy();
+        mapsResponse
+            .json()
+            .then(res => {
+                setDataSource(res.punkty);
+            })
+            .catch(err => console.log(err + 'blad'));
+    }
+
+    navigation.addListener("focus", () => {
+        setMapLoaded(false);
+        setIsLoading(true);
     })
 
     useEffect(() => {
         fetchData();
-    },[isLoading]);
+    }, [isLoading]);
 
     const HomeButtonHandler = () => {
         navigation.openDrawer();
@@ -59,13 +100,16 @@ function MapaScreen({ navigation, route }) {
         );
     }
     else {
+        setTimeout(async function () {
+            setMapLoaded(true);
+        }, 25);
         return (
-            <View style={styles.container}>
+            <View style={[styles.container, { opacity: mapLoaded ? 1 : 0 }]}>
                 <MapView provider={PROVIDER_GOOGLE} style={{ flex: 1 }} initialRegion={{
-                    latitude: 53.77020960646819,
-                    longitude: 20.4703061185026,
-                    longitudeDelta: 0.15,
-                    latitudeDelta: 0.15
+                    latitude: latitude,
+                    longitude: longitude,
+                    longitudeDelta: zoom,
+                    latitudeDelta: zoom
                 }}  >
                     {dataSource.map(point => renderMarker(point, navigation))}
                 </MapView>
