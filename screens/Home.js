@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {AsyncStorage} from 'react-native';
+import { AsyncStorage } from 'react-native';
 import Jadlodajnie from "../screens/Jadlodajnie";
 import Ulubione from "../screens/Ulubione";
 import Powiadomienia from '../screens/Powiadomienia';
@@ -76,7 +76,7 @@ const Home = props => {
                     <CustomDrawer {...props} dataSource={dataSource} />
                 )
             }}
-                drawerStyle={{width:'80%'}}
+                drawerStyle={{ width: '80%' }}
                 drawerContentOptions={{
                     activeTintColor: Colors.accent,
                     activeBackgroundColor: Colors.colorTextWhite,
@@ -91,14 +91,14 @@ const Home = props => {
                             drawerIcon: ({ color }) => <MaterialCommunityIcons name="food-fork-drink" size={24} color={color} />,
                             cardStyleInterpolator: forFade
                         }
-                        
-                    } 
-                    />
+
+                    }
+                />
                 <Drawer.Screen name="Ulubione" component={Ulubione} options={
                     {
                         drawerIcon: ({ color }) => <Ionicons name="md-star" size={30} color={color} />,
                         cardStyleInterpolator: forFade
-                        
+
                     }
                 }
                 />
@@ -108,14 +108,15 @@ const Home = props => {
                         cardStyleInterpolator: forFade
                     }
                 } />
-                <Drawer.Screen name="Mapa" component={Mapa} options={
-                    {
-                        drawerIcon: ({ color }) => <Foundation name="map" size={27} color={color} />,
-                        cardStyleInterpolator: forFade
-                    }
-                } />
+                <Drawer.Screen name="Mapa" component={Mapa}
+                    initialParams={{ navigation: Drawer.navigation }}
+                    options={
+                        {
+                            drawerIcon: ({ color }) => <Foundation name="map" size={27} color={color} />,
+                            cardStyleInterpolator: forFade
+                        }
+                    } />
                 <Drawer.Screen name="Logowanie" component={Logowanie}
-                    // initialParams={{ navigation: Drawer.navigation }}
                     options={
                         {
                             title: "Logowanie",

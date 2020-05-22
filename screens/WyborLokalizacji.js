@@ -57,7 +57,6 @@ const WyborLokalizacji = props => {
     };
     const onMiastoChangedHandler = (miasto) => {
         setMiasto(miasto.value);
-        console.log(miasto.latitude);
         setLatitude(miasto.latitude);
         setLongitude(miasto.longitude);
         setZoom(miasto.zoom);
