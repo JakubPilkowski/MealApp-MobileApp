@@ -20,8 +20,12 @@ const WyborLokalizacji = props => {
     const [miastoEnabled, setMiastoEnabled] = useState(false);
     const [errorMessage, setErrorMessage] = useState("\n");
     const [isLoading, setIsLoading] = useState(true);
-    const [wojewodztwa, setWojewodztwa] = useState([new PickerItem('Wybierz województwo...', 'default')]);
-    const [miasta, setMiasta] = useState([new PickerItem('Wybierz miasto...', 'default')]);
+    const [wojewodztwa, setWojewodztwa] = useState([new PickerItem('Wybierz województwo...', 'default',0,0,0)]);
+    const [miasta, setMiasta] = useState([new PickerItem('Wybierz miasto...', 'default',0,0,0)]);
+    const [latitude, setLatitude] = useState();
+    const [longitude, setLongitude] = useState();
+    const [zoom, setZoom] = useState();
+
 
     let confirmButton;
     if (Platform.OS === "android" && Platform.Version >= 21) {
@@ -38,14 +42,13 @@ const WyborLokalizacji = props => {
             onClick={() => confirmButtonHandler()} />
     }
     const onWojewodztwoChangedHandler = (wojewodztwo) => {
-        setWojewodztwo(wojewodztwo);
-
-        if (wojewodztwo !== "default") {
+        setWojewodztwo(wojewodztwo.value);
+        if (wojewodztwo.value !== "default") {
             setIsLoading(true);
             setWojewodztwoEnabled(false);
             setMiastoEnabled(false);
             setMiasto("default");
-            getMiastaForWojewodztwo(wojewodztwo);
+            getMiastaForWojewodztwo(wojewodztwo.value);
         }
         else {
             setMiasto("default");
@@ -53,7 +56,10 @@ const WyborLokalizacji = props => {
         }
     };
     const onMiastoChangedHandler = (miasto) => {
-        setMiasto(miasto);
+        setMiasto(miasto.value);
+        setLatitude(miasto.latitude);
+        setLongitude(miasto.longitude);
+        setZoom(miasto.zoom);
     }
 
     const confirmButtonHandler = () => {
@@ -73,6 +79,9 @@ const WyborLokalizacji = props => {
             await AsyncStorage.setItem('firstUse', 'false');
             await AsyncStorage.setItem('wojewodztwo', wojewodztwo);
             await AsyncStorage.setItem('miasto', miasto);
+            await AsyncStorage.setItem('latitude', latitude.toString());
+            await AsyncStorage.setItem('longitude', longitude.toString());
+            await AsyncStorage.setItem('zoom',zoom.toString());
             props.navigation.navigate('Home');
         }
         catch (error) {
@@ -87,7 +96,7 @@ const WyborLokalizacji = props => {
                 .json()
                 .then(res => {
                     res.map((item) => {
-                        setWojewodztwa(wojewodztwa => [...wojewodztwa, new PickerItem(item.name, item.slug)]);
+                        setWojewodztwa(wojewodztwa => [...wojewodztwa, new PickerItem(item.name, item.slug,0,0,0)]);
                     });
 
                     setIsLoading(false);
@@ -101,9 +110,9 @@ const WyborLokalizacji = props => {
         res
             .json()
             .then(res => {
-                setMiasta([new PickerItem("Wybierz miasto...", "default")]);
+                setMiasta([new PickerItem("Wybierz miasto...", "default",0,0,0)]);
                 res.map((item) => {
-                    setMiasta(miasta => [...miasta, new PickerItem(item.name, item.slug)]);
+                    setMiasta(miasta => [...miasta, new PickerItem(item.name, item.slug, item.latitude, item.longitude, item.zoom)]);
                 });
                 setIsLoading(false);
                 setWojewodztwoEnabled(true);
