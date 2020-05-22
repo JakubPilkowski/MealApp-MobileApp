@@ -37,7 +37,6 @@ function MapaScreen({ navigation, route }) {
     const [mapLoaded, setMapLoaded] = useState(false);
     const [expanded, setExpanded] = useState(false);
 
-    //inicjalne pobranie danych
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
@@ -169,8 +168,8 @@ function MapaScreen({ navigation, route }) {
     navigation.setOptions({
         headerLeft: () => {
             return expanded ?
-            null:
-            <IconWithAction content={<Feather name="menu" size={26} color={Colors.colorTextWhite} />} onClick={HomeButtonHandler} />
+                null :
+                <IconWithAction content={<Feather name="menu" size={26} color={Colors.colorTextWhite} />} onClick={HomeButtonHandler} />
         },
         headerRight: () => {
             return expanded ?
@@ -214,7 +213,7 @@ function MapaScreen({ navigation, route }) {
                         enabled={wojewodztwoEnabled}
                         onPickerChange={(wojewodztwo) => onWojewodztwoChangedHandler(wojewodztwo)}
                     />
-                    <CustomPicker containerStyle={{ opacity: miastoEnabled ? 1 : 0.5, marginVertical:12 }}
+                    <CustomPicker containerStyle={{ opacity: miastoEnabled ? 1 : 0.5, marginVertical: 12 }}
                         enabled={miastoEnabled}
                         pickerItems={miasta} selectedValue={miasto}
                         onPickerChange={(miasto) => onMiastoChangedHandler(miasto)}
