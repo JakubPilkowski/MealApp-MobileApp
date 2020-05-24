@@ -1,5 +1,5 @@
 import React, { useState, useEffect} from 'react';
-import { View, StyleSheet, FlatList, ImageBackground, Text, LayoutAnimation, Platform, TouchableOpacity, TouchableNativeFeedback, Keyboard } from "react-native";
+import { View, StyleSheet, FlatList, ImageBackground,AsyncStorage, Text, LayoutAnimation, Platform, TouchableOpacity, TouchableNativeFeedback, Keyboard } from "react-native";
 import Strings from "../src/themes/strings";
 import Colors from "../src/themes/colors";
 import { createStackNavigator} from '@react-navigation/stack';
@@ -32,6 +32,8 @@ function JadlodajnieScreen({ navigation, route }) {
     const [searchViewValue, setSearchViewValue] = useState('');
     const [indicatorValue, setIndicatorValue] = useState(12.5 + ((sliderValue - 1) * 75 / 54) + '%');
     const [chosenItems, setChosenItems] = useState([]);
+    const [wojewodztwo, setWojewodztwo] = useState();
+    const [miasto, setMiasto] = useState();
     const { drawerNavigation } = route.params;
     const [isLoading, setIsLoading] = useState(true);
     const [jadlodajnie, setJadlodajnie] = useState([]);
@@ -39,17 +41,29 @@ function JadlodajnieScreen({ navigation, route }) {
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
-                const res = await Connection.getJadlodajnie();
+                const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
+                const miastoValue = await AsyncStorage.getItem("miasto");
+                setWojewodztwo(wojewodztwoValue);
+                setMiasto(miastoValue);
+                console.log(wojewodztwoValue);
+                console.log(miastoValue);
+                const res = await Connection.getJadlodajnie(wojewodztwoValue, miastoValue);
                 res
                     .json()
                     .then(res => {
-                        setJadlodajnie(res.jadlodajnie);
+                        setJadlodajnie(res);
                         setIsLoading(false);
                     })
                     .catch(err => console.log(err + 'blad'));
-            }, 2000);
+            }, 300);
         }
     }
+
+    navigation.addListener("focus", () => {
+        //setMapLoaded(false);
+        setIsLoading(true);
+    })
+
     useEffect(() => {
         fetchData();
     }, [isLoading]);
@@ -202,7 +216,10 @@ function JadlodajnieScreen({ navigation, route }) {
                 <FlatList
                     scrollEnabled={expanded ? false : true}
                     data={jadlodajnie} renderItem={({ item, index }) =>
-                        <Jadlodajnia title={item.title} containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} onMoreClick={(jadlodajniaId) => { navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: jadlodajniaId }); }} jadlodajnia={item} ></Jadlodajnia>}
+                        <Jadlodajnia  containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} onMoreClick={(jadlodajniaId) => { 
+                            // navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: jadlodajniaId }); 
+                        }}
+                             jadlodajnia={item} ></Jadlodajnia>}
                     keyExtractor={item => item.id.toString()}
                 />
         }
@@ -323,21 +340,6 @@ function JadlodajnieScreen({ navigation, route }) {
                             });
                         }}
                     />
-                    {/* <View style={{ marginTop: 6, height: chosenItems.length < 3 ? chosenItems.length * 46 : 138 }}>
-                        <FlatList
-                            data={chosenItems}
-                            renderItem={(itemData) => {
-                                let index = Math.floor(Math.random() * (Math.floor(7) - Math.ceil(0))) + Math.ceil(0);
-                                return (
-                                    <View style={{ height: 40, flexDirection: 'row', marginBottom: 6, borderRadius: 20, paddingHorizontal: 18, alignItems: 'center', justifyContent: 'space-between', paddingVertical: 3, borderColor: colors[index], borderWidth: 2 }}>
-                                        <MaterialCommunityIcons name="food-variant" size={24} color={colors[index]} />
-                                        <Text style={{ fontSize: 16, color: colors[index], textAlign: 'center' }}>{itemData.item.name}</Text>
-                                        <MaterialIcons size={24} color={colors[index]} name="cancel" />
-                                    </View>
-                                )
-                            }}
-                        />
-                    </View> */}
                 </View>
                 {searchButton}
                 <TouchableOpacity onPress={() => {

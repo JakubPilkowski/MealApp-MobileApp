@@ -244,24 +244,11 @@ function MapaScreen({ navigation, route }) {
     }
 }
 
-function renderMarkersForPlace(navigation, addressList, jadlodajnia) {
-    addressList.map(punkt => {
-        return renderMarker(punkt, navigation, jadlodajnia)
-    })
-}
-function renderMarker(point, navigation, jadlodajnia) {
-    // console.log(jadlodajnia.slug);
-    console.log(point.address);
-    console.log(point.latitude);
-    console.log(point.longitude);
-    console.log(point.name);
-    // console.log(jadlodajnia.name);
+function renderMarker(point, navigation, jadlodajnia, wojewodztwo, miasto) {
+
     const contentText = "Kliknij by przejść" + '\n' + "do jadłodajni";
     return (
-        // <View>
-        // <Button title="halo"/>
-        // <Text>hahdhsahdhadshahdashsdadhsashda</Text>
-        // {/* //     {addressList.map(point => { */}
+
         <Marker coordinate={{
             latitude: point.latitude,
             longitude: point.longitude
@@ -290,9 +277,6 @@ function renderMarker(point, navigation, jadlodajnia) {
                 />
             </Callout>
         </Marker>
-        // {/* //     } */}
-        // {/* //     )} */}
-        // </View>
     )
 }
 const Mapa = props => {

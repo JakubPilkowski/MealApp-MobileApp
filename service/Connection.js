@@ -9,12 +9,11 @@ export default class Connection {
         return fetch(`${API_URL}voivodeships/${wojewodztwo}/places`);
     }
 
-    static getJadlodajnie(){
-        return fetch('http://www.mocky.io/v2/5ea1ce4d310000f7611eee1d');
+    static getJadlodajnie(wojewodztwo, miasto){
+        return fetch(`${API_URL}eatingHouses/voivodeship/${wojewodztwo}/place/${miasto}`);
     }
     static getSzczegolyJadlodajnia(){
-        return fetch('http://www.mocky.io/v2/5e73641c300000d5512e64d0');
-          
+        return fetch('http://www.mocky.io/v2/5e73641c300000d5512e64d0');          
     }
     static getUlubione(){
         return fetch('http://www.mocky.io/v2/5e749894300000d431a5f4d3');

@@ -5,14 +5,14 @@ import Strings from '../src/themes/strings';
 import Colors from '../src/themes/colors';
 import Dimensions from '../src/themes/dimensions';
 import { FlatList, TouchableOpacity, TouchableNativeFeedback } from 'react-native-gesture-handler';
-import Danie from './Danie';
+import Content from './Content';
 import IosButton from './IosButton';
 import AndroidButton from './AndroidButton';
 import GradientDivider from './GradientDivider';
 
 const Jadlodajnia = props => {
     const jadlodajnia = props.jadlodajnia;
-    const dania = jadlodajnia.dania;
+    let counter = 0;
     let moreButton;
     if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21)) {
         moreButton =
@@ -24,15 +24,14 @@ const Jadlodajnia = props => {
         moreButton =
             <AndroidButton onClick={() => {
                 props.onMoreClick(jadlodajnia.id)
-                // props.navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: jadlodajnia.id });
             }} text={Strings.more} containerStyle={styles.androidButtonView} buttonStyle={styles.buttonStyle} />
     }
     return (
         <View key={jadlodajnia.id} style={[styles.container, props.containerStyle]}>
             <View style={styles.avatarContainer}>
-                <Image style={styles.image} source={{ uri: jadlodajnia.iconUrl }} ></Image>
+                <Image style={styles.image} source={jadlodajnia.logoUrl !== "notImplemented" ? {uri:jadlodajnia.logoUrl}: require("../src/images/ikonka_v3.png")} ></Image>
                 <View style={{ flexDirection: 'column', flex: 1, justifyContent: "center" }}>
-                    <Text style={styles.avatarName}>{jadlodajnia.title}</Text>
+                    <Text style={styles.avatarName}>{jadlodajnia.name}</Text>
                     <GradientDivider startColor={Colors.primary} endColor={Colors.accent}
                         from="left" locationEnd={0.7} dividerStyle={{ flex: 0 }} />
                     <Text style={styles.avatarName}></Text>
@@ -41,16 +40,18 @@ const Jadlodajnia = props => {
             <View style={{ marginBottom: 20 }}>
                 <Text style={styles.menu}>{Strings.todays_set}</Text>
                 <Divider style={styles.divider}></Divider>
-                {dania.map(danie => renderDania(danie))}
+                {jadlodajnia.menuList.map(menuListItem => 
+                    menuListItem.contentList.map(content => renderMenuContent(content))
+                )}
             </View>
             {moreButton}
         </View>
     );
 }
 
-function renderDania(danie) {
+function renderMenuContent(content) {
     return (
-        <Danie id={danie.danie_id} nazwa={danie.nazwa} cena={danie.cena}></Danie>
+        <Content id={content.id} type={content.type} content={content.content}></Content>
     );
 }
 const styles = StyleSheet.create({
