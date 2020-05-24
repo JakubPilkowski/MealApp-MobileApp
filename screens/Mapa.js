@@ -52,7 +52,7 @@ function MapaScreen({ navigation, route }) {
                 setLatitude(Number(latitudeValue));
                 setLongitude(Number(longitudeValue));
                 setZoom(Number(zoomValue));
-                getMapy();
+                getMapy(wojewodztwoValue, miastoValue);
                 setIsLoading(false);
             }, 500);
         }
@@ -90,13 +90,19 @@ function MapaScreen({ navigation, route }) {
             .catch(err => console.log(err + 'blad'));
     }
     //pobieranie punktów na mapie
-    async function getMapy() {
-        const mapsResponse = await Connection.getMapy();
+    async function getMapy(wojewodztwo, miasto) {
+        console.log("wojewodztwo " + wojewodztwo);
+        console.log("miasto " + miasto);
+        const mapsResponse = await Connection.getMapy(wojewodztwo, miasto);
         mapsResponse
             .json()
             .then(res => {
-                setDataSource(res.punkty);
+                // res.map((punkt) => {
+                //     setDataSource(punkty => [...punkty, { id: punkt.id, name: punkt.name, slug: punkt.slug, addressList: punkt.addressList }]);
+                // })
+                setDataSource(res);
                 setSearchResultsLoading(false);
+                console.log(res);
             })
             .catch(err => console.log(err + 'blad'));
     }
@@ -145,14 +151,14 @@ function MapaScreen({ navigation, route }) {
 
     //reload aplikacji po wejściu do zakładki mapy
     navigation.addListener("focus", () => {
-        setMapLoaded(false);
+        //setMapLoaded(false);
         setIsLoading(true);
     })
 
     //rerender ekranu
     useEffect(() => {
         if (searchResultsLoading) {
-            getMapy()
+            getMapy(wojewodztwo, miasto);
         }
         else {
             fetchData();
@@ -227,22 +233,42 @@ function MapaScreen({ navigation, route }) {
                     longitudeDelta: zoom,
                     latitudeDelta: zoom
                 }}  >
-                    {dataSource.map(point => renderMarker(point, navigation))}
+                    {dataSource.map(jadlodajnia =>
+                        jadlodajnia.addressList.map(punkt =>
+                            renderMarker(punkt, navigation,jadlodajnia)
+                            )
+                    )}
                 </MapView>
             </View>
         );
     }
 }
-function renderMarker(point, navigation) {
+
+function renderMarkersForPlace(navigation, addressList, jadlodajnia) {
+    addressList.map(punkt => {
+        return renderMarker(punkt, navigation, jadlodajnia)
+    })
+}
+function renderMarker(point, navigation, jadlodajnia) {
+    // console.log(jadlodajnia.slug);
+    console.log(point.address);
+    console.log(point.latitude);
+    console.log(point.longitude);
+    console.log(point.name);
+    // console.log(jadlodajnia.name);
     const contentText = "Kliknij by przejść" + '\n' + "do jadłodajni";
     return (
+        // <View>
+        // <Button title="halo"/>
+        // <Text>hahdhsahdhadshahdashsdadhsashda</Text>
+        // {/* //     {addressList.map(point => { */}
         <Marker coordinate={{
-            latitude: point.szerokoscGeo,
-            longitude: point.dlugoscGeo
+            latitude: point.latitude,
+            longitude: point.longitude
         }}
             key={point.id}
             onCalloutPress={() => {
-                navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: point.jadlodajnia_id });
+                // navigation.navigate('JadlodajnieWiecej', { jadlodajniaSlug: jadlodajnia.slug, wojewodztwo: wojewodztwo, miasto: miasto });
             }}
         >
             <Callout tooltip={true} >
@@ -256,14 +282,17 @@ function renderMarker(point, navigation) {
                     cardStyle={{ borderRadius: dimensions.defaultHugeBorderRadius, borderColor: Colors.accent, borderWidth: dimensions.defaultBorderWidth, }}
                     content={
                         <View style={{ alignItems: 'center' }}>
-                            <Text style={{ fontSize: 12 }}>{point.title}</Text>
-                            <Text style={{ fontSize: 12 }}>{point.szczegóły}</Text>
+                            <Text style={{ fontSize: 12 }}>{jadlodajnia.name}</Text>
+                            <Text style={{ fontSize: 12 }}>{point.address}</Text>
                             <IosButton text={contentText} buttonStyle={{ fontSize: 14 }} />
                         </View>
                     }
                 />
             </Callout>
         </Marker>
+        // {/* //     } */}
+        // {/* //     )} */}
+        // </View>
     )
 }
 const Mapa = props => {

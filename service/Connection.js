@@ -19,8 +19,8 @@ export default class Connection {
     static getUlubione(){
         return fetch('http://www.mocky.io/v2/5e749894300000d431a5f4d3');
     }
-    static getMapy(){
-        return fetch('http://www.mocky.io/v2/5e7a4d4730000078009309fa');
+    static getMapy(wojewodztwo, miasto){
+        return fetch(`${API_URL}map/eatingHouses/voivodeship/${wojewodztwo}/place/${miasto}`);
     }
     static getUserOptions(){
         return fetch('http://www.mocky.io/v2/5e820a472f00000d002fb833');
