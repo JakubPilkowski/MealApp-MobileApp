@@ -11,20 +11,21 @@ import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 
 
 
-const InformacjeOgolneJadlodajnia = props => {
+const JadlodajnieLocalizationDetails = props => {
 
     const informacje = props.informacje;
     return (
         <View style={{ flex: 1 }}>
             <View style={{ marginHorizontal: dimensions.defaultMargin }}>
-                <Text style={styles.centerAlignText}>Adres</Text>
+                 <Text style={styles.centerAlignText}>Adres</Text>
                 <JadlodajniaNoteWithIcon icon={
                     <FontAwesome size={36} color={Colors.primary} name="map-marker"></FontAwesome>
                 } content={
                     <View style={styles.textContainer}>
-                        <Text style={styles.rightAlignText}>{informacje.adres}</Text>
+                        <Text style={styles.rightAlignText}>{informacje.address}</Text>
                     </View>
                 } />
+                
                 <Text style={styles.centerAlignText}>Kontakt</Text>
                 <JadlodajniaNoteWithIcon
                     icon={
@@ -33,11 +34,12 @@ const InformacjeOgolneJadlodajnia = props => {
                     content=
                     {
                         <View style={styles.textContainer}>
-                            {informacje.kontakt.map(kontakt => renderKontakty(kontakt))}
+                            <Text style={styles.rightAlignText}>{informacje.phoneNumber}</Text>
                         </View>
                     }
                 />
                 <Text style={styles.centerAlignText}>Godziny otwarcia</Text>
+                {/*
                 <JadlodajniaNoteWithIcon
                     icon={
                         <Feather name="clock" size={36} color={Colors.primary}></Feather>
@@ -47,7 +49,9 @@ const InformacjeOgolneJadlodajnia = props => {
                             {informacje.godzinyOtwarcia.map(godzina => renderGodzinyOtwarcia(godzina))}
                         </View>
                     }
-                />
+                /> */}
+            {/* nie ma open hours wypełnionych */}
+            
             </View>
             <Text style={styles.centerAlignText}>Mapa</Text>
             <View style={{ borderWidth: 2, borderColor: Colors.accent, margin: dimensions.defaultMargin, }}>
@@ -57,20 +61,16 @@ const InformacjeOgolneJadlodajnia = props => {
                 pitchEnabled={false}
                 zoomEnabled={false}
                 style={{ height: 200, borderColor: Colors.primary, borderWidth: dimensions.borderWidth }} initialRegion={{
-                    latitude: informacje.mapa.szerokoscGeo,
-                    longitude: informacje.mapa.dlugoscGeo,
+                    latitude: informacje.latitude,
+                    longitude: informacje.longitude,
                     longitudeDelta: 0.003,
                     latitudeDelta: 0.003
                 }} minZoomLevel={10} >
                     <Marker coordinate={{
-                        latitude: informacje.mapa.szerokoscGeo,
-                        longitude: informacje.mapa.dlugoscGeo
+                        latitude: informacje.latitude,
+                        longitude: informacje.longitude
                     }}>
-                        {/* <View style={{ flexDirection: 'row' }}> */}
-                        {/* <Text>{props.nazwa}</Text> */}
                         <FontAwesome size={36} color={Colors.primary} name="map-marker"></FontAwesome>
-                        {/* </View> */}
-
                     </Marker>
                 </MapView>
             </View>
@@ -110,4 +110,4 @@ const styles = StyleSheet.create({
 });
 
 
-export default InformacjeOgolneJadlodajnia;
+export default JadlodajnieLocalizationDetails;

@@ -1,32 +1,32 @@
 import React from 'react';
-import { View, Text, Dimensions, StyleSheet } from 'react-native';
-import { Divider } from 'react-native-elements'
-// import Danie from './Danie';
-import dimensions from '../src/themes/dimensions';
+import { View, StyleSheet, Text } from 'react-native';
+import { Divider } from 'react-native-elements';
 import Colors from '../src/themes/colors';
-
-const {width, height} = Dimensions.get('window');
-
+import Dimensions from '../src/themes/dimensions';
 
 
-const Zestaw = (props)=> {
-        return (
-            <View style={{ width: width - 100, flexDirection: 'column' }}>
-                <Text style={{ textAlign: "center", fontSize: dimensions.hugeFontSize }}>{props.date}</Text>
-                <Divider style={[styles.divider, { marginBottom: dimensions.defaultSmallMargin, width: "40%", alignSelf: "center" }]}></Divider>
-                {/* <Danie nazwa={props.name} cena={props.price}></Danie>
-                <Danie nazwa={props.name} cena={props.price}></Danie> */}
-            </View>
-        )
-
+const Zestaw = props => {
+    return (
+        <View key={props.id} style={styles.container}>
+                <Text style={styles.danie}>{props.content}</Text>
+            <Divider style={styles.divider}></Divider>
+        </View>
+    );
 }
 
-const styles=StyleSheet.create({
+
+const styles = StyleSheet.create({
+    container: {
+        marginTop: Dimensions.defaultMargin
+    },
+    danie: {
+        fontSize: Dimensions.defaultFontSize,
+        textAlign: "center"
+    },
     divider: {
         backgroundColor: Colors.accent,
-        height: dimensions.defaultBorderWidth,
-        width: "100%"
-    },
+        height: Dimensions.defaultBorderWidth,
+    }
 });
 
 

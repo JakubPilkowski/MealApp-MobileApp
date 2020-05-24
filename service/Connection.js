@@ -12,8 +12,8 @@ export default class Connection {
     static getJadlodajnie(wojewodztwo, miasto){
         return fetch(`${API_URL}eatingHouses/voivodeship/${wojewodztwo}/place/${miasto}`);
     }
-    static getSzczegolyJadlodajnia(){
-        return fetch('http://www.mocky.io/v2/5e73641c300000d5512e64d0');          
+    static getSzczegolyJadlodajnia(slug, wojewodztwo, miasto){
+        return fetch(`${API_URL}eatingHouses/${slug}/voivodeship/${wojewodztwo}/place/${miasto}`);          
     }
     static getUlubione(){
         return fetch('http://www.mocky.io/v2/5e749894300000d431a5f4d3');
