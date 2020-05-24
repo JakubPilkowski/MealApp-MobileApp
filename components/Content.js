@@ -5,13 +5,12 @@ import Colors from '../src/themes/colors';
 import Dimensions from '../src/themes/dimensions';
 
 
-const Danie = props => {
+const Content = props => {
+    const type = props.type;
+
     return (
         <View key={props.id} style={styles.container}>
-            <View style={styles.information}>
-                <Text style={styles.danie}>{props.nazwa}</Text>
-                <Text style={styles.cena}>{props.cena} zł</Text>
-            </View>
+                <Text style={styles.danie}>{props.content}</Text>
             <Divider style={styles.divider}></Divider>
         </View>
     );
@@ -22,21 +21,9 @@ const styles = StyleSheet.create({
     container: {
         marginTop: Dimensions.defaultMargin
     },
-    information: {
-        flex: 1,
-        flexDirection: "row",
-        justifyContent: "space-between"
-    },
     danie: {
-        flex: 1,
         fontSize: Dimensions.defaultFontSize,
-        textAlign: "left"
-    },
-    cena: {
-        // flex: 1,
-        fontSize: Dimensions.defaultFontSize,
-        // textAlign: "right",
-        textAlignVertical:'center'
+        textAlign: "center"
     },
     divider: {
         backgroundColor: Colors.accent,
@@ -45,4 +32,4 @@ const styles = StyleSheet.create({
 });
 
 
-export default Danie;
+export default Content;
