@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, FlatList, ActivityIndicator, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid } from 'react-native';
+import { View, Text, StyleSheet, AsyncStorage, Animated, ScrollView, SafeAreaView, FlatList, ActivityIndicator, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
 import Strings from "../src/themes/strings";
@@ -7,17 +7,18 @@ const HEADER_EXPANDED_HEIGHT = 225;
 const HEADER_COLLAPSED_HEIGHT = 56;
 import { Ionicons, FontAwesome, Feather } from '@expo/vector-icons';
 import Connection from '../service/Connection';
-import Zestaw from '../components/Zestaw';
-import InformacjeOgolneJadlodajnia from '../components/InformacjeOgolneJadlodajnia';
 import IconWithAction from '../components/IconWithAction';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import { setAutoFocusEnabled } from 'expo/build/AR';
+import JadlodajnieLocalizationDetails from '../components/JadlodajnieLocalizationDetails';
+import ZestawsView from '../components/ZestawsView';
 const { width, height } = Dimensions.get('window');
 
 const JadlodajnieWiecej = props => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [dataSource, setDataSource] = useState([]);
+    const {jadlodajniaSlug, wojewodztwo, miasto} = props.route.params;
     const [scrollY, setScrollY] = useState(new Animated.Value(0));
     const scrollRef = useRef(null);
     const [iconColor, setIconColor] = useState("white");
@@ -28,11 +29,12 @@ const JadlodajnieWiecej = props => {
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
-                const res = await Connection.getSzczegolyJadlodajnia();
+
+                const res = await Connection.getSzczegolyJadlodajnia(jadlodajniaSlug, wojewodztwo, miasto);
                 res
                     .json()
                     .then(res => {
-                        setDataSource(res.szczegoly);
+                        setDataSource(res);
                         setIsLoading(false);
                     })
                     .catch(err => console.log(err + 'blad'));
@@ -50,7 +52,6 @@ const JadlodajnieWiecej = props => {
     }
     else {
         let currentWidth = 0;
-        const szczegoly = dataSource;
         const headerHeight = scrollY.interpolate(
             {
                 inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
@@ -62,7 +63,7 @@ const JadlodajnieWiecej = props => {
             outputRange: [1, 0],
             extrapolate: 'clamp'
         });
-
+        console.log(dataSource.menuList.length);
         // if(isFavourite){
         //     setIconColor("gold");
         // }
@@ -74,13 +75,13 @@ const JadlodajnieWiecej = props => {
             <View>
                 <Animated.View style={[styles.header, { height: headerHeight }]} >
                     <Animated.View style={styles.headerImageContainer}>
-                        <Animated.Image source={{ uri: szczegoly.imageUrl }}
+                        <Animated.Image source={{ uri: "https://restaumatic.imgix.net/uploads/accounts/28994/media_library/15fdee8f-00c9-4a69-93c0-eb69c6de5727.jpg?auto=compress&crop=focalpoint&fit=crop&h=256&w=341" }}
                             style={[styles.headerImage, {
                                 height: headerHeight,
                                 opacity: heroTitleOpacity,
                             }]}
                         ></Animated.Image>
-                        <Animated.Text style={[styles.headerExpanded, { opacity: 1 }]}>{szczegoly.nazwa} </Animated.Text>
+                        <Animated.Text style={[styles.headerExpanded, { opacity: 1 }]}>{dataSource.name}</Animated.Text>
                     </Animated.View>
                 </Animated.View>
                 <View style={[styles.backButtonContainer, { left: 0 }]}>
@@ -141,7 +142,7 @@ const JadlodajnieWiecej = props => {
                                 <Feather name="arrow-left-circle" color={Colors.primary} size={36}></Feather>
                             </TouchableOpacity>
                         </View>
-                        <FlatList data={szczegoly.zestawy}
+                        <FlatList data={dataSource.menuList}
                             horizontal={true}
                             scrollEnabled={false}
                             getItemLayout={(data, index) => (
@@ -153,22 +154,15 @@ const JadlodajnieWiecej = props => {
                             ref={scrollRef}
                             renderItem={itemData =>
                                 <View style={{ flexDirection: 'column', width: width - 100 }}>
-                                    <Zestaw date={itemData.item.data} name={itemData.item.nazwa} price={itemData.item.cena}></Zestaw>
-
-                                    <Text style={{ textAlign: 'center', fontSize: 20, marginVertical: dimensions.defaultHugeMargin }}>
-                                        Menu główne
-                                            </Text>
-                                    <View style={{}}>
-                                        <Text>UWAGA! Do odwołania nasze lokale pracują w godzinach 11:00 - 16:30.{'\n'}Obowiązuje zakaz spożywania posiłków na miejscu!{'\n'}Nadal funkcjonuje sprzedaż posiłków na wynos oraz z dowozem!{'\n'}Uprzejmie prosimy o zastosowanie zasady podchodzenia do bufetu pojedynczo oraz wchodzenia do lokalu nie więcej niż trzech osób w jednym momencie.{'\n'}Dostawy w zależności od odległości realizujemy za dodatkową opłatą.{'\n'}W ofercie stałej:{'\n'}codziennie, od godziny 11{'\n'}1. pierogi{'\n'}- z kapustą i grzybami 8 szt. cena 10,99 zł{'\n'}- z mięsem 8 szt. cena 10,99 zł{'\n'}- ruskie 8 szt. cena 10,99 zł{'\n'}{'\n'}2. duża zupa \"Pełny Gar\" cena 6,99 zł{'\n'}zupa codzienna cena 5,50 zł{'\n'}3. kotlet schabowy + zupa dnia + surówka cena 14,99 zł{'\n'}{'\n'}4. kompot cena 1,50 zł</Text>
-                                    </View>
+                                    <ZestawsView date={itemData.item.date} contentList={itemData.item.contentList} />
                                 </View>
 
                             }
-                            keyExtractor={item => item.zestaw_id.toString()}
+                            keyExtractor={item => item.id.toString()}
                         />
                         <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: "center", width: 50 }}>
                             <TouchableOpacity onPress={() => {
-                                if (scrollIndex < 2) {
+                                if (scrollIndex < dataSource.menuList.length) {
                                     let index = scrollIndex + 1;
                                     setScrollIndex(index);
                                     scrollRef.current.scrollToIndex({ index: index });
@@ -177,13 +171,16 @@ const JadlodajnieWiecej = props => {
                                 <Feather name="arrow-right-circle" color={Colors.primary} size={36}></Feather>
                             </TouchableOpacity>
                         </View>
-
-
-
+                    </View>
+                    <Text style={{ textAlign: 'center', fontSize: 20, marginVertical: dimensions.defaultHugeMargin }}>
+                        Menu główne
+                                            </Text>
+                    <View style={{}}>
+                        <Text>UWAGA! Do odwołania nasze lokale pracują w godzinach 11:00 - 16:30.{'\n'}Obowiązuje zakaz spożywania posiłków na miejscu!{'\n'}Nadal funkcjonuje sprzedaż posiłków na wynos oraz z dowozem!{'\n'}Uprzejmie prosimy o zastosowanie zasady podchodzenia do bufetu pojedynczo oraz wchodzenia do lokalu nie więcej niż trzech osób w jednym momencie.{'\n'}Dostawy w zależności od odległości realizujemy za dodatkową opłatą.{'\n'}W ofercie stałej:{'\n'}codziennie, od godziny 11{'\n'}1. pierogi{'\n'}- z kapustą i grzybami 8 szt. cena 10,99 zł{'\n'}- z mięsem 8 szt. cena 10,99 zł{'\n'}- ruskie 8 szt. cena 10,99 zł{'\n'}{'\n'}2. duża zupa \"Pełny Gar\" cena 6,99 zł{'\n'}zupa codzienna cena 5,50 zł{'\n'}3. kotlet schabowy + zupa dnia + surówka cena 14,99 zł{'\n'}{'\n'}4. kompot cena 1,50 zł</Text>
                     </View>
                     <Text style={{ textAlign: "center", fontSize: 20, marginBottom: dimensions.defaultHugeMargin }}>Dostępne punkty</Text>
                     <SafeAreaView>
-                        {szczegoly.lokalizacje.map(lokalizacja => renderInformacje(szczegoly, lokalizacja))}
+                        {dataSource.addressList.map(localizationInfo => renderLocalizationInfo(dataSource, localizationInfo))}
                     </SafeAreaView>
                 </ScrollView>
             </View>
@@ -198,9 +195,9 @@ const JadlodajnieWiecej = props => {
 }
 
 
-function renderInformacje(szczegoly, lokalizacja) {
+function renderLocalizationInfo(informacje, lokalizacja) {
     return (
-        <InformacjeOgolneJadlodajnia nazwa={szczegoly.nazwa} informacje={lokalizacja} />
+        <JadlodajnieLocalizationDetails nazwa={informacje.nazwa} informacje={lokalizacja} />
     );
 }
 const styles = StyleSheet.create({

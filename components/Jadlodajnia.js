@@ -5,10 +5,10 @@ import Strings from '../src/themes/strings';
 import Colors from '../src/themes/colors';
 import Dimensions from '../src/themes/dimensions';
 import { FlatList, TouchableOpacity, TouchableNativeFeedback } from 'react-native-gesture-handler';
-import Content from './Content';
 import IosButton from './IosButton';
 import AndroidButton from './AndroidButton';
 import GradientDivider from './GradientDivider';
+import Zestaw from './Zestaw';
 
 const Jadlodajnia = props => {
     const jadlodajnia = props.jadlodajnia;
@@ -41,7 +41,7 @@ const Jadlodajnia = props => {
                 <Text style={styles.menu}>{Strings.todays_set}</Text>
                 <Divider style={styles.divider}></Divider>
                 {jadlodajnia.menuList.map(menuListItem => 
-                    menuListItem.contentList.map(content => renderMenuContent(content))
+                    menuListItem.contentList.map(zestaw => renderZestaw(zestaw))
                 )}
             </View>
             {moreButton}
@@ -49,9 +49,9 @@ const Jadlodajnia = props => {
     );
 }
 
-function renderMenuContent(content) {
+function renderZestaw(zestaw) {
     return (
-        <Content id={content.id} type={content.type} content={content.content}></Content>
+        <Zestaw id={zestaw.id} content={zestaw.content}/>
     );
 }
 const styles = StyleSheet.create({

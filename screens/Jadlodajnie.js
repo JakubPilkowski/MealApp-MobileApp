@@ -217,7 +217,7 @@ function JadlodajnieScreen({ navigation, route }) {
                     scrollEnabled={expanded ? false : true}
                     data={jadlodajnie} renderItem={({ item, index }) =>
                         <Jadlodajnia  containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} onMoreClick={(jadlodajniaId) => { 
-                            // navigation.navigate('JadlodajnieWiecej', { jadlodajniaId: jadlodajniaId }); 
+                            navigation.navigate('JadlodajnieWiecej', { jadlodajniaSlug:item.slug, wojewodztwo: wojewodztwo, miasto: miasto }); 
                         }}
                              jadlodajnia={item} ></Jadlodajnia>}
                     keyExtractor={item => item.id.toString()}
@@ -371,7 +371,7 @@ const Jadlodajnie = props => {
     return (
         <Stack.Navigator initialRouteName="Jadlodajnie" screenOptions={ScreenStyle}>
             <Stack.Screen name="Jadlodajnie" component={JadlodajnieScreen} initialParams={{ drawerNavigation: props.navigation }} />
-            <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
+            <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej} 
                 options={{
                     headerStyle: {
                         opacity: 0, height: 0
