@@ -14,9 +14,9 @@
     ],
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./src/images/ikonka_v3.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./src/images/splash_screen.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -29,6 +29,6 @@
     "ios": {
       "supportsTablet": true
     },
-    "description": ""
+    "description": "Aplikacja wyświetlająca spisy restauracji/jadłodajni na terenie Olsztyna. Aplikacja ma służyć jako zbiór dostępnych miejsc do spożycia posiłków aby zmniejszyć ilość czasu potrzebną na wyszukiwanie każdej jadłodajni oddzielnie. Dzięki aplikacji użytkownik dowie się jakie dania serwowane są danego dnia, gdzie znajduję się restauracja oraz jaki jest do niej kontakt. "
   }
 }
