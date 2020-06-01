@@ -11,9 +11,12 @@ const {width, height} = Dimensions.get('window');
 
 
 const ZestawsView = (props)=> {
+    const date = props.date.split('T');
+
+
         return (
             <View style={{ width: width - 100, flexDirection: 'column' }}>
-                <Text style={{ textAlign: "center", fontSize: dimensions.hugeFontSize }}>{props.date}</Text>
+                <Text style={{ textAlign: "center", fontSize: dimensions.hugeFontSize }}>{date[0]}</Text>
                 <Divider style={[styles.divider, { marginBottom: dimensions.defaultSmallMargin, width: "40%", alignSelf: "center" }]}></Divider>
                 {props.contentList.map(zestaw => renderZestaw(zestaw))}
             </View>
