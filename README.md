@@ -1,4 +1,5 @@
 Aplikacja Mobilna MealApp
+======
 Wersja mobilna aplikacji służącej do przeglądania spisów jadłodajnii
 ======
 
@@ -21,22 +22,17 @@ Instalacja Aplikacji
 
 ![KodQR](/readmeImages/KodQR.png)
 
-### Aplikacja Expo powinna automatycznie odpalić nasz projekt.
-### Jeżeli nie to w zakładce projects pojawi się aplikacja MealApp. Jedyne co musimy zrobić to kliknąć na ikonkę naszej aplikacji.
-
+### Aplikacja Expo powinna automatycznie odpalić nasz projekt. Jeżeli nie to w zakładce projects pojawi się aplikacja MealApp. Jedyne co musimy zrobić to kliknąć na ikonkę naszej aplikacji.
 ![ExpoAplikacjaMealApp](/readmeImages/Expo_Aplikacja_MealApp.jpg)
 
-###Voilà!
+### Voilà!
 
 
 Odpalenie Aplikacji Z Poziomu Projektowego
 =====
 
-### By móc odpalić projekt musimy mieć zainstalowanego node.js. Z poziomu dowolnej aplikacji do tworzenia kodu wpisujemy w terminalu komendę `npm start`.
-### Przeglądarka powinno odpalić nam panel sterowania aplikacją.
+### By móc odpalić projekt musimy mieć zainstalowanego node.js. Z poziomu dowolnej aplikacji do tworzenia kodu wpisujemy w terminalu komendę `npm start`. Przeglądarka powinno odpalić nam panel sterowania aplikacją.
 
 ![PanelSterowania](/readmeImages/PanelSterowania.png)
 
-### Panel sterowania umożliwia nam odpalenie aplikacji za pomocą telefonu lub symulatora.
-### UWAGA!!! Aplikacja odpalona z poziomu projektowego zużywa więcej zasobów telefonu przez co bardzo szybko aplikacja zaczyna się lagować.
-### Nie polecane w przypadku sprawdzania płynności działania aplikacji.
+### Panel sterowania umożliwia nam odpalenie aplikacji za pomocą telefonu lub symulatora. UWAGA!!! Aplikacja odpalona z poziomu projektowego zużywa więcej zasobów telefonu przez co bardzo szybko aplikacja zaczyna się lagować. Nie polecane w przypadku sprawdzania płynności działania aplikacji.
