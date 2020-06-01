@@ -5,7 +5,7 @@ import Colors from "../src/themes/colors";
 
 const PlaceHolder = props => {
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, props.containerStyle]}>
             <Image style={styles.imageStyle} source={props.src} />
             <Text style={styles.textStyle}>{props.text}</Text>
         </View>

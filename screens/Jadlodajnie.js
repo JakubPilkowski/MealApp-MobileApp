@@ -1,13 +1,14 @@
-import React, { useState, useEffect} from 'react';
-import { View, StyleSheet, FlatList, ImageBackground,AsyncStorage, Text, LayoutAnimation, Platform, TouchableOpacity, TouchableNativeFeedback, Keyboard } from "react-native";
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, FlatList, ImageBackground,ActivityIndicator, AsyncStorage, Text, LayoutAnimation, Platform, TouchableOpacity, TouchableNativeFeedback, Keyboard } from "react-native";
 import Strings from "../src/themes/strings";
 import Colors from "../src/themes/colors";
-import { createStackNavigator} from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import IconWithAction from "../components/IconWithAction";
 import ScreenStyle from "../src/themes/screenStyle";
 import Jadlodajnia from "../components/Jadlodajnia";
 import Connection from '../service/Connection';
+import CustomPicker from '../components/CustomPicker';
 import {
     AntDesign,
     Feather, Ionicons,
@@ -21,21 +22,28 @@ import PlaceHolder from '../components/PlaceHolder';
 import { Slider, SearchBar } from 'react-native-elements';
 import CustomMultiSelect from '../components/CustomMultiSelect';
 const { width, height } = Dimensions.get("screen");
+import PickerItem from '../models/PickerItem';
 
 
 function JadlodajnieScreen({ navigation, route }) {
     const [expanded, setExpanded] = useState(false);
     const [detailedSearchExpanded, setDetailedSearchExpanded] = useState(false);
+    const [searchResultsLoading, setSearchResultsLoading] = useState(false);
     const [sliderValue, setSliderValue] = useState(25);
     const [searchResults, setSearchResults] = useState([]);
     const [sliderOpacity, setSliderOpacity] = useState(0);
     const [searchViewValue, setSearchViewValue] = useState('');
     const [indicatorValue, setIndicatorValue] = useState(12.5 + ((sliderValue - 1) * 75 / 54) + '%');
     const [chosenItems, setChosenItems] = useState([]);
+    const [wojewodztwa, setWojewodztwa] = useState([new PickerItem('Wybierz województwo...', 'default', 0, 0, 0)]);
+    const [miasta, setMiasta] = useState([new PickerItem('Wybierz miasto...', 'default', 0, 0, 0)]);
     const [wojewodztwo, setWojewodztwo] = useState();
     const [miasto, setMiasto] = useState();
     const { drawerNavigation } = route.params;
     const [isLoading, setIsLoading] = useState(true);
+    const [wojewodztwoEnabled, setWojewodztwoEnabled] = useState(true);
+    const [miastoEnabled, setMiastoEnabled] = useState(false);
+    const [isPickerLoading, setIsPickerLoading] = useState(false);
     const [jadlodajnie, setJadlodajnie] = useState([]);
     const [mode, setMode] = useState('default');
     async function fetchData() {
@@ -43,30 +51,87 @@ function JadlodajnieScreen({ navigation, route }) {
             setTimeout(async function () {
                 const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
                 const miastoValue = await AsyncStorage.getItem("miasto");
+                getWojewodztwa();
+                getMiastaForWojewodztwo(wojewodztwoValue);
                 setWojewodztwo(wojewodztwoValue);
                 setMiasto(miastoValue);
-                console.log(wojewodztwoValue);
-                console.log(miastoValue);
-                const res = await Connection.getJadlodajnie(wojewodztwoValue, miastoValue);
-                res
-                    .json()
-                    .then(res => {
-                        setJadlodajnie(res);
-                        setIsLoading(false);
-                    })
-                    .catch(err => console.log(err + 'blad'));
+                getJadlodajnie(wojewodztwoValue,miastoValue);
+                setIsLoading(false);
+              
             }, 300);
         }
     }
+    async function getJadlodajnie(wojewodztwo, miasto){
+        const res = await Connection.getJadlodajnie(wojewodztwo, miasto);
+        res
+            .json()
+            .then(res => {
+                setJadlodajnie(res);
+                setSearchResultsLoading(false);
+            })
+            .catch(err => console.log(err + 'blad'));
+    }
+
+    //pobieranie województw
+    async function getWojewodztwa() {
+        if (wojewodztwa.length <= 1) {
+            const wojewodztwaResponse = await Connection.getWojewodztwa();
+            wojewodztwaResponse
+                .json()
+                .then(res => {
+                    res.map((item) => {
+                        setWojewodztwa(wojewodztwa => [...wojewodztwa, new PickerItem(item.name, item.slug, 0, 0, 0)]);
+                    });
+                })
+                .catch(err => console.log(err + 'blad'));
+        }
+    }
+    //pobieranie miast dla województwa
+    async function getMiastaForWojewodztwo(wojewodztwo) {
+        const res = await Connection.getMiastaForWojewodztwo(wojewodztwo);
+        res
+            .json()
+            .then(res => {
+                setMiasta([new PickerItem("Wybierz miasto...", "default", 0, 0, 0)]);
+                res.map((item) => {
+                    setMiasta(miasta => [...miasta, new PickerItem(item.name, item.slug, item.latitude, item.longitude, item.zoom)]);
+                });
+                setIsPickerLoading(false);
+                setWojewodztwoEnabled(true);
+                setMiastoEnabled(true);
+            })
+            .catch(err => console.log(err + 'blad'));
+    }
+
+    const onWojewodztwoChangedHandler = (wojewodztwo) => {
+        setWojewodztwo(wojewodztwo.value);
+        if (wojewodztwo.value !== "default") {
+            setIsPickerLoading(true);
+            setWojewodztwoEnabled(false);
+            setMiastoEnabled(false);
+            setMiasto("default");
+            getMiastaForWojewodztwo(wojewodztwo.value);
+        }
+        else {
+            setMiasto("default");
+            setMiastoEnabled(false);
+        }
+    }
+
+    const onMiastoChangedHandler = (miasto) => {
+        setMiasto(miasto.value);
+    }
 
     navigation.addListener("focus", () => {
-        //setMapLoaded(false);
         setIsLoading(true);
     })
 
     useEffect(() => {
-        fetchData();
-    }, [isLoading]);
+        if(isLoading)
+            fetchData();
+        else if(searchResultsLoading)
+            getJadlodajnie(wojewodztwo, miasto);
+    }, [isLoading, searchResultsLoading]);
 
     const multiSelectItems = [{
         id: '92iij',
@@ -176,13 +241,16 @@ function JadlodajnieScreen({ navigation, route }) {
         name: 'Feta',
     }];
 
-
+    const onSearchClicked = () =>{
+        toggleSearchView();
+        setSearchResultsLoading(true);
+    }
 
     let searchButton;
     if (Platform.OS === "android" && Platform.Version >= 21)
-        searchButton = <AndroidButton text="Wyszukaj" containerStyle={{ width: '60%', alignSelf: 'center', marginTop: 12 }} onClick={toggleSearchView} />
+        searchButton = <AndroidButton text="Wyszukaj" containerStyle={{ width: '60%', alignSelf: 'center', marginTop: 12 }} onClick={()=>{onSearchClicked()}} />
     if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21))
-        searchButton = <IosButton text="Wyszukaj" onClick={toggleSearchView} />
+        searchButton = <IosButton text="Wyszukaj" onClick={()=>{onSearchClicked()}} />
 
 
     navigation.setOptions({
@@ -207,7 +275,7 @@ function JadlodajnieScreen({ navigation, route }) {
     });
 
     let content;
-    if (isLoading) {
+    if (isLoading || searchResultsLoading) {
         content = <CustomLoadingComponent />
     }
     else {
@@ -216,15 +284,15 @@ function JadlodajnieScreen({ navigation, route }) {
                 <FlatList
                     scrollEnabled={expanded ? false : true}
                     data={jadlodajnie} renderItem={({ item, index }) =>
-                        <Jadlodajnia  containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} onMoreClick={(jadlodajniaId) => { 
-                            navigation.navigate('JadlodajnieWiecej', { jadlodajniaSlug:item.slug, wojewodztwo: wojewodztwo, miasto: miasto }); 
+                        <Jadlodajnia containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} onMoreClick={(jadlodajniaId) => {
+                            navigation.navigate('JadlodajnieWiecej', { jadlodajniaSlug: item.slug, wojewodztwo: wojewodztwo, miasto: miasto });
                         }}
-                             jadlodajnia={item} ></Jadlodajnia>}
+                            jadlodajnia={item} ></Jadlodajnia>}
                     keyExtractor={item => item.id.toString()}
                 />
         }
         else {
-            content = <PlaceHolder text={"Ups, nie ma \ntakich restauracji"} src={require('../src/images/plate_v2.png')} />
+            content = <PlaceHolder text={"Ups, nie ma \ntakich restauracji"} src={require('../src/images/plate_v2.png')} containerStyle={{opacity: detailedSearchExpanded ? 0 : 1}}/>
         }
     }
     function applyFilter(text) {
@@ -247,7 +315,7 @@ function JadlodajnieScreen({ navigation, route }) {
         <View style={styles.container} >
             <View style={{
                 height: expanded ? null : 0,
-                display: expanded ? 'flex' : 'none', overflow: 'hidden', backgroundColor: Colors.backgroundColor, borderWidth: 2,
+                display: expanded ? 'flex' : 'none', overflow: 'hidden',zIndex:9999, backgroundColor: Colors.backgroundColor, borderWidth: 2,
                 paddingVertical: 12,
                 alignItems: 'center',
                 borderColor: Colors.primary, borderBottomLeftRadius: 16, borderBottomRightRadius: 16
@@ -302,7 +370,19 @@ function JadlodajnieScreen({ navigation, route }) {
                     width: '100%',
                     alignItems: 'center',
                 }}>
-                    <Text style={{ fontSize: 16, marginTop: dimensions.defaultMargin, marginBottom: Dimensions.defaultSmallMargin }}>Odległość od lokalizacji</Text>
+                    <CustomPicker
+                        containerStyle={{ opacity: wojewodztwoEnabled ? 1 : 0.5, marginTop: 12 }}
+                        pickerItems={wojewodztwa} selectedValue={wojewodztwo}
+                        enabled={wojewodztwoEnabled}
+                        onPickerChange={(wojewodztwo) => onWojewodztwoChangedHandler(wojewodztwo)}
+                    />
+                    <CustomPicker containerStyle={{ opacity: miastoEnabled ? 1 : 0.5, marginVertical: 12 }}
+                        enabled={miastoEnabled}
+                        pickerItems={miasta} selectedValue={miasto}
+                        onPickerChange={(miasto) => onMiastoChangedHandler(miasto)}
+                    />
+                    <ActivityIndicator size="large" color={Colors.primary} animating={isPickerLoading} />
+                    {/* <Text style={{ fontSize: 16, marginTop: dimensions.defaultMargin, marginBottom: Dimensions.defaultSmallMargin }}>Odległość od lokalizacji</Text>
                     <View style={{ justifyContent: 'center', }}>
                         <View style={{ width: "100%", flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                             <Text style={{ textAlign: 'center', flex: 1 }}>1km</Text>
@@ -328,7 +408,7 @@ function JadlodajnieScreen({ navigation, route }) {
                         <View style={{ width: 24, justifyContent: 'center', borderRadius: 6, borderWidth: 1, borderColor: Colors.accent, backgroundColor: Colors.colorTextWhite, height: 24, left: indicatorValue }}>
                             <Text style={{ textAlign: 'center' }}>{sliderValue}</Text>
                         </View>
-                    </View>
+                    </View> */}
                     <Text style={styles.title}>Tagi</Text>
                     <CustomMultiSelect placeHolder="Wybierz tagi (max 3)" items={multiSelectItems} chosenItems={chosenItems} mode={mode}
                         onAddItem={(item) => {
@@ -371,7 +451,7 @@ const Jadlodajnie = props => {
     return (
         <Stack.Navigator initialRouteName="Jadlodajnie" screenOptions={ScreenStyle}>
             <Stack.Screen name="Jadlodajnie" component={JadlodajnieScreen} initialParams={{ drawerNavigation: props.navigation }} />
-            <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej} 
+            <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
                 options={{
                     headerStyle: {
                         opacity: 0, height: 0

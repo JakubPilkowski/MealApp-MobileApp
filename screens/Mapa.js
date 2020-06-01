@@ -102,7 +102,6 @@ function MapaScreen({ navigation, route }) {
                 // })
                 setDataSource(res);
                 setSearchResultsLoading(false);
-                console.log(res);
             })
             .catch(err => console.log(err + 'blad'));
     }
