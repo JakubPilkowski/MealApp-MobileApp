@@ -15,6 +15,7 @@ W aplikacji expo klikamy przycisk Scan QR Code znajdujący się w zakładce Proj
 ![ExpoAplikacja](/readmeImages/Expo_Aplikacja.jpg)
 
 Używany naszego skanera na kod QR podany na stronie projektu.
+
 ![KodQR](/readmeImages/KodQR.png)
 
 Aplikacja Expo powinna automatycznie odpalić nasz projekt.
@@ -31,5 +32,5 @@ Przeglądarka powinno odpalić nam panel sterowania aplikacją.
 ![PanelSterowania](/readmeImages/PanelSterowania.png)
 
 Panel sterowania umożliwia nam odpalenie aplikacji za pomocą telefonu lub symulatora.
-UWAGA!!! Aplikacja odpalona z poziomu projektowego złużywa więcej zasobów telefonu przez co bardzo szybko aplikacja zaczyna się lagować.
+UWAGA!!! Aplikacja odpalona z poziomu projektowego zużywa więcej zasobów telefonu przez co bardzo szybko aplikacja zaczyna się lagować.
 Nie polecane w przypadku sprawdzania płynności działania aplikacji.
