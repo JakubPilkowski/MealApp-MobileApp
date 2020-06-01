@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, AsyncStorage, Animated, ScrollView, SafeAreaView, FlatList, ActivityIndicator, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid } from 'react-native';
+import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, FlatList, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
 import Strings from "../src/themes/strings";
@@ -9,7 +9,6 @@ import { Ionicons, FontAwesome, Feather } from '@expo/vector-icons';
 import Connection from '../service/Connection';
 import IconWithAction from '../components/IconWithAction';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
-import { setAutoFocusEnabled } from 'expo/build/AR';
 import JadlodajnieLocalizationDetails from '../components/JadlodajnieLocalizationDetails';
 import ZestawsView from '../components/ZestawsView';
 const { width, height } = Dimensions.get('window');
@@ -18,23 +17,28 @@ const JadlodajnieWiecej = props => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [dataSource, setDataSource] = useState([]);
-    const {jadlodajniaSlug, wojewodztwo, miasto} = props.route.params;
+    const { jadlodajniaSlug, wojewodztwo, miasto } = props.route.params;
     const [scrollY, setScrollY] = useState(new Animated.Value(0));
     const scrollRef = useRef(null);
     const [iconColor, setIconColor] = useState("white");
     const [isFavourite, setIsFavourite] = useState(false);
-    const [scrollIndex, setScrollIndex] = useState(0);
+    const [scrollIndex, setScrollIndex] = useState();
     const [favouriteButtonEnabled, setFavouriteButtonEnabled] = useState(true);
 
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
-
                 const res = await Connection.getSzczegolyJadlodajnia(jadlodajniaSlug, wojewodztwo, miasto);
                 res
                     .json()
                     .then(res => {
                         setDataSource(res);
+                        const date = new Date().toJSON().slice(0, 10);
+                        res.menuList.map((data, dataIndex) => {
+                            const splitedDate = data.date.split("T");
+                            if (splitedDate[0] == date)
+                                setScrollIndex(dataIndex);
+                        })
                         setIsLoading(false);
                     })
                     .catch(err => console.log(err + 'blad'));
@@ -51,7 +55,6 @@ const JadlodajnieWiecej = props => {
         content = <CustomLoadingComponent />
     }
     else {
-        let currentWidth = 0;
         const headerHeight = scrollY.interpolate(
             {
                 inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
@@ -63,7 +66,15 @@ const JadlodajnieWiecej = props => {
             outputRange: [1, 0],
             extrapolate: 'clamp'
         });
-        console.log(dataSource.menuList.length);
+        const titlePadding = scrollY.interpolate({
+            inputRange : [0, HEADER_EXPANDED_HEIGHT- HEADER_COLLAPSED_HEIGHT],
+            outputRange : [6, 0]
+        });
+        const titleBackground = scrollY.interpolate({
+            inputRange : [0, HEADER_EXPANDED_HEIGHT- HEADER_COLLAPSED_HEIGHT],
+            outputRange : [Colors.primary, 'transparent'] 
+        })
+
         // if(isFavourite){
         //     setIconColor("gold");
         // }
@@ -75,13 +86,13 @@ const JadlodajnieWiecej = props => {
             <View>
                 <Animated.View style={[styles.header, { height: headerHeight }]} >
                     <Animated.View style={styles.headerImageContainer}>
-                        <Animated.Image source={{ uri: "https://restaumatic.imgix.net/uploads/accounts/28994/media_library/15fdee8f-00c9-4a69-93c0-eb69c6de5727.jpg?auto=compress&crop=focalpoint&fit=crop&h=256&w=341" }}
+                        <Animated.Image source={{ uri: dataSource.photoUrl }}
                             style={[styles.headerImage, {
                                 height: headerHeight,
                                 opacity: heroTitleOpacity,
                             }]}
                         ></Animated.Image>
-                        <Animated.Text style={[styles.headerExpanded, { opacity: 1 }]}>{dataSource.name}</Animated.Text>
+                        <Animated.Text style={[styles.headerExpanded, {backgroundColor: titleBackground ,padding: titlePadding}]}>{dataSource.name}</Animated.Text>
                     </Animated.View>
                 </Animated.View>
                 <View style={[styles.backButtonContainer, { left: 0 }]}>
@@ -149,20 +160,19 @@ const JadlodajnieWiecej = props => {
                                 { length: width - 100, offset: (width - 100) * index, index }
                             )
                             }
-                            initialScrollIndex={0}
+                            initialScrollIndex={scrollIndex}
                             showsHorizontalScrollIndicator={false}
                             ref={scrollRef}
                             renderItem={itemData =>
                                 <View style={{ flexDirection: 'column', width: width - 100 }}>
                                     <ZestawsView date={itemData.item.date} contentList={itemData.item.contentList} />
                                 </View>
-
                             }
                             keyExtractor={item => item.id.toString()}
                         />
                         <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: "center", width: 50 }}>
                             <TouchableOpacity onPress={() => {
-                                if (scrollIndex < dataSource.menuList.length) {
+                                if (scrollIndex < dataSource.menuList.length - 1) {
                                     let index = scrollIndex + 1;
                                     setScrollIndex(index);
                                     scrollRef.current.scrollToIndex({ index: index });
@@ -241,7 +251,7 @@ const styles = StyleSheet.create({
         position: 'absolute', textAlign: "center", fontSize: 18, color: Colors.colorTextWhite, marginTop: 28,
     },
     headerExpanded: {
-        textAlign: 'center', fontSize: dimensions.toolbarFontSize, color: Colors.colorTextWhite, position: 'absolute', bottom: dimensions.defaultMargin
+        textAlign: 'center', fontSize: dimensions.toolbarFontSize, borderRadius:6, color: Colors.colorTextWhite, position: 'absolute', bottom: dimensions.defaultMargin
     },
     scrollContainer: {
         paddingTop: HEADER_EXPANDED_HEIGHT
