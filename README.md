@@ -18,7 +18,7 @@ Instalacja Aplikacji
 
 ![ExpoAplikacja](/readmeImages/Expo_Aplikacja.jpg)
 
-### Używany naszego skanera na kod QR podany na stronie projektu.
+### Używamy naszego skanera na kod QR podany na stronie projektu.
 
 ![KodQR](/readmeImages/KodQR.png)
 
