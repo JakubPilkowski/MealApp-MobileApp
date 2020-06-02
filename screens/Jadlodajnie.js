@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect} from 'react';
 import { View, StyleSheet, FlatList, ImageBackground, ActivityIndicator, AsyncStorage, Text, LayoutAnimation, Platform, TouchableOpacity, TouchableNativeFeedback, Keyboard, ScrollView } from "react-native";
-import Strings from "../src/themes/strings";
 import Colors from "../src/themes/colors";
 import { createStackNavigator } from '@react-navigation/stack';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
@@ -19,24 +18,20 @@ import IosButton from '../components/IosButton';
 import { Dimensions } from 'react-native';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import PlaceHolder from '../components/PlaceHolder';
-import { Slider, SearchBar } from 'react-native-elements';
+import { SearchBar } from 'react-native-elements';
 import CustomMultiSelect from '../components/CustomMultiSelect';
 const { width, height } = Dimensions.get("screen");
 import PickerItem from '../models/PickerItem';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 
 function JadlodajnieScreen({ navigation, route }) {
     const [expanded, setExpanded] = useState(false);
     const [detailedSearchExpanded, setDetailedSearchExpanded] = useState(false);
     const [searchResultsLoading, setSearchResultsLoading] = useState(false);
-    const [sliderValue, setSliderValue] = useState(25);
     const [searchResults, setSearchResults] = useState([]);
-    const [sliderOpacity, setSliderOpacity] = useState(0);
     const [searchViewValue, setSearchViewValue] = useState('');
     const [names, setNames] = useState([]);
     const [tags, setTags] = useState([]);
-    const [indicatorValue, setIndicatorValue] = useState(12.5 + ((sliderValue - 1) * 75 / 54) + '%');
     const [chosenItems, setChosenItems] = useState([]);
     const [wojewodztwa, setWojewodztwa] = useState([new PickerItem('Wybierz województwo...', 'default', 0, 0, 0)]);
     const [miasta, setMiasta] = useState([new PickerItem('Wybierz miasto...', 'default', 0, 0, 0)]);
@@ -49,7 +44,8 @@ function JadlodajnieScreen({ navigation, route }) {
     const [isPickerLoading, setIsPickerLoading] = useState(false);
     const [jadlodajnie, setJadlodajnie] = useState([]);
     const [mode, setMode] = useState('default');
-    const multiSelectRef = useRef();
+    const [defaultWojewodztwo, setDefaultWojewodztwo] = useState();
+    const [defaultMiasto, setDefaultMiasto] = useState();
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
@@ -59,6 +55,8 @@ function JadlodajnieScreen({ navigation, route }) {
                 getMiastaForWojewodztwo(wojewodztwoValue);
                 setWojewodztwo(wojewodztwoValue);
                 setMiasto(miastoValue);
+                setDefaultWojewodztwo(wojewodztwoValue);
+                setDefaultMiasto(miastoValue);
                 getEatingHousesNames();
                 getTagi();
                 getJadlodajnie(wojewodztwoValue, miastoValue);
@@ -70,13 +68,18 @@ function JadlodajnieScreen({ navigation, route }) {
         res
             .json()
             .then(res => {
-                setJadlodajnie(res);
-                setSearchResultsLoading(false);
+                if (searchResultsLoading) {
+                    getSearchResults(res);
+                }
+                else {
+                    setJadlodajnie(res);
+                }
                 setIsLoading(false);
             })
             .catch(err => console.log(err + 'blad'));
     }
     async function getEatingHousesNames() {
+        setNames([]);
         const res = await Connection.getEatingHousesNames();
         res
             .json()
@@ -86,6 +89,7 @@ function JadlodajnieScreen({ navigation, route }) {
             .catch(err => console.log(err + 'blad'));
     }
     async function getTagi() {
+        setTags([]);
         const res = await Connection.getTags();
         res
             .json()
@@ -159,117 +163,52 @@ function JadlodajnieScreen({ navigation, route }) {
             getJadlodajnie(wojewodztwo, miasto);
     }, [isLoading, searchResultsLoading]);
 
-    const multiSelectItems = [{
-        id: '92iij',
-        name: 'Pierogi',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'a0s0a8ssbsds',
-        name: 'Kapustka',
-        selected: false,
-        color: 'black'
-    }, {
-        id: '16hbajsabsds',
-        name: 'Kotlet',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'nahs75a5sgs',
-        name: 'Brokuły',
-        selected: false,
-        color: 'black'
-    }, {
-        id: '667atsas',
-        name: 'Ciasto',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'hsyasajss',
-        name: 'Kurczak',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'djsjudksjds',
-        name: 'Pierwsze danie',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'sdhyaysdjs',
-        name: 'Śniadanie',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'suudydjsjds',
-        name: 'Obiad',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'suudydjsjdss',
-        name: 'Kolacja',
-        selected: false,
-        color: 'black'
-    }
-
-    ];
-
-
     const HomeButtonHandler = () => {
         navigation.openDrawer();
     }
     const toggleSearchView = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeIn);
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setDetailedSearchExpanded(false);
-        setSliderOpacity(0);
         setExpanded(!expanded);
     }
     const toggleDetailedSearchView = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeIn);
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setDetailedSearchExpanded(!detailedSearchExpanded);
     }
-    const toggleSlider = () => {
-        if (sliderOpacity === 0) {
-            setTimeout(function () {
-                setSliderOpacity(1);
-            }, 150);
-        }
-        else {
-            setSliderOpacity(0);
-        }
-    }
-
-    items = [{
-        id: '92iijs7yta',
-        name: 'Pełny gar',
-    }, {
-        id: 'a0s0a8ssbsd',
-        name: 'Stołówka warmińska',
-    }, {
-        id: '16hbajsabsd',
-        name: 'Bistro-Kociołek',
-    }, {
-        id: 'nahs75a5sg',
-        name: 'Bar Kąsek',
-    }, {
-        id: '667atsas',
-        name: 'Bar u Sióstr',
-    }, {
-        id: 'hsyasajs',
-        name: 'Bistro Kopernika',
-    }, {
-        id: 'djsjudksjd',
-        name: 'Kuźnia smaków',
-    }, {
-        id: 'sdhyaysdj',
-        name: 'Kwadrans',
-    }, {
-        id: 'suudydjsjd',
-        name: 'Feta',
-    }];
 
     const onSearchClicked = () => {
         toggleSearchView();
         setSearchResultsLoading(true);
+    }
+
+    const getSearchResults = (jadlodajnie) => {
+        let searchResults = jadlodajnie;
+        if (searchViewValue !== "") {
+            searchResults = searchResults.filter((jadlodajnia) => jadlodajnia.name === searchViewValue);
+        }
+        if (chosenItems.length > 0) {
+            let tmpJadlodajnieArray = [];
+            let tags = chosenItems;
+            tags.map(chosenTag => {
+                searchResults.map(jadlodajnia => {
+                    jadlodajnia.eatingHouseTagList.map((tag) => {
+                        if(chosenTag.name === tag.name){
+                            let result = 1;
+                            tmpJadlodajnieArray.map((tmpJadlodajnia)=>{
+                                if(jadlodajnia.name === tmpJadlodajnia.name)
+                                    result = 0;
+                            })
+                            if(result==1){
+                                tmpJadlodajnieArray.push(jadlodajnia);
+                            }
+                        }
+                    })
+                })
+            })           
+            searchResults = tmpJadlodajnieArray; 
+        }
+        setJadlodajnie(searchResults);
+        setSearchResultsLoading(false);
     }
 
     let searchButton;
@@ -338,18 +277,28 @@ function JadlodajnieScreen({ navigation, route }) {
 
 
     return (
-        <View style={styles.container} >
-            <KeyboardAwareScrollView 
-                keyboardShouldPersistTaps="handled"
-            >
-                <View style={{
-                    height: expanded ? null : 0,
-                    display: expanded ? 'flex' : 'none', overflow: 'hidden', zIndex: 9999, backgroundColor: Colors.backgroundColor, borderWidth: 2,
-                    paddingVertical: 12,
-                    alignItems: 'center',
-                    borderColor: Colors.primary, borderBottomLeftRadius: 16, borderBottomRightRadius: 16
-                }}>
-
+        <View style={styles.container}>
+            <View style={{
+                height: expanded ? null : 0,
+                display: expanded ? 'flex' : 'none',
+                overflow: 'hidden',
+                zIndex: 9999,
+                backgroundColor: Colors.backgroundColor,
+                borderWidth: expanded ? 2 : 0,
+                paddingVertical: 12,
+                alignItems: 'center',
+                borderColor: Colors.primary,
+                borderBottomLeftRadius: 16,
+                borderBottomRightRadius: 16
+            }}>
+                <ScrollView style={{
+                    width: '100%',
+                }}
+                    contentContainerStyle={{
+                        alignItems: 'center'
+                    }}
+                    keyboardShouldPersistTaps='handled'
+                >
                     <Text style={{ fontSize: 16, marginTop: 6, marginBottom: 6 }}>Nazwa Jadłodajnii</Text>
                     <View style={{ width: '85%', alignItems: 'center' }}>
                         <SearchBar
@@ -387,7 +336,6 @@ function JadlodajnieScreen({ navigation, route }) {
                             setSearchResults([]);
                             Keyboard.dismiss();
                             toggleDetailedSearchView();
-                            toggleSlider();
                         }}>
                             <Text style={{ fontSize: 16, color: Colors.accent, marginTop: 12 }}>{!detailedSearchExpanded ? "Zaawansowane" : "Schowaj zaawansowane"}</Text>
                         </TouchableOpacity>
@@ -426,15 +374,22 @@ function JadlodajnieScreen({ navigation, route }) {
                     {searchButton}
                     <TouchableOpacity onPress={() => {
                         setSearchViewValue("");
-                        setSliderValue(25);
-                        setIndicatorValue(12.5 + ((25 - 1) * 75 / 54) + '%');
                         setChosenItems([]);
+                        tags.map((tag) => {
+                            tag.selected = false;
+                        })
                         setMode("restart");
+                        setIsPickerLoading(true);
+                        setWojewodztwoEnabled(false);
+                        setMiastoEnabled(false);
+                        getMiastaForWojewodztwo(defaultWojewodztwo);
+                        setWojewodztwo(defaultWojewodztwo);
+                        setMiasto(defaultMiasto);
                     }}>
                         <Text style={{ fontSize: 16, color: Colors.accent, marginTop: 6 }}>Przywróć domyślne</Text>
                     </TouchableOpacity>
-                </View>
-            </KeyboardAwareScrollView>
+                </ScrollView>
+            </View>
             <ImageBackground source={require('../src/images/pancakes.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>
                 {content}
             </ImageBackground>

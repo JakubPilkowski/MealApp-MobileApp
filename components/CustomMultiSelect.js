@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, FlatList, Platform, TouchableNativeFeedback, TouchableOpacity, Modal, Keyboard, Dimensions } from 'react-native';
-import { SearchBar } from 'react-native-elements';
+import { View, StyleSheet, Text, FlatList, Platform, TouchableNativeFeedback, TouchableOpacity, Modal, Dimensions } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
-import { Entypo, MaterialIcons, MaterialCommunityIcons } from "react-native-vector-icons";
+import { Entypo, MaterialIcons, MaterialCommunityIcons, AntDesign } from "react-native-vector-icons";
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
+import IconWithAction from '../components/IconWithAction';
 const { width, height } = Dimensions.get("screen");
 
 
-const CustomMultiSelect = (props) =>{
+const CustomMultiSelect = (props) => {
 
-    const [searchViewValue, setSearchViewValue] = useState("");
     const [visibility, setVisisbility] = useState(false);
     const [items, setItems] = useState(props.items);
     const [searchResults, setSearchResults] = useState(items);
@@ -23,8 +22,6 @@ const CustomMultiSelect = (props) =>{
             count++;
         }
     });
-
- 
 
     const onAddItemHandler = (item, index) => {
         if (item.selected === true) {
@@ -57,82 +54,56 @@ const CustomMultiSelect = (props) =>{
                 props.onAddItem(item);
             }
             else {
-                setSearchViewValue('');
                 setSearchResults(items);
                 setErrorEnabled(true);
                 setTimeout(function () {
                     setErrorEnabled(false);
-                }, 700)
+                }, 1000)
             }
         }
-
     }
-    function applyFilter(text) {
-        setSearchViewValue(text);
-        if (text !== "") {
-            const filterResults = items.filter(item => {
-                const itemData = item.name.toLowerCase();
-                const searchResult = text.toLowerCase();
-                return itemData.indexOf(searchResult) > -1;
-            });
-            setSearchResults(filterResults);
-        }
-        else {
-            setSearchResults(items);
-        }
-    }
-
     let input;
     let multiSelect =
         <Modal
             visible={visibility}
             transparent={true}
             animationType={"fade"}>
-            <View style={{ margin: 20, marginVertical: 125, minHeight: height - 290, alignSelf: "center", backgroundColor: Colors.backgroundColor, padding: 12, borderRadius: 6, borderColor: Colors.primary, borderWidth: 2 }}>
-                <Text style={{ color: Colors.colorTextDark, fontSize: 18, textAlign: "center" }}>Wybierz intersujące tagi</Text>
-                <SearchBar
-                    onCancel={() => { setSearchResults(items); }}
-                    placeholder="Wyszukaj..."
-                    platform="android"
-                    inputStyle={{ fontSize: 16 }}
-                    onFocus={() => { applyFilter(searchViewValue) }}
-                    onSubmitEditing={() => { setSearchResults(items) }}
-                    containerStyle={{ borderTopLeftRadius: dimensions.defaultBorderRadius, marginBottom: 6, borderTopEndRadius: dimensions.defaultBorderRadius }}
-                    onChangeText={(text) => applyFilter(text)}
-                    value={searchViewValue}
-                />
-                <Text style={{ textAlign: 'center', fontSize: 14, color: 'red', marginBottom: 6, opacity: errorEnabled ? 1 : 0 }}>Dodałeś już 3 tagi!!!</Text>
-                <KeyboardAwareFlatList
-                    keyboardShouldPersistTaps='handled'
-                    style={{
-                        height: items.length <= 4 ? items.length * 52 : 208,
-                        width: width - 36 * 2,
-                        marginBottom: 6
-                    }}
-                    data={searchResults} renderItem={({ item, index }) => {
-                        return (
-                            <TouchableNativeFeedback onPress={() => {
-                                onAddItemHandler(item, index);
-                                Keyboard.dismiss();
-                            }}
-                            >
-                                <View style={{
-                                    height: 40, width: width - 40 * 2, alignSelf: 'center', alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row',
-                                    borderWidth: 2, borderColor: Colors.accent, borderRadius: 6, paddingHorizontal: 3, marginBottom: 12
-                                }}>
-                                    <Text style={{ fontSize: 16 }}>{item.name}</Text>
-                                    <View style={{ opacity: item.selected ? 1 : 0 }}>
-                                        <Entypo size={24} color={Colors.primary} name="check" />
+            <View style={{ margin: 0, marginVertical: 0, width: width, height: height, backgroundColor: 'rgba(0,0,0,0.5)', padding: 24, }}>
+                <View style={{ backgroundColor: Colors.colorTextWhite, padding: 12, borderColor: Colors.primary, borderWidth: 2, borderRadius: 3 }}>
+                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between',alignItems:'center',paddingBottom:24}}>
+                        <Text style={{ textAlign: 'center', fontSize: 16, color: 'red',fontWeight:'bold', opacity: errorEnabled ? 1 : 0,}}>Dodałeś już 3 tagi!!!</Text>
+                        <IconWithAction containerStyle={{width:26,height:26}}
+                            content={<AntDesign name="close" size={26} color={Colors.primary} />}
+                            onClick={()=>{setVisisbility(false)}} />
+                    </View>
+                    <KeyboardAwareFlatList
+                        data={searchResults} renderItem={({ item, index }) => {
+
+                            return (
+                                <View>
+                                    <TouchableNativeFeedback onPress={() => {
+                                        onAddItemHandler(item, index);
+                                    }}>
+                                        <View style={{
+                                            height: 40, width: width - (38 * 2), alignSelf: 'center', alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row',
+                                            borderWidth: 2, borderColor: Colors.accent, borderRadius: 6, paddingHorizontal: 3, marginBottom: 12
+                                        }}>
+                                            <Text style={{ fontSize: 16 }}>{item.name}</Text>
+                                            <View style={{ opacity: item.selected ? 1 : 0 }}>
+                                                <Entypo size={24} color={Colors.primary} name="check" />
+                                            </View>
+                                        </View>
+                                    </TouchableNativeFeedback>
+                                    <View style={{ display: searchResults.length === index + 1 ? 'flex' : 'none', borderWidth: searchResults.length === index + 1 ? 2 : 0, borderColor: Colors.primary, borderRadius: 6, paddingVertical: 6, }} >
+                                        <TouchableOpacity onPress={() => { setVisisbility(false) }}>
+                                            <Text style={{ textAlign: 'center', color: Colors.primary, fontSize: 16, fontWeight: 'bold' }}>Potwierdź</Text>
+                                        </TouchableOpacity>
                                     </View>
                                 </View>
-                            </TouchableNativeFeedback>
-                        )
-                    }}
-                />
-                <View style={{ borderWidth: 2, borderColor: Colors.primary, borderRadius: 6, paddingVertical: 6, }} >
-                    <TouchableOpacity onPress={() => { setVisisbility(false) }}>
-                        <Text style={{ textAlign: 'center', color: Colors.primary, fontSize: 16, fontWeight: 'bold' }}>Potwierdź</Text>
-                    </TouchableOpacity>
+                            )
+                        }}
+                    />
+
                 </View>
             </View>
         </Modal>;
@@ -182,7 +153,6 @@ const CustomMultiSelect = (props) =>{
                     <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(Colors.accent, true)}
                         onPress={() => {
                             if (props.mode === "restart") {
-                                console.log(props.items);
                                 setItems(props.items);
                                 setSearchResults(props.items);
                                 count = 0;
