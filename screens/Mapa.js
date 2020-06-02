@@ -91,18 +91,13 @@ function MapaScreen({ navigation, route }) {
     }
     //pobieranie punktów na mapie
     async function getMapy(wojewodztwo, miasto) {
-        console.log("wojewodztwo " + wojewodztwo);
-        console.log("miasto " + miasto);
+
         const mapsResponse = await Connection.getMapy(wojewodztwo, miasto);
         mapsResponse
             .json()
             .then(res => {
-                // res.map((punkt) => {
-                //     setDataSource(punkty => [...punkty, { id: punkt.id, name: punkt.name, slug: punkt.slug, addressList: punkt.addressList }]);
-                // })
                 setDataSource(res);
                 setSearchResultsLoading(false);
-                console.log(res);
             })
             .catch(err => console.log(err + 'blad'));
     }

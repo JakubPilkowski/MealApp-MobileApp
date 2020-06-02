@@ -6,12 +6,9 @@ import Dimensions from "../src/themes/dimensions";
 const IconWithAction = props => {
 
     return (
-        <View style={styles.buttonContainer}>
-            <TouchableOpacity onPress={props.onClick}>
-               
-                    {props.content}
-                        {/* <Image style={[styles.button, props.imageStyle]} source={props.src}></Image> */}
-             
+        <View style={[styles.buttonContainer, props.containerStyle]}>
+            <TouchableOpacity onPress={props.onClick}>             
+                    {props.content}  
             </TouchableOpacity>
         </View>
     );

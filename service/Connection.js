@@ -8,9 +8,14 @@ export default class Connection {
     static getMiastaForWojewodztwo(wojewodztwo){
         return fetch(`${API_URL}voivodeships/${wojewodztwo}/places`);
     }
-
     static getJadlodajnie(wojewodztwo, miasto){
         return fetch(`${API_URL}eatingHouses/voivodeship/${wojewodztwo}/place/${miasto}`);
+    }
+    static getEatingHousesNames(){
+        return fetch(`${API_URL}eatingHousesNames`);
+    }
+    static getTags(){
+        return fetch(`${API_URL}eatingHouseTags`);
     }
     static getSzczegolyJadlodajnia(slug, wojewodztwo, miasto){
         return fetch(`${API_URL}eatingHouses/${slug}/voivodeship/${wojewodztwo}/place/${miasto}`);          

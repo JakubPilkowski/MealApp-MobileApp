@@ -1,13 +1,13 @@
 import React, { useState, useEffect} from 'react';
-import { View, StyleSheet, FlatList, ImageBackground,AsyncStorage, Text, LayoutAnimation, Platform, TouchableOpacity, TouchableNativeFeedback, Keyboard } from "react-native";
-import Strings from "../src/themes/strings";
+import { View, StyleSheet, FlatList, ImageBackground, ActivityIndicator, AsyncStorage, Text, LayoutAnimation, Platform, TouchableOpacity, TouchableNativeFeedback, Keyboard, ScrollView } from "react-native";
 import Colors from "../src/themes/colors";
-import { createStackNavigator} from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import IconWithAction from "../components/IconWithAction";
 import ScreenStyle from "../src/themes/screenStyle";
 import Jadlodajnia from "../components/Jadlodajnia";
 import Connection from '../service/Connection';
+import CustomPicker from '../components/CustomPicker';
 import {
     AntDesign,
     Feather, Ionicons,
@@ -18,171 +18,204 @@ import IosButton from '../components/IosButton';
 import { Dimensions } from 'react-native';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import PlaceHolder from '../components/PlaceHolder';
-import { Slider, SearchBar } from 'react-native-elements';
+import { SearchBar } from 'react-native-elements';
 import CustomMultiSelect from '../components/CustomMultiSelect';
 const { width, height } = Dimensions.get("screen");
+import PickerItem from '../models/PickerItem';
 
 
 function JadlodajnieScreen({ navigation, route }) {
     const [expanded, setExpanded] = useState(false);
     const [detailedSearchExpanded, setDetailedSearchExpanded] = useState(false);
-    const [sliderValue, setSliderValue] = useState(25);
+    const [searchResultsLoading, setSearchResultsLoading] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
-    const [sliderOpacity, setSliderOpacity] = useState(0);
     const [searchViewValue, setSearchViewValue] = useState('');
-    const [indicatorValue, setIndicatorValue] = useState(12.5 + ((sliderValue - 1) * 75 / 54) + '%');
+    const [names, setNames] = useState([]);
+    const [tags, setTags] = useState([]);
     const [chosenItems, setChosenItems] = useState([]);
+    const [wojewodztwa, setWojewodztwa] = useState([new PickerItem('Wybierz województwo...', 'default', 0, 0, 0)]);
+    const [miasta, setMiasta] = useState([new PickerItem('Wybierz miasto...', 'default', 0, 0, 0)]);
     const [wojewodztwo, setWojewodztwo] = useState();
     const [miasto, setMiasto] = useState();
     const { drawerNavigation } = route.params;
     const [isLoading, setIsLoading] = useState(true);
+    const [wojewodztwoEnabled, setWojewodztwoEnabled] = useState(true);
+    const [miastoEnabled, setMiastoEnabled] = useState(false);
+    const [isPickerLoading, setIsPickerLoading] = useState(false);
     const [jadlodajnie, setJadlodajnie] = useState([]);
     const [mode, setMode] = useState('default');
+    const [defaultWojewodztwo, setDefaultWojewodztwo] = useState();
+    const [defaultMiasto, setDefaultMiasto] = useState();
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
                 const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
                 const miastoValue = await AsyncStorage.getItem("miasto");
+                getWojewodztwa();
+                getMiastaForWojewodztwo(wojewodztwoValue);
                 setWojewodztwo(wojewodztwoValue);
                 setMiasto(miastoValue);
-                console.log(wojewodztwoValue);
-                console.log(miastoValue);
-                const res = await Connection.getJadlodajnie(wojewodztwoValue, miastoValue);
-                res
-                    .json()
-                    .then(res => {
-                        setJadlodajnie(res);
-                        setIsLoading(false);
-                    })
-                    .catch(err => console.log(err + 'blad'));
+                setDefaultWojewodztwo(wojewodztwoValue);
+                setDefaultMiasto(miastoValue);
+                getEatingHousesNames();
+                getTagi();
+                getJadlodajnie(wojewodztwoValue, miastoValue);
             }, 300);
         }
     }
+    async function getJadlodajnie(wojewodztwo, miasto) {
+        const res = await Connection.getJadlodajnie(wojewodztwo, miasto);
+        res
+            .json()
+            .then(res => {
+                if (searchResultsLoading) {
+                    getSearchResults(res);
+                }
+                else {
+                    setJadlodajnie(res);
+                }
+                setIsLoading(false);
+            })
+            .catch(err => console.log(err + 'blad'));
+    }
+    async function getEatingHousesNames() {
+        setNames([]);
+        const res = await Connection.getEatingHousesNames();
+        res
+            .json()
+            .then(res => {
+                setNames(res);
+            })
+            .catch(err => console.log(err + 'blad'));
+    }
+    async function getTagi() {
+        setTags([]);
+        const res = await Connection.getTags();
+        res
+            .json()
+            .then(res => {
+                res.map((tag) => {
+                    setTags(tags => [...tags, { id: tag.id, name: tag.name, selected: false, color: 'black' }]);
+                })
+            })
+            .catch(err => console.log(err + 'blad'));
+        setMode('restart');
+    }
+
+    //pobieranie województw
+    async function getWojewodztwa() {
+        if (wojewodztwa.length <= 1) {
+            const wojewodztwaResponse = await Connection.getWojewodztwa();
+            wojewodztwaResponse
+                .json()
+                .then(res => {
+                    res.map((item) => {
+                        setWojewodztwa(wojewodztwa => [...wojewodztwa, new PickerItem(item.name, item.slug, 0, 0, 0)]);
+                    });
+                })
+                .catch(err => console.log(err + 'blad'));
+        }
+    }
+    //pobieranie miast dla województwa
+    async function getMiastaForWojewodztwo(wojewodztwo) {
+        const res = await Connection.getMiastaForWojewodztwo(wojewodztwo);
+        res
+            .json()
+            .then(res => {
+                setMiasta([new PickerItem("Wybierz miasto...", "default", 0, 0, 0)]);
+                res.map((item) => {
+                    setMiasta(miasta => [...miasta, new PickerItem(item.name, item.slug, item.latitude, item.longitude, item.zoom)]);
+                });
+                setIsPickerLoading(false);
+                setWojewodztwoEnabled(true);
+                setMiastoEnabled(true);
+            })
+            .catch(err => console.log(err + 'blad'));
+    }
+
+    const onWojewodztwoChangedHandler = (wojewodztwo) => {
+        setWojewodztwo(wojewodztwo.value);
+        if (wojewodztwo.value !== "default") {
+            setIsPickerLoading(true);
+            setWojewodztwoEnabled(false);
+            setMiastoEnabled(false);
+            setMiasto("default");
+            getMiastaForWojewodztwo(wojewodztwo.value);
+        }
+        else {
+            setMiasto("default");
+            setMiastoEnabled(false);
+        }
+    }
+
+    const onMiastoChangedHandler = (miasto) => {
+        setMiasto(miasto.value);
+    }
 
     navigation.addListener("focus", () => {
-        //setMapLoaded(false);
         setIsLoading(true);
     })
 
     useEffect(() => {
-        fetchData();
-    }, [isLoading]);
-
-    const multiSelectItems = [{
-        id: '92iij',
-        name: 'Pierogi',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'a0s0a8ssbsds',
-        name: 'Kapustka',
-        selected: false,
-        color: 'black'
-    }, {
-        id: '16hbajsabsds',
-        name: 'Kotlet',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'nahs75a5sgs',
-        name: 'Brokuły',
-        selected: false,
-        color: 'black'
-    }, {
-        id: '667atsas',
-        name: 'Ciasto',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'hsyasajss',
-        name: 'Kurczak',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'djsjudksjds',
-        name: 'Pierwsze danie',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'sdhyaysdjs',
-        name: 'Śniadanie',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'suudydjsjds',
-        name: 'Obiad',
-        selected: false,
-        color: 'black'
-    }, {
-        id: 'suudydjsjdss',
-        name: 'Kolacja',
-        selected: false,
-        color: 'black'
-    }
-
-    ];
-
+        if (isLoading)
+            fetchData();
+        else if (searchResultsLoading)
+            getJadlodajnie(wojewodztwo, miasto);
+    }, [isLoading, searchResultsLoading]);
 
     const HomeButtonHandler = () => {
         navigation.openDrawer();
     }
     const toggleSearchView = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeIn);
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setDetailedSearchExpanded(false);
-        setSliderOpacity(0);
         setExpanded(!expanded);
     }
     const toggleDetailedSearchView = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeIn);
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setDetailedSearchExpanded(!detailedSearchExpanded);
     }
-    const toggleSlider = () => {
-        if (sliderOpacity === 0) {
-            setTimeout(function () {
-                setSliderOpacity(1);
-            }, 150);
-        }
-        else {
-            setSliderOpacity(0);
-        }
+
+    const onSearchClicked = () => {
+        toggleSearchView();
+        setSearchResultsLoading(true);
     }
 
-    items = [{
-        id: '92iijs7yta',
-        name: 'Pełny gar',
-    }, {
-        id: 'a0s0a8ssbsd',
-        name: 'Stołówka warmińska',
-    }, {
-        id: '16hbajsabsd',
-        name: 'Bistro-Kociołek',
-    }, {
-        id: 'nahs75a5sg',
-        name: 'Bar Kąsek',
-    }, {
-        id: '667atsas',
-        name: 'Bar u Sióstr',
-    }, {
-        id: 'hsyasajs',
-        name: 'Bistro Kopernika',
-    }, {
-        id: 'djsjudksjd',
-        name: 'Kuźnia smaków',
-    }, {
-        id: 'sdhyaysdj',
-        name: 'Kwadrans',
-    }, {
-        id: 'suudydjsjd',
-        name: 'Feta',
-    }];
-
-
+    const getSearchResults = (jadlodajnie) => {
+        let searchResults = jadlodajnie;
+        if (searchViewValue !== "") {
+            searchResults = searchResults.filter((jadlodajnia) => jadlodajnia.name === searchViewValue);
+        }
+        if (chosenItems.length > 0) {
+            let tmpJadlodajnieArray = [];
+            let tags = chosenItems;
+            tags.map(chosenTag => {
+                searchResults.map(jadlodajnia => {
+                    jadlodajnia.eatingHouseTagList.map((tag) => {
+                        if(chosenTag.name === tag.name){
+                            let result = 1;
+                            tmpJadlodajnieArray.map((tmpJadlodajnia)=>{
+                                if(jadlodajnia.name === tmpJadlodajnia.name)
+                                    result = 0;
+                            })
+                            if(result==1){
+                                tmpJadlodajnieArray.push(jadlodajnia);
+                            }
+                        }
+                    })
+                })
+            })           
+            searchResults = tmpJadlodajnieArray; 
+        }
+        setJadlodajnie(searchResults);
+        setSearchResultsLoading(false);
+    }
 
     let searchButton;
     if (Platform.OS === "android" && Platform.Version >= 21)
-        searchButton = <AndroidButton text="Wyszukaj" containerStyle={{ width: '60%', alignSelf: 'center', marginTop: 12 }} onClick={toggleSearchView} />
+        searchButton = <AndroidButton text="Wyszukaj" containerStyle={{ width: '60%', alignSelf: 'center', marginTop: 12 }} onClick={() => { onSearchClicked() }} />
     if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21))
-        searchButton = <IosButton text="Wyszukaj" onClick={toggleSearchView} />
+        searchButton = <IosButton text="Wyszukaj" onClick={() => { onSearchClicked() }} />
 
 
     navigation.setOptions({
@@ -207,7 +240,7 @@ function JadlodajnieScreen({ navigation, route }) {
     });
 
     let content;
-    if (isLoading) {
+    if (isLoading || searchResultsLoading) {
         content = <CustomLoadingComponent />
     }
     else {
@@ -216,21 +249,21 @@ function JadlodajnieScreen({ navigation, route }) {
                 <FlatList
                     scrollEnabled={expanded ? false : true}
                     data={jadlodajnie} renderItem={({ item, index }) =>
-                        <Jadlodajnia  containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} onMoreClick={(jadlodajniaId) => { 
-                            navigation.navigate('JadlodajnieWiecej', { jadlodajniaSlug:item.slug, wojewodztwo: wojewodztwo, miasto: miasto }); 
+                        <Jadlodajnia containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} onMoreClick={(jadlodajniaId) => {
+                            navigation.navigate('JadlodajnieWiecej', { jadlodajniaSlug: item.slug, wojewodztwo: wojewodztwo, miasto: miasto });
                         }}
-                             jadlodajnia={item} ></Jadlodajnia>}
+                            jadlodajnia={item} ></Jadlodajnia>}
                     keyExtractor={item => item.id.toString()}
                 />
         }
         else {
-            content = <PlaceHolder text={"Ups, nie ma \ntakich restauracji"} src={require('../src/images/plate_v2.png')} />
+            content = <PlaceHolder text={"Ups, nie ma \ntakich restauracji"} src={require('../src/images/plate_v2.png')} containerStyle={{ opacity: detailedSearchExpanded ? 0 : 1 }} />
         }
     }
     function applyFilter(text) {
         setSearchViewValue(text);
         if (text !== "") {
-            const filterResults = items.filter(item => {
+            const filterResults = names.filter(item => {
                 const itemData = item.name.toLowerCase();
                 const searchResult = text.toLowerCase();
                 return itemData.indexOf(searchResult) > -1;
@@ -244,113 +277,118 @@ function JadlodajnieScreen({ navigation, route }) {
 
 
     return (
-        <View style={styles.container} >
+        <View style={styles.container}>
             <View style={{
                 height: expanded ? null : 0,
-                display: expanded ? 'flex' : 'none', overflow: 'hidden', backgroundColor: Colors.backgroundColor, borderWidth: 2,
+                display: expanded ? 'flex' : 'none',
+                overflow: 'hidden',
+                zIndex: 9999,
+                backgroundColor: Colors.backgroundColor,
+                borderWidth: expanded ? 2 : 0,
                 paddingVertical: 12,
                 alignItems: 'center',
-                borderColor: Colors.primary, borderBottomLeftRadius: 16, borderBottomRightRadius: 16
+                borderColor: Colors.primary,
+                borderBottomLeftRadius: 16,
+                borderBottomRightRadius: 16
             }}>
-
-                <Text style={{ fontSize: 16, marginTop: 6, marginBottom: 6 }}>Nazwa Jadłodajnii</Text>
-                <View style={{ width: '85%', alignItems: 'center' }}>
-                    <SearchBar
-                        onCancel={() => { setSearchResults([]); }}
-                        placeholder="Wyszukaj jadłodajnie..."
-                        platform="android"
-                        inputStyle={{ fontSize: 16 }}
-                        onFocus={() => { applyFilter(searchViewValue) }}
-                        onSubmitEditing={() => { setSearchResults([]) }}
-                        containerStyle={{ borderRadius: dimensions.defaultBorderRadius }}
-                        onChangeText={(text) => applyFilter(text)}
-                        value={searchViewValue}
-                    />
-                    <FlatList
-                        keyboardShouldPersistTaps='handled'
-                        style={{
-                            height: searchResults.length * 40 <= 160 ? searchResults.length * 40 : 160,
-                        }}
-                        data={searchResults} renderItem={({ item, index }) => {
-                            return (
-                                <TouchableNativeFeedback onPress={() => {
-                                    setSearchViewValue(item.name)
-                                    setSearchResults([]);
-                                    Keyboard.dismiss();
-                                }}
-                                >
-                                    <View style={{ height: 40, width: 85 * width / 100, alignItems: 'center', justifyContent: 'center', }}>
-                                        <Text style={{ fontSize: 16 }}>{item.name}</Text>
-                                    </View>
-                                </TouchableNativeFeedback>
-                            )
-                        }}
-                    />
-                    <TouchableOpacity onPress={() => {
-                        setSearchResults([]);
-                        Keyboard.dismiss();
-                        toggleDetailedSearchView();
-                        toggleSlider();
-                    }}>
-                        <Text style={{ fontSize: 16, color: Colors.accent, marginTop: 12 }}>{!detailedSearchExpanded ? "Zaawansowane" : "Schowaj zaawansowane"}</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={{
-                    height: detailedSearchExpanded ? null : 0,
-                    display: detailedSearchExpanded ? 'flex' : 'none', overflow: 'hidden',
-                    paddingVertical: 12,
+                <ScrollView style={{
                     width: '100%',
-                    alignItems: 'center',
-                }}>
-                    <Text style={{ fontSize: 16, marginTop: dimensions.defaultMargin, marginBottom: Dimensions.defaultSmallMargin }}>Odległość od lokalizacji</Text>
-                    <View style={{ justifyContent: 'center', }}>
-                        <View style={{ width: "100%", flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                            <Text style={{ textAlign: 'center', flex: 1 }}>1km</Text>
-                            <Slider
-                                style={{ width: "75%", height: 40, opacity: sliderOpacity }}
-                                animateTransitions={true}
-                                minimumValue={1}
-                                maximumValue={50}
-                                value={sliderValue}
-                                onValueChange={(value) => {
-                                    setSliderValue(value)
-                                    setIndicatorValue(12.5 + ((value - 1) * 75 / 54) + '%')
-                                }}
-                                step={1}
-                                minimumTrackTintColor={Colors.primary}
-                                trackStyle={{ height: 6 }}
-                                thumbStyle={{
-                                    height: 24, width: 24, borderColor: Colors.primary, backgroundColor: Colors.accent, borderWidth: 6, borderRadius: 12
-                                }}
-                            />
-                            <Text style={{ textAlign: 'center', flex: 1 }}>50km</Text>
-                        </View>
-                        <View style={{ width: 24, justifyContent: 'center', borderRadius: 6, borderWidth: 1, borderColor: Colors.accent, backgroundColor: Colors.colorTextWhite, height: 24, left: indicatorValue }}>
-                            <Text style={{ textAlign: 'center' }}>{sliderValue}</Text>
-                        </View>
+                }}
+                    contentContainerStyle={{
+                        alignItems: 'center'
+                    }}
+                    keyboardShouldPersistTaps='handled'
+                >
+                    <Text style={{ fontSize: 16, marginTop: 6, marginBottom: 6 }}>Nazwa Jadłodajnii</Text>
+                    <View style={{ width: '85%', alignItems: 'center' }}>
+                        <SearchBar
+                            onCancel={() => { setSearchResults([]); }}
+                            placeholder="Wyszukaj jadłodajnie..."
+                            platform="android"
+                            inputStyle={{ fontSize: 16 }}
+                            onFocus={() => { applyFilter(searchViewValue) }}
+                            onSubmitEditing={() => { setSearchResults([]) }}
+                            containerStyle={{ borderRadius: dimensions.defaultBorderRadius }}
+                            onChangeText={(text) => applyFilter(text)}
+                            value={searchViewValue}
+                        />
+                        <FlatList
+                            keyboardShouldPersistTaps='handled'
+                            style={{
+                                height: searchResults.length * 40 <= 160 ? searchResults.length * 40 : 160,
+                            }}
+                            data={searchResults} renderItem={({ item, index }) => {
+                                return (
+                                    <TouchableNativeFeedback onPress={() => {
+                                        setSearchViewValue(item.name)
+                                        setSearchResults([]);
+                                        Keyboard.dismiss();
+                                    }}
+                                    >
+                                        <View style={{ height: 40, width: 85 * width / 100, alignItems: 'center', justifyContent: 'center', }}>
+                                            <Text style={{ fontSize: 16 }}>{item.name}</Text>
+                                        </View>
+                                    </TouchableNativeFeedback>
+                                )
+                            }}
+                        />
+                        <TouchableOpacity onPress={() => {
+                            setSearchResults([]);
+                            Keyboard.dismiss();
+                            toggleDetailedSearchView();
+                        }}>
+                            <Text style={{ fontSize: 16, color: Colors.accent, marginTop: 12 }}>{!detailedSearchExpanded ? "Zaawansowane" : "Schowaj zaawansowane"}</Text>
+                        </TouchableOpacity>
                     </View>
-                    <Text style={styles.title}>Tagi</Text>
-                    <CustomMultiSelect placeHolder="Wybierz tagi (max 3)" items={multiSelectItems} chosenItems={chosenItems} mode={mode}
-                        onAddItem={(item) => {
-                            setMode("defualt");
-                            setChosenItems(currentItems => [...currentItems, { id: item.id, name: item.name, selected: !item.selected, color: 'black' }]);
-                        }} onRemoveItem={(item) => {
-                            setChosenItems(currentItems => {
-                                return currentItems.filter((chosenItem) => chosenItem.id !== item.id);
-                            });
-                        }}
-                    />
-                </View>
-                {searchButton}
-                <TouchableOpacity onPress={() => {
-                    setSearchViewValue("");
-                    setSliderValue(25);
-                    setIndicatorValue(12.5 + ((25 - 1) * 75 / 54) + '%');
-                    setChosenItems([]);
-                    setMode("restart");
-                }}>
-                    <Text style={{ fontSize: 16, color: Colors.accent, marginTop: 6 }}>Przywróć domyślne</Text>
-                </TouchableOpacity>
+                    <View style={{
+                        height: detailedSearchExpanded ? null : 0,
+                        display: detailedSearchExpanded ? 'flex' : 'none', overflow: 'hidden',
+                        paddingVertical: 12,
+                        width: '100%',
+                        alignItems: 'center',
+                    }}>
+                        <CustomPicker
+                            containerStyle={{ opacity: wojewodztwoEnabled ? 1 : 0.5, marginTop: 12 }}
+                            pickerItems={wojewodztwa} selectedValue={wojewodztwo}
+                            enabled={wojewodztwoEnabled}
+                            onPickerChange={(wojewodztwo) => onWojewodztwoChangedHandler(wojewodztwo)}
+                        />
+                        <CustomPicker containerStyle={{ opacity: miastoEnabled ? 1 : 0.5, marginVertical: 12 }}
+                            enabled={miastoEnabled}
+                            pickerItems={miasta} selectedValue={miasto}
+                            onPickerChange={(miasto) => onMiastoChangedHandler(miasto)}
+                        />
+                        <ActivityIndicator size="large" color={Colors.primary} animating={isPickerLoading} style={{}} />
+                        <Text style={styles.title}>Tagi</Text>
+                        <CustomMultiSelect placeHolder="Wybierz tagi (max 3)" items={tags} chosenItems={chosenItems} mode={mode}
+                            onAddItem={(item) => {
+                                setMode("defualt");
+                                setChosenItems(currentItems => [...currentItems, { id: item.id, name: item.name, selected: !item.selected, color: 'black' }]);
+                            }} onRemoveItem={(item) => {
+                                setChosenItems(currentItems => {
+                                    return currentItems.filter((chosenItem) => chosenItem.id !== item.id);
+                                });
+                            }}
+                        />
+                    </View>
+                    {searchButton}
+                    <TouchableOpacity onPress={() => {
+                        setSearchViewValue("");
+                        setChosenItems([]);
+                        tags.map((tag) => {
+                            tag.selected = false;
+                        })
+                        setMode("restart");
+                        setIsPickerLoading(true);
+                        setWojewodztwoEnabled(false);
+                        setMiastoEnabled(false);
+                        getMiastaForWojewodztwo(defaultWojewodztwo);
+                        setWojewodztwo(defaultWojewodztwo);
+                        setMiasto(defaultMiasto);
+                    }}>
+                        <Text style={{ fontSize: 16, color: Colors.accent, marginTop: 6 }}>Przywróć domyślne</Text>
+                    </TouchableOpacity>
+                </ScrollView>
             </View>
             <ImageBackground source={require('../src/images/pancakes.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>
                 {content}
@@ -371,7 +409,7 @@ const Jadlodajnie = props => {
     return (
         <Stack.Navigator initialRouteName="Jadlodajnie" screenOptions={ScreenStyle}>
             <Stack.Screen name="Jadlodajnie" component={JadlodajnieScreen} initialParams={{ drawerNavigation: props.navigation }} />
-            <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej} 
+            <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
                 options={{
                     headerStyle: {
                         opacity: 0, height: 0
@@ -399,6 +437,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: dimensions.defaultMargin,
         color: Colors.colorTextDark,
+        fontSize: 16
     }
 });
 
