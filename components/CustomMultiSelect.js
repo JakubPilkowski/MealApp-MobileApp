@@ -8,7 +8,7 @@ import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
 const { width, height } = Dimensions.get("screen");
 
 
-const CustomMultiSelect = props => {
+const CustomMultiSelect = (props) =>{
 
     const [searchViewValue, setSearchViewValue] = useState("");
     const [visibility, setVisisbility] = useState(false);
@@ -23,6 +23,9 @@ const CustomMultiSelect = props => {
             count++;
         }
     });
+
+ 
+
     const onAddItemHandler = (item, index) => {
         if (item.selected === true) {
             count--;
@@ -86,7 +89,7 @@ const CustomMultiSelect = props => {
             transparent={true}
             animationType={"fade"}>
             <View style={{ margin: 20, marginVertical: 125, minHeight: height - 290, alignSelf: "center", backgroundColor: Colors.backgroundColor, padding: 12, borderRadius: 6, borderColor: Colors.primary, borderWidth: 2 }}>
-                <Text style={{ color: Colors.colorTextDark, fontSize: 18, textAlign: "center" }}>Wybierz intersujące dania</Text>
+                <Text style={{ color: Colors.colorTextDark, fontSize: 18, textAlign: "center" }}>Wybierz intersujące tagi</Text>
                 <SearchBar
                     onCancel={() => { setSearchResults(items); }}
                     placeholder="Wyszukaj..."
@@ -179,6 +182,7 @@ const CustomMultiSelect = props => {
                     <TouchableNativeFeedback background={TouchableNativeFeedback.Ripple(Colors.accent, true)}
                         onPress={() => {
                             if (props.mode === "restart") {
+                                console.log(props.items);
                                 setItems(props.items);
                                 setSearchResults(props.items);
                                 count = 0;
@@ -220,10 +224,7 @@ const CustomMultiSelect = props => {
         </View>
     )
 
-
 }
-
-
 
 const styles = StyleSheet.create({
     mainContainer: {
