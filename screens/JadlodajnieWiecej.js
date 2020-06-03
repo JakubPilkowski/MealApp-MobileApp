@@ -230,6 +230,11 @@ const JadlodajnieWiecej = props => {
                         </Text>
                         {staticContent}
                     </View>
+                    <View style={{ backgroundColor: Colors.colorTextWhite, marginHorizontal: 12, borderRadius: 12, padding: 14, marginBottom: 24 }}>
+                        <Text style={{ textAlign: 'center', fontSize: 20,}}>
+                            Dostępne Punkty
+                        </Text>
+                    </View>
                     <SafeAreaView>
                         {dataSource.addressList.map(localizationInfo => renderLocalizationInfo(dataSource, localizationInfo))}
                     </SafeAreaView>
