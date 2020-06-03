@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Animated, Easing, Modal } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
@@ -10,7 +10,7 @@ const CustomLoadingComponent = props => {
     const dotOneValue = new Animated.Value(0);
     const dotTwoValue = new Animated.Value(0);
     const dotThreeValue = new Animated.Value(0);
-
+    const [blockNextAnimations , setBlockNextAnimations] = useState(true);
     function loaderImageAnim() {
         spinValue.setValue(0);
         bounceValue.setValue(0);
@@ -65,9 +65,10 @@ const CustomLoadingComponent = props => {
             ]
         ).start(() => loadTextAnim())
     }
-
-    loaderImageAnim();
-    loadTextAnim();
+    useEffect(()=>{
+        loaderImageAnim();
+        loadTextAnim();
+    }, [blockNextAnimations])
     const spin = spinValue.interpolate({
         inputRange: [0, 0.5, 1],
         outputRange: ['0deg', '360deg', '720deg']
@@ -99,6 +100,7 @@ const CustomLoadingComponent = props => {
     return (
         <Modal transparent={true}
             visible={true}
+            animatedType={'none'}
         >
             <View style={{ flex: 1, alignItems: "center", justifyContent: 'center', borderColor: Colors.primary }}>
                 <View style={{ width: "100%", alignItems: 'center' }}>

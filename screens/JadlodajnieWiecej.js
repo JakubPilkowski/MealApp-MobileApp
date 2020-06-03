@@ -4,7 +4,7 @@ import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
 const HEADER_EXPANDED_HEIGHT = 225;
 const HEADER_COLLAPSED_HEIGHT = 56;
-import { Ionicons, FontAwesome, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome, Feather, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import Connection from '../service/Connection';
 import IconWithAction from '../components/IconWithAction';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
@@ -23,6 +23,7 @@ const JadlodajnieWiecej = props => {
     const [isFavourite, setIsFavourite] = useState(false);
     const [scrollIndex, setScrollIndex] = useState();
     const [favouriteButtonEnabled, setFavouriteButtonEnabled] = useState(true);
+    const colors = ['crimson', 'darkgreen', 'darkmagenta', 'darkorange', 'darkturquoise', 'hotpink'];
     const [display, setDisplay] = useState(true);
     async function fetchData() {
         if (isLoading) {
@@ -48,10 +49,10 @@ const JadlodajnieWiecej = props => {
     useEffect(() => {
         fetchData();
     }, [isLoading]);
-    
-    BackHandler.addEventListener('hardwareBackPress', () =>{
+
+    BackHandler.addEventListener('hardwareBackPress', () => {
         setDisplay(false);
-        props.navigation.goBack();
+        // props.navigation.goBack();
     })
     let content;
 
@@ -71,12 +72,12 @@ const JadlodajnieWiecej = props => {
             extrapolate: 'clamp'
         });
         const titlePadding = scrollY.interpolate({
-            inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
-            outputRange: [6, 0]
+            inputRange: [0,(HEADER_EXPANDED_HEIGHT-HEADER_COLLAPSED_HEIGHT)/2, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
+            outputRange: [6,0,0]
         });
         const titleBackground = scrollY.interpolate({
-            inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
-            outputRange: [Colors.primary, 'transparent']
+            inputRange: [0,(HEADER_EXPANDED_HEIGHT-HEADER_COLLAPSED_HEIGHT)/2, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
+            outputRange: [Colors.primary, 'transparent', 'transparent']
         })
         let staticContent;
         let staticContentValue = "";
@@ -172,17 +173,17 @@ const JadlodajnieWiecej = props => {
                         <Animated.Text style={[styles.headerExpanded, { backgroundColor: titleBackground, padding: titlePadding }]}>{dataSource.name}</Animated.Text>
                     </Animated.View>
                 </Animated.View>
-                <View style={[styles.backButtonContainer, { left: 0 }]}>
-                    <TouchableOpacity
-                        onPress={() => {
-                            setDisplay(false);
-                            props.navigation.goBack();
-                        }}>
-                        <Ionicons name="ios-arrow-round-back" size={36} color={Colors.colorTextWhite}></Ionicons>
-                    </TouchableOpacity>
-                </View>
+                <Animated.View style={[styles.backButtonContainer, { left: 0 }]}>
+                    <IconWithAction  containerStyle={{backgroundColor: titleBackground,width:36,height:36,  borderRadius:24}} 
+                    content = {<AntDesign name="arrowleft" size={28} color={Colors.colorTextWhite}></AntDesign>}
+                    onClick={() => {
+                        setDisplay(false);
+                        props.navigation.goBack();
+                    }}
+                    />
+                </Animated.View>
                 <View style={[styles.backButtonContainer, { right: 0 }]}>
-                    <IconWithAction content={<FontAwesome name="star" color={iconColor} size={24} />} onClick={() => {
+                    <IconWithAction containerStyle={{backgroundColor: titleBackground,width:36,height:36, borderRadius:24}} content={<FontAwesome name="star" color={iconColor} size={24} />} onClick={() => {
                         if (favouriteButtonEnabled) {
                             if (isFavourite) {
                                 ToastAndroid.show("Usunięto z ulubionych !!!", ToastAndroid.SHORT);
@@ -237,11 +238,25 @@ const JadlodajnieWiecej = props => {
                         {staticContent}
                     </View>
                     <View style={{ backgroundColor: Colors.colorTextWhite, marginHorizontal: 12, borderRadius: 12, padding: 14, marginBottom: 24 }}>
-                        <Text style={{ textAlign: 'center', fontSize: 20,}}>
+                        <Text style={{ textAlign: 'center', fontSize: 20, marginBottom:6}}>
+                            Tagi
+                        </Text>
+                        <View style={{ flexWrap: 'wrap', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                            {dataSource.eatingHouseTagList.map((tag,index) => {
+                                  let colorIndex = Math.floor(Math.random() * (Math.floor(6) - Math.ceil(0))) + Math.ceil(0);
+                                  return (
+                                    <View style={{ height: 40, borderRadius: 20, paddingHorizontal: 18, justifyContent: 'center', paddingVertical: 3, marginBottom: 12, borderColor: colors[colorIndex], borderWidth: 2 }}>
+                                        <Text style={{ textAlign: 'center', color: colors[colorIndex], fontSize: 16 }}>{tag.name}</Text>
+                                    </View>)
+                            })}
+                        </View>
+                    </View>
+                    <View style={{ backgroundColor: Colors.colorTextWhite, marginHorizontal: 12, borderRadius: 12, padding: 14, marginBottom: 24 }}>
+                        <Text style={{ textAlign: 'center', fontSize: 20, }}>
                             Dostępne Punkty
                         </Text>
                     </View>
-                    <SafeAreaView style={{display: display ? 'flex': 'none'}}>
+                    <SafeAreaView style={{ display: display ? 'flex' : 'none' }}>
                         {dataSource.addressList.map(localizationInfo => renderLocalizationInfo(dataSource, localizationInfo))}
                     </SafeAreaView>
                 </ScrollView>
