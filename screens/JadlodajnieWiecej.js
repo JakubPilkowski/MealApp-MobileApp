@@ -2,10 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, FlatList, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
-import Strings from "../src/themes/strings";
 const HEADER_EXPANDED_HEIGHT = 225;
 const HEADER_COLLAPSED_HEIGHT = 56;
-import { Ionicons, FontAwesome, Feather } from '@expo/vector-icons';
+import { Ionicons, FontAwesome, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import Connection from '../service/Connection';
 import IconWithAction from '../components/IconWithAction';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
@@ -24,7 +23,7 @@ const JadlodajnieWiecej = props => {
     const [isFavourite, setIsFavourite] = useState(false);
     const [scrollIndex, setScrollIndex] = useState();
     const [favouriteButtonEnabled, setFavouriteButtonEnabled] = useState(true);
-
+    const [buttonEnabled, setButtonEnabled] = useState(true);
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
@@ -67,14 +66,87 @@ const JadlodajnieWiecej = props => {
             extrapolate: 'clamp'
         });
         const titlePadding = scrollY.interpolate({
-            inputRange : [0, HEADER_EXPANDED_HEIGHT- HEADER_COLLAPSED_HEIGHT],
-            outputRange : [6, 0]
+            inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
+            outputRange: [6, 0]
         });
         const titleBackground = scrollY.interpolate({
-            inputRange : [0, HEADER_EXPANDED_HEIGHT- HEADER_COLLAPSED_HEIGHT],
-            outputRange : [Colors.primary, 'transparent'] 
+            inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
+            outputRange: [Colors.primary, 'transparent']
+        })
+        let staticContent;
+        let staticContentValue = "";
+        let dailyContent;
+        dataSource.menuList.map(menuLista => {
+            menuLista.contentList.map(content => {
+                if (content.type === "STATIC") {
+                    staticContentValue = content.content;
+                }
+            })
         })
 
+        if (staticContentValue === "") {
+            staticContent =
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                    <MaterialCommunityIcons name="food-off" color={Colors.primary} size={56} />
+                    <Text style={{ fontSize: 16, textAlign: 'center' }}>Ta jadłodajnia nie udostępnia menu głównego</Text>
+                </View>
+        }
+        else {
+            staticContent =
+                <Text style={{ fontSize: 16, textAlign: 'justify' }}>{staticContentValue}</Text>
+        }
+        if (dataSource.menuList.length > 0) {
+            dailyContent =
+                <View style={{ flex: 1, flexDirection: 'row' }}>
+                    <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingRight: 6 }}>
+                        <TouchableOpacity onPress={() => {
+
+                            if (scrollIndex !== 0) {
+                                let index = scrollIndex - 1;
+                                setScrollIndex(index);
+                                scrollRef.current.scrollToIndex({ animated: true, index: index });
+                            }
+                        }}>
+                            <Feather name="arrow-left-circle" color={Colors.primary} size={36}></Feather>
+                        </TouchableOpacity>
+                    </View>
+                    <FlatList data={dataSource.menuList}
+                        horizontal={true}
+                        scrollEnabled={false}
+                        getItemLayout={(data, index) => (
+                            { length: width - 120, offset: (width - 120) * index, index }
+                        )
+                        }
+                        initialScrollIndex={scrollIndex}
+                        showsHorizontalScrollIndicator={false}
+                        ref={scrollRef}
+                        renderItem={itemData =>
+                            <View style={{ flexDirection: 'column', width: width - 120, }}>
+                                <ZestawsView date={itemData.item.date} contentList={itemData.item.contentList} />
+                            </View>
+                        }
+                        keyExtractor={item => item.id.toString()}
+                    />
+                    <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: "center", paddingStart: 6 }}>
+                        <TouchableOpacity onPress={() => {
+                            if (scrollIndex < dataSource.menuList.length - 1) {
+                                let index = scrollIndex + 1;
+                                setScrollIndex(index);
+                                scrollRef.current.scrollToIndex({ index: index });
+                            }
+                        }}>
+                            <Feather name="arrow-right-circle" color={Colors.primary} size={36}></Feather>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+        }
+        else {
+            dailyContent =
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                    <MaterialCommunityIcons name="food-off" color={Colors.primary} size={56} />
+                    <Text style={{ fontSize: 16, textAlign: 'center' }}>Ta jadłodajnia nie udostępnia aktualności</Text>
+                </View>
+        }
         // if(isFavourite){
         //     setIconColor("gold");
         // }
@@ -92,7 +164,7 @@ const JadlodajnieWiecej = props => {
                                 opacity: heroTitleOpacity,
                             }]}
                         ></Animated.Image>
-                        <Animated.Text style={[styles.headerExpanded, {backgroundColor: titleBackground ,padding: titlePadding}]}>{dataSource.name}</Animated.Text>
+                        <Animated.Text style={[styles.headerExpanded, { backgroundColor: titleBackground, padding: titlePadding }]}>{dataSource.name}</Animated.Text>
                     </Animated.View>
                 </Animated.View>
                 <View style={[styles.backButtonContainer, { left: 0 }]}>
@@ -139,56 +211,30 @@ const JadlodajnieWiecej = props => {
                         }])}
                     scrollEventThrottle={16}
                 >
-                    <Text style={{ fontSize: 20, textAlign: "center", marginVertical: dimensions.defaultHugeMargin }}>Aktualności</Text>
-                    <View style={{ flex: 1, flexDirection: 'row', marginBottom: dimensions.defaultMarginBetweenItems }}>
-                        <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 50 }}>
-                            <TouchableOpacity onPress={() => {
-                                console.log(scrollIndex);
-                                if (scrollIndex !== 0) {
-                                    let index = scrollIndex - 1;
-                                    setScrollIndex(index);
-                                    scrollRef.current.scrollToIndex({ animated: true, index: index });
-                                }
-                            }}>
-                                <Feather name="arrow-left-circle" color={Colors.primary} size={36}></Feather>
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList data={dataSource.menuList}
-                            horizontal={true}
-                            scrollEnabled={false}
-                            getItemLayout={(data, index) => (
-                                { length: width - 100, offset: (width - 100) * index, index }
-                            )
-                            }
-                            initialScrollIndex={scrollIndex}
-                            showsHorizontalScrollIndicator={false}
-                            ref={scrollRef}
-                            renderItem={itemData =>
-                                <View style={{ flexDirection: 'column', width: width - 100 }}>
-                                    <ZestawsView date={itemData.item.date} contentList={itemData.item.contentList} />
-                                </View>
-                            }
-                            keyExtractor={item => item.id.toString()}
-                        />
-                        <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: "center", width: 50 }}>
-                            <TouchableOpacity onPress={() => {
-                                if (scrollIndex < dataSource.menuList.length - 1) {
-                                    let index = scrollIndex + 1;
-                                    setScrollIndex(index);
-                                    scrollRef.current.scrollToIndex({ index: index });
-                                }
-                            }}>
-                                <Feather name="arrow-right-circle" color={Colors.primary} size={36}></Feather>
-                            </TouchableOpacity>
-                        </View>
+                    <View style={{
+                        backgroundColor: Colors.colorTextWhite,
+                        marginHorizontal: 12,
+                        borderRadius: 12,
+                        paddingVertical: 12,
+                        padding: 6,
+                        marginVertical: 24
+                    }}>
+
+                        <Text style={{ fontSize: 20, textAlign: "center", marginBottom: 6 }}>Aktualności</Text>
+                        {dailyContent}
+
                     </View>
-                    <Text style={{ textAlign: 'center', fontSize: 20, marginVertical: dimensions.defaultHugeMargin }}>
-                        Menu główne
-                                            </Text>
-                    <View style={{}}>
-                        <Text>UWAGA! Do odwołania nasze lokale pracują w godzinach 11:00 - 16:30.{'\n'}Obowiązuje zakaz spożywania posiłków na miejscu!{'\n'}Nadal funkcjonuje sprzedaż posiłków na wynos oraz z dowozem!{'\n'}Uprzejmie prosimy o zastosowanie zasady podchodzenia do bufetu pojedynczo oraz wchodzenia do lokalu nie więcej niż trzech osób w jednym momencie.{'\n'}Dostawy w zależności od odległości realizujemy za dodatkową opłatą.{'\n'}W ofercie stałej:{'\n'}codziennie, od godziny 11{'\n'}1. pierogi{'\n'}- z kapustą i grzybami 8 szt. cena 10,99 zł{'\n'}- z mięsem 8 szt. cena 10,99 zł{'\n'}- ruskie 8 szt. cena 10,99 zł{'\n'}{'\n'}2. duża zupa \"Pełny Gar\" cena 6,99 zł{'\n'}zupa codzienna cena 5,50 zł{'\n'}3. kotlet schabowy + zupa dnia + surówka cena 14,99 zł{'\n'}{'\n'}4. kompot cena 1,50 zł</Text>
+                    <View style={{ backgroundColor: Colors.colorTextWhite, marginHorizontal: 12, borderRadius: 12, padding: 14, marginBottom: 24 }}>
+                        <Text style={{ textAlign: 'center', fontSize: 20, marginBottom: 6 }}>
+                            Menu główne
+                        </Text>
+                        {staticContent}
                     </View>
-                    <Text style={{ textAlign: "center", fontSize: 20, marginBottom: dimensions.defaultHugeMargin }}>Dostępne punkty</Text>
+                    <View style={{ backgroundColor: Colors.colorTextWhite, marginHorizontal: 12, borderRadius: 12, padding: 14, marginBottom: 24 }}>
+                        <Text style={{ textAlign: 'center', fontSize: 20,}}>
+                            Dostępne Punkty
+                        </Text>
+                    </View>
                     <SafeAreaView>
                         {dataSource.addressList.map(localizationInfo => renderLocalizationInfo(dataSource, localizationInfo))}
                     </SafeAreaView>
@@ -207,7 +253,7 @@ const JadlodajnieWiecej = props => {
 
 function renderLocalizationInfo(informacje, lokalizacja) {
     return (
-        <JadlodajnieLocalizationDetails nazwa={informacje.nazwa} informacje={lokalizacja} />
+        <JadlodajnieLocalizationDetails informacje={lokalizacja} />
     );
 }
 const styles = StyleSheet.create({
@@ -251,7 +297,7 @@ const styles = StyleSheet.create({
         position: 'absolute', textAlign: "center", fontSize: 18, color: Colors.colorTextWhite, marginTop: 28,
     },
     headerExpanded: {
-        textAlign: 'center', fontSize: dimensions.toolbarFontSize, borderRadius:6, color: Colors.colorTextWhite, position: 'absolute', bottom: dimensions.defaultMargin
+        textAlign: 'center', fontSize: dimensions.toolbarFontSize, borderRadius: 6, color: Colors.colorTextWhite, position: 'absolute', bottom: dimensions.defaultMargin
     },
     scrollContainer: {
         paddingTop: HEADER_EXPANDED_HEIGHT

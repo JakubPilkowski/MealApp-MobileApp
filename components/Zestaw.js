@@ -17,7 +17,7 @@ const Zestaw = props => {
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: Dimensions.defaultMargin
+        marginBottom: Dimensions.defaultMargin
     },
     danie: {
         fontSize: Dimensions.defaultFontSize,
