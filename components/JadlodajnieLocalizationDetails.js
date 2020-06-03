@@ -82,13 +82,13 @@ const JadlodajnieLocalizationDetails = props => {
             <View style={styles.infoBackground}>
 
                 <Text style={[styles.centerAlignText, { marginBottom: 6 }]}>Mapa</Text>
-                <View >
+                <View style={{borderWidth:1, borderColor: 'white'}}>
                     <MapView provider={PROVIDER_GOOGLE}
                         scrollEnabled={false}
                         rotateEnabled={false}
                         pitchEnabled={false}
                         zoomEnabled={false}
-                        style={{ height: 200, borderColor: Colors.primary, borderWidth: dimensions.borderWidth }} initialRegion={{
+                        style={{ height: 200}} initialRegion={{
                             latitude: informacje.latitude,
                             longitude: informacje.longitude,
                             longitudeDelta: 0.003,

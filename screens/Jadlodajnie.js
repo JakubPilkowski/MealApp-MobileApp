@@ -48,7 +48,6 @@ function JadlodajnieScreen({ navigation, route }) {
     const [defaultMiasto, setDefaultMiasto] = useState();
     async function fetchData() {
         if (isLoading) {
-            setTimeout(async function () {
                 const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
                 const miastoValue = await AsyncStorage.getItem("miasto");
                 getWojewodztwa();
@@ -59,8 +58,7 @@ function JadlodajnieScreen({ navigation, route }) {
                 setDefaultMiasto(miastoValue);
                 getEatingHousesNames();
                 getTagi();
-                getJadlodajnie(wojewodztwoValue, miastoValue);
-            }, 300);
+                getJadlodajnie(wojewodztwoValue, miastoValue);    
         }
     }
     async function getJadlodajnie(wojewodztwo, miasto) {
@@ -249,7 +247,7 @@ function JadlodajnieScreen({ navigation, route }) {
                 <FlatList
                     scrollEnabled={expanded ? false : true}
                     data={jadlodajnie} renderItem={({ item, index }) =>
-                        <Jadlodajnia containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} onMoreClick={(jadlodajniaId) => {
+                        <Jadlodajnia containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} onMoreClick={() => {
                             navigation.navigate('JadlodajnieWiecej', { jadlodajniaSlug: item.slug, wojewodztwo: wojewodztwo, miasto: miasto });
                         }}
                             jadlodajnia={item} ></Jadlodajnia>}
