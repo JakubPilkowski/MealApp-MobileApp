@@ -1,16 +1,16 @@
 import React from "react";
-import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image, Animated } from 'react-native';
 import Dimensions from "../src/themes/dimensions";
 
 
 const IconWithAction = props => {
 
     return (
-        <View style={[styles.buttonContainer, props.containerStyle]}>
+        <Animated.View style={[styles.buttonContainer, props.containerStyle]}>
             <TouchableOpacity onPress={props.onClick}>             
                     {props.content}  
             </TouchableOpacity>
-        </View>
+        </Animated.View>
     );
 
 }

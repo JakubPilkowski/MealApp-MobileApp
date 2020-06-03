@@ -48,6 +48,7 @@ function JadlodajnieScreen({ navigation, route }) {
     const [defaultMiasto, setDefaultMiasto] = useState();
     async function fetchData() {
         if (isLoading) {
+            setTimeout(async function(){
                 const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
                 const miastoValue = await AsyncStorage.getItem("miasto");
                 getWojewodztwa();
@@ -56,9 +57,13 @@ function JadlodajnieScreen({ navigation, route }) {
                 setMiasto(miastoValue);
                 setDefaultWojewodztwo(wojewodztwoValue);
                 setDefaultMiasto(miastoValue);
-                getEatingHousesNames();
-                getTagi();
-                getJadlodajnie(wojewodztwoValue, miastoValue);    
+                await Promise.all([
+                    getEatingHousesNames(),
+                    getTagi(),
+                    getJadlodajnie(wojewodztwoValue, miastoValue)
+                ]);
+                setIsLoading(false);  
+            },200)
         }
     }
     async function getJadlodajnie(wojewodztwo, miasto) {
@@ -72,7 +77,6 @@ function JadlodajnieScreen({ navigation, route }) {
                 else {
                     setJadlodajnie(res);
                 }
-                setIsLoading(false);
             })
             .catch(err => console.log(err + 'blad'));
     }

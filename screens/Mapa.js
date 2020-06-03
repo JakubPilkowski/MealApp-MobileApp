@@ -45,16 +45,18 @@ function MapaScreen({ navigation, route }) {
                 const latitudeValue = await AsyncStorage.getItem('latitude');
                 const longitudeValue = await AsyncStorage.getItem('longitude');
                 const zoomValue = await AsyncStorage.getItem('zoom');
-                getWojewodztwa();
-                getMiastaForWojewodztwo(wojewodztwoValue);
                 setWojewodztwo(wojewodztwoValue);
                 setMiasto(miastoValue);
                 setLatitude(Number(latitudeValue));
                 setLongitude(Number(longitudeValue));
                 setZoom(Number(zoomValue));
-                getMapy(wojewodztwoValue, miastoValue);
+                await Promise.all([
+                    getWojewodztwa(),
+                    getMiastaForWojewodztwo(wojewodztwoValue),
+                    getMapy(wojewodztwoValue, miastoValue),
+                ])
                 setIsLoading(false);
-            }, 500);
+            }, 200);
         }
     }
     //pobieranie województw
@@ -66,7 +68,6 @@ function MapaScreen({ navigation, route }) {
                 .then(res => {
                     res.map((item) => {
                         setWojewodztwa(wojewodztwa => [...wojewodztwa, new PickerItem(item.name, item.slug, 0, 0, 0)]);
-
                     });
                 })
                 .catch(err => console.log(err + 'blad'));
@@ -82,7 +83,6 @@ function MapaScreen({ navigation, route }) {
                 res.map((item) => {
                     setMiasta(miasta => [...miasta, new PickerItem(item.name, item.slug, item.latitude, item.longitude, item.zoom)]);
                 });
-                setIsLoading(false);
                 setIsPickerLoading(false);
                 setWojewodztwoEnabled(true);
                 setMiastoEnabled(true);
@@ -91,7 +91,6 @@ function MapaScreen({ navigation, route }) {
     }
     //pobieranie punktów na mapie
     async function getMapy(wojewodztwo, miasto) {
-
         const mapsResponse = await Connection.getMapy(wojewodztwo, miasto);
         mapsResponse
             .json()
@@ -146,7 +145,6 @@ function MapaScreen({ navigation, route }) {
 
     //reload aplikacji po wejściu do zakładki mapy
     navigation.addListener("focus", () => {
-        //setMapLoaded(false);
         setIsLoading(true);
     })
 
@@ -188,6 +186,7 @@ function MapaScreen({ navigation, route }) {
     });
     //renderowanie ekranu
     if (isLoading || searchResultsLoading) {
+        console.log("ile razy jestem tutaj");
         return (
             <ImageBackground source={require('../src/images/lokalizacja.jpg')} style={{ flex: 1, backgroundColor: Colors.backgroundColor }} imageStyle={{ opacity: 0.3 }}>
                 <CustomLoadingComponent />
@@ -230,8 +229,8 @@ function MapaScreen({ navigation, route }) {
                 }}  >
                     {dataSource.map(jadlodajnia =>
                         jadlodajnia.addressList.map(punkt =>
-                            renderMarker(punkt, navigation,jadlodajnia)
-                            )
+                            renderMarker(punkt, navigation, jadlodajnia, wojewodztwo, miasto)
+                        )
                     )}
                 </MapView>
             </View>
@@ -250,7 +249,7 @@ function renderMarker(point, navigation, jadlodajnia, wojewodztwo, miasto) {
         }}
             key={point.id}
             onCalloutPress={() => {
-                // navigation.navigate('JadlodajnieWiecej', { jadlodajniaSlug: jadlodajnia.slug, wojewodztwo: wojewodztwo, miasto: miasto });
+                navigation.navigate('JadlodajnieWiecej', { jadlodajniaSlug: jadlodajnia.slug, wojewodztwo: wojewodztwo, miasto: miasto });
             }}
         >
             <Callout tooltip={true} >
