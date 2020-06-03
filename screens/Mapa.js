@@ -186,7 +186,6 @@ function MapaScreen({ navigation, route }) {
     });
     //renderowanie ekranu
     if (isLoading || searchResultsLoading) {
-        console.log("ile razy jestem tutaj");
         return (
             <ImageBackground source={require('../src/images/lokalizacja.jpg')} style={{ flex: 1, backgroundColor: Colors.backgroundColor }} imageStyle={{ opacity: 0.3 }}>
                 <CustomLoadingComponent />

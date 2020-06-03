@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet,AsyncStorage, ImageBackground, TextInput, Dimensions, ScrollView, Platform, TouchableNativeFeedback, TouchableOpacity, TouchableHighlight, ActivityIndicator, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, AsyncStorage, ImageBackground, TextInput, Dimensions, ScrollView, Platform, TouchableNativeFeedback, TouchableOpacity, TouchableHighlight, ActivityIndicator, SafeAreaView } from 'react-native';
 import colors from '../src/themes/colors';
 import { createStackNavigator } from '@react-navigation/stack';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -12,7 +12,7 @@ import {
 } from "react-native-vector-icons";
 import {
     CommonActions,
-  } from '@react-navigation/native';
+} from '@react-navigation/native';
 import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
@@ -140,12 +140,12 @@ function LogowanieScreen({ navigation }) {
                 await AsyncStorage.setItem('avatar', result.user.photoUrl);
                 navigation.dispatch({
                     ...CommonActions.reset({
-                        index:1,
-                        routes : [
-                           {name: "Home"}, 
+                        index: 1,
+                        routes: [
+                            { name: "Home" },
                         ]
                     }),
-                  });
+                });
             } else {
                 console.log("cancelled")
             }
@@ -154,43 +154,43 @@ function LogowanieScreen({ navigation }) {
         }
     }
 
-async function facebookLogin() {
-  try {
-    await Facebook.initializeAsync('2731653760400277');
-    const {
-      type,
-      token,
-      expires,
-      permissions,
-      declinedPermissions,
-    } = await Facebook.logInWithReadPermissionsAsync({
-      permissions: ['public_profile', 'email'],
-    });
-    if (type === 'success') {
-      // Get the user's name using Facebook's Graph API
-      const response = await fetch(`https://graph.facebook.com/me?fields=id,name,email,picture.height(512)&access_token=${token}`);
-      const data = await response.json();
-    
-      await AsyncStorage.setItem('authToken', token);
-    await AsyncStorage.setItem('facebookId', data.id);
-    await AsyncStorage.setItem('login', data.name);
-    await AsyncStorage.setItem('email', data.email);
-    await AsyncStorage.setItem('avatar', data.picture.data.url);
- navigation.dispatch({
+    async function facebookLogin() {
+        try {
+            await Facebook.initializeAsync('2731653760400277');
+            const {
+                type,
+                token,
+                expires,
+                permissions,
+                declinedPermissions,
+            } = await Facebook.logInWithReadPermissionsAsync({
+                permissions: ['public_profile', 'email'],
+            });
+            if (type === 'success') {
+                // Get the user's name using Facebook's Graph API
+                const response = await fetch(`https://graph.facebook.com/me?fields=id,name,email,picture.height(512)&access_token=${token}`);
+                const data = await response.json();
+
+                await AsyncStorage.setItem('authToken', token);
+                await AsyncStorage.setItem('facebookId', data.id);
+                await AsyncStorage.setItem('login', data.name);
+                await AsyncStorage.setItem('email', data.email);
+                await AsyncStorage.setItem('avatar', data.picture.data.url);
+                navigation.dispatch({
                     ...CommonActions.reset({
-                        index:1,
-                        routes : [
-                           {name: "Home"}, 
+                        index: 1,
+                        routes: [
+                            { name: "Home" },
                         ]
                     }),
-                  });
-    } else {
-      // type === 'cancel'
+                });
+            } else {
+                // type === 'cancel'
+            }
+        } catch ({ message }) {
+            alert(`Facebook Login Error: ${message}`);
+        }
     }
-  } catch ({ message }) {
-    alert(`Facebook Login Error: ${message}`);
-  }
-}
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
@@ -227,7 +227,7 @@ async function facebookLogin() {
                     <Text style={{ textAlign: 'center', color: colors.colorTextDark, fontSize: 16, marginVertical: dimensions.defaultHugeMargin }}>Inne opcje logowania</Text>
                     <View style={{ flexDirection: 'row', marginHorizontal: 20, marginBottom: 30 }}>
                         <View style={{ marginHorizontal: 20 }}>
-                            <TouchableOpacity onPress={()=> {facebookLogin()}}>
+                            <TouchableOpacity onPress={() => { facebookLogin() }}>
                                 <FontAwesome name="facebook-official" size={50} color="blue" />
                             </TouchableOpacity>
                         </View>

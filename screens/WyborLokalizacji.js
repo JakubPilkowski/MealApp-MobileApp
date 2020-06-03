@@ -9,7 +9,7 @@ import GradientDivider from '../components/GradientDivider';
 import Validation from '../service/Validation';
 import PickerItem from '../models/PickerItem';
 import CustomPicker from '../components/CustomPicker';
-
+import {CommonActions} from '@react-navigation/native';
 
 
 const WyborLokalizacji = props => {
@@ -20,8 +20,8 @@ const WyborLokalizacji = props => {
     const [miastoEnabled, setMiastoEnabled] = useState(false);
     const [errorMessage, setErrorMessage] = useState("\n");
     const [isLoading, setIsLoading] = useState(true);
-    const [wojewodztwa, setWojewodztwa] = useState([new PickerItem('Wybierz województwo...', 'default',0,0,0)]);
-    const [miasta, setMiasta] = useState([new PickerItem('Wybierz miasto...', 'default',0,0,0)]);
+    const [wojewodztwa, setWojewodztwa] = useState([new PickerItem('Wybierz województwo...', 'default', 0, 0, 0)]);
+    const [miasta, setMiasta] = useState([new PickerItem('Wybierz miasto...', 'default', 0, 0, 0)]);
     const [latitude, setLatitude] = useState();
     const [longitude, setLongitude] = useState();
     const [zoom, setZoom] = useState();
@@ -81,8 +81,15 @@ const WyborLokalizacji = props => {
             await AsyncStorage.setItem('miasto', miasto);
             await AsyncStorage.setItem('latitude', latitude.toString());
             await AsyncStorage.setItem('longitude', longitude.toString());
-            await AsyncStorage.setItem('zoom',zoom.toString());
-            props.navigation.navigate('Home');
+            await AsyncStorage.setItem('zoom', zoom.toString());
+            props.navigation.dispatch({
+                ...CommonActions.reset({
+                    index: 1,
+                    routes: [
+                        { name: "Home" },
+                    ]
+                }),
+            });
         }
         catch (error) {
             console.log(error);
@@ -96,7 +103,7 @@ const WyborLokalizacji = props => {
                 .json()
                 .then(res => {
                     res.map((item) => {
-                        setWojewodztwa(wojewodztwa => [...wojewodztwa, new PickerItem(item.name, item.slug,0,0,0)]);
+                        setWojewodztwa(wojewodztwa => [...wojewodztwa, new PickerItem(item.name, item.slug, 0, 0, 0)]);
                     });
 
                     setIsLoading(false);
@@ -110,7 +117,7 @@ const WyborLokalizacji = props => {
         res
             .json()
             .then(res => {
-                setMiasta([new PickerItem("Wybierz miasto...", "default",0,0,0)]);
+                setMiasta([new PickerItem("Wybierz miasto...", "default", 0, 0, 0)]);
                 res.map((item) => {
                     setMiasta(miasta => [...miasta, new PickerItem(item.name, item.slug, item.latitude, item.longitude, item.zoom)]);
                 });
