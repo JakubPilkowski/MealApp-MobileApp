@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList, ImageBackground, ActivityIndicator, AsyncStorage, Text, LayoutAnimation, Platform, TouchableOpacity, TouchableNativeFeedback, Keyboard, ScrollView } from "react-native";
 import Colors from "../src/themes/colors";
 import { createStackNavigator } from '@react-navigation/stack';
@@ -30,6 +30,7 @@ function JadlodajnieScreen({ navigation, route }) {
     const [searchResultsLoading, setSearchResultsLoading] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [searchViewValue, setSearchViewValue] = useState('');
+    const [isLoaded, setIsLoaded] = useState(false);
     const [names, setNames] = useState([]);
     const [tags, setTags] = useState([]);
     const [chosenItems, setChosenItems] = useState([]);
@@ -48,7 +49,7 @@ function JadlodajnieScreen({ navigation, route }) {
     const [defaultMiasto, setDefaultMiasto] = useState();
     async function fetchData() {
         if (isLoading) {
-            setTimeout(async function(){
+            setTimeout(async function () {
                 const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
                 const miastoValue = await AsyncStorage.getItem("miasto");
                 getWojewodztwa();
@@ -62,8 +63,8 @@ function JadlodajnieScreen({ navigation, route }) {
                     getTagi(),
                     getJadlodajnie(wojewodztwoValue, miastoValue)
                 ]);
-                setIsLoading(false);  
-            },200)
+                setIsLoading(false);
+            }, 200)
         }
     }
     async function getJadlodajnie(wojewodztwo, miasto) {
@@ -153,11 +154,9 @@ function JadlodajnieScreen({ navigation, route }) {
     const onMiastoChangedHandler = (miasto) => {
         setMiasto(miasto.value);
     }
-
-    navigation.addListener("focus", () => {
-        setIsLoading(true);
+    navigation.addListener("focus" , ()=>{
+            setIsLoading(true);
     })
-
     useEffect(() => {
         if (isLoading)
             fetchData();
@@ -194,20 +193,20 @@ function JadlodajnieScreen({ navigation, route }) {
             tags.map(chosenTag => {
                 searchResults.map(jadlodajnia => {
                     jadlodajnia.eatingHouseTagList.map((tag) => {
-                        if(chosenTag.name === tag.name){
+                        if (chosenTag.name === tag.name) {
                             let result = 1;
-                            tmpJadlodajnieArray.map((tmpJadlodajnia)=>{
-                                if(jadlodajnia.name === tmpJadlodajnia.name)
+                            tmpJadlodajnieArray.map((tmpJadlodajnia) => {
+                                if (jadlodajnia.name === tmpJadlodajnia.name)
                                     result = 0;
                             })
-                            if(result==1){
+                            if (result == 1) {
                                 tmpJadlodajnieArray.push(jadlodajnia);
                             }
                         }
                     })
                 })
-            })           
-            searchResults = tmpJadlodajnieArray; 
+            })
+            searchResults = tmpJadlodajnieArray;
         }
         setJadlodajnie(searchResults);
         setSearchResultsLoading(false);
