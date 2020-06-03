@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, FlatList, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid } from 'react-native';
+import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, FlatList, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid, BackHandler } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
 const HEADER_EXPANDED_HEIGHT = 225;
@@ -23,7 +23,7 @@ const JadlodajnieWiecej = props => {
     const [isFavourite, setIsFavourite] = useState(false);
     const [scrollIndex, setScrollIndex] = useState();
     const [favouriteButtonEnabled, setFavouriteButtonEnabled] = useState(true);
-    const [buttonEnabled, setButtonEnabled] = useState(true);
+    const [display, setDisplay] = useState(true);
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
@@ -41,13 +41,18 @@ const JadlodajnieWiecej = props => {
                         setIsLoading(false);
                     })
                     .catch(err => console.log(err + 'blad'));
-            }, 500);
+            }, 200);
         }
     }
 
     useEffect(() => {
         fetchData();
     }, [isLoading]);
+    
+    BackHandler.addEventListener('hardwareBackPress', () =>{
+        setDisplay(false);
+        props.navigation.goBack();
+    })
     let content;
 
     if (isLoading) {
@@ -170,6 +175,7 @@ const JadlodajnieWiecej = props => {
                 <View style={[styles.backButtonContainer, { left: 0 }]}>
                     <TouchableOpacity
                         onPress={() => {
+                            setDisplay(false);
                             props.navigation.goBack();
                         }}>
                         <Ionicons name="ios-arrow-round-back" size={36} color={Colors.colorTextWhite}></Ionicons>
@@ -235,7 +241,7 @@ const JadlodajnieWiecej = props => {
                             Dostępne Punkty
                         </Text>
                     </View>
-                    <SafeAreaView>
+                    <SafeAreaView style={{display: display ? 'flex': 'none'}}>
                         {dataSource.addressList.map(localizationInfo => renderLocalizationInfo(dataSource, localizationInfo))}
                     </SafeAreaView>
                 </ScrollView>

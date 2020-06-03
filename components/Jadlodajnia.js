@@ -17,32 +17,42 @@ const Jadlodajnia = props => {
     if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21)) {
         moreButton =
             <IosButton onClick={() => {
-                props.onMoreClick(jadlodajnia.id);
+                props.onMoreClick();
             }} text={Strings.more} />
     }
-    if (Platform.OS === 'android' && Platform.Version >=21) {
+    if (Platform.OS === 'android' && Platform.Version >= 21) {
         moreButton =
             <AndroidButton onClick={() => {
-                props.onMoreClick(jadlodajnia.id)
+                props.onMoreClick();
             }} text={Strings.more} containerStyle={styles.androidButtonView} buttonStyle={styles.buttonStyle} />
     }
+    let dailyContent;
+    if (jadlodajnia.menuList.length > 0) {
+        dailyContent =
+            jadlodajnia.menuList.map(menuListItem =>
+                menuListItem.contentList.map(zestaw => renderZestaw(zestaw))
+            )
+    }
+    else {
+        dailyContent =
+            <Text style={{fontSize: 16, textAlign:'center'}}>Ta jadłodajnia nie udostępnia dzisiejszych zestawów</Text>
+    }
+
     return (
         <View key={jadlodajnia.id} style={[styles.container, props.containerStyle]}>
             <View style={styles.avatarContainer}>
-                <Image style={styles.image} source={jadlodajnia.logoUrl !== "notImplemented" ? {uri:jadlodajnia.logoUrl}: require("../src/images/ikonka_v3.png")} ></Image>
+                <Image style={styles.image} source={jadlodajnia.logoUrl !== "notImplemented" ? { uri: jadlodajnia.logoUrl } : require("../src/images/ikonka_v3.png")} ></Image>
                 <View style={{ flexDirection: 'column', flex: 1, justifyContent: "center" }}>
-                    <Text style={styles.avatarName}>{jadlodajnia.name}</Text>
+                    <Text style={[styles.avatarName, {fontSize: jadlodajnia.name.length > 15 ? 20 : 24}]}>{jadlodajnia.name}</Text>
                     <GradientDivider startColor={Colors.primary} endColor={Colors.accent}
                         from="left" locationEnd={0.7} dividerStyle={{ flex: 0 }} />
-                    <Text style={styles.avatarName}></Text>
+                    <Text style={[styles.avatarName, {fontSize: jadlodajnia.name.length > 15 ? 20 : 24}]}></Text>
                 </View>
             </View>
             <View style={{ marginBottom: 20 }}>
                 <Text style={styles.menu}>{Strings.todays_set}</Text>
                 <Divider style={styles.divider}></Divider>
-                {jadlodajnia.menuList.map(menuListItem => 
-                    menuListItem.contentList.map(zestaw => renderZestaw(zestaw))
-                )}
+                {dailyContent}
             </View>
             {moreButton}
         </View>
@@ -50,9 +60,10 @@ const Jadlodajnia = props => {
 }
 
 function renderZestaw(zestaw) {
-    return (
-        <Zestaw id={zestaw.id} content={zestaw.content}/>
-    );
+    if (zestaw.type === "DAILY")
+        return (
+            <Zestaw id={zestaw.id} content={zestaw.content} danieStyle={{fontSize:16}}/>
+        );
 }
 const styles = StyleSheet.create({
     container: {
@@ -90,6 +101,7 @@ const styles = StyleSheet.create({
     divider: {
         backgroundColor: Colors.accent,
         height: Dimensions.defaultBorderWidth,
+        marginBottom: Dimensions.defaultMargin
     },
     buttonStyle: {
         paddingVertical: 9,

@@ -8,7 +8,7 @@ import Dimensions from '../src/themes/dimensions';
 const Zestaw = props => {
     return (
         <View key={props.id} style={styles.container}>
-                <Text style={styles.danie}>{props.content}</Text>
+                <Text style={[styles.danie, props.danieStyle]}>{props.content}</Text>
             <Divider style={styles.divider}></Divider>
         </View>
     );
@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
         marginBottom: Dimensions.defaultMargin
     },
     danie: {
-        fontSize: Dimensions.defaultFontSize,
+        fontSize: 14,
         textAlign: "center"
     },
     divider: {
