@@ -62,9 +62,8 @@ function MapaScreen({ navigation, route }) {
     //pobieranie województw
     async function getWojewodztwa() {
         if (wojewodztwa.length <= 1) {
-            const wojewodztwaResponse = await Connection.getWojewodztwa();
+            const wojewodztwaResponse = Connection.getWojewodztwa();
             wojewodztwaResponse
-                .json()
                 .then(res => {
                     res.map((item) => {
                         setWojewodztwa(wojewodztwa => [...wojewodztwa, new PickerItem(item.name, item.slug, 0, 0, 0)]);
@@ -75,9 +74,9 @@ function MapaScreen({ navigation, route }) {
     }
     //pobieranie miast dla województwa
     async function getMiastaForWojewodztwo(wojewodztwo) {
-        const res = await Connection.getMiastaForWojewodztwo(wojewodztwo);
+        const res =  Connection.getMiastaForWojewodztwo(wojewodztwo);
         res
-            .json()
+            
             .then(res => {
                 setMiasta([new PickerItem("Wybierz miasto...", "default", 0, 0, 0)]);
                 res.map((item) => {
@@ -91,9 +90,8 @@ function MapaScreen({ navigation, route }) {
     }
     //pobieranie punktów na mapie
     async function getMapy(wojewodztwo, miasto) {
-        const mapsResponse = await Connection.getMapy(wojewodztwo, miasto);
+        const mapsResponse = Connection.getMapy(wojewodztwo, miasto);
         mapsResponse
-            .json()
             .then(res => {
                 setDataSource(res);
                 setSearchResultsLoading(false);

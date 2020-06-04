@@ -28,9 +28,8 @@ const JadlodajnieWiecej = props => {
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
-                const res = await Connection.getSzczegolyJadlodajnia(jadlodajniaSlug, wojewodztwo, miasto);
+                const res = Connection.getSzczegolyJadlodajnia(jadlodajniaSlug, wojewodztwo, miasto);
                 res
-                    .json()
                     .then(res => {
                         setDataSource(res);
                         const date = new Date().toJSON().slice(0, 10);

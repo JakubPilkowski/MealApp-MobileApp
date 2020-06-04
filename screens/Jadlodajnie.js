@@ -52,13 +52,13 @@ function JadlodajnieScreen({ navigation, route }) {
             setTimeout(async function () {
                 const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
                 const miastoValue = await AsyncStorage.getItem("miasto");
-                getWojewodztwa();
-                getMiastaForWojewodztwo(wojewodztwoValue);
                 setWojewodztwo(wojewodztwoValue);
                 setMiasto(miastoValue);
                 setDefaultWojewodztwo(wojewodztwoValue);
                 setDefaultMiasto(miastoValue);
                 await Promise.all([
+                    getWojewodztwa(),
+                    getMiastaForWojewodztwo(wojewodztwoValue),
                     getEatingHousesNames(),
                     getTagi(),
                     getJadlodajnie(wojewodztwoValue, miastoValue)
@@ -68,9 +68,8 @@ function JadlodajnieScreen({ navigation, route }) {
         }
     }
     async function getJadlodajnie(wojewodztwo, miasto) {
-        const res = await Connection.getJadlodajnie(wojewodztwo, miasto);
+        const res = Connection.getJadlodajnie(wojewodztwo, miasto);
         res
-            .json()
             .then(res => {
                 if (searchResultsLoading) {
                     getSearchResults(res);
@@ -83,9 +82,8 @@ function JadlodajnieScreen({ navigation, route }) {
     }
     async function getEatingHousesNames() {
         setNames([]);
-        const res = await Connection.getEatingHousesNames();
+        const res = Connection.getEatingHousesNames();
         res
-            .json()
             .then(res => {
                 setNames(res);
             })
@@ -93,9 +91,8 @@ function JadlodajnieScreen({ navigation, route }) {
     }
     async function getTagi() {
         setTags([]);
-        const res = await Connection.getTags();
+        const res = Connection.getTags();
         res
-            .json()
             .then(res => {
                 res.map((tag) => {
                     setTags(tags => [...tags, { id: tag.id, name: tag.name, selected: false, color: 'black' }]);
@@ -108,9 +105,8 @@ function JadlodajnieScreen({ navigation, route }) {
     //pobieranie województw
     async function getWojewodztwa() {
         if (wojewodztwa.length <= 1) {
-            const wojewodztwaResponse = await Connection.getWojewodztwa();
+            const wojewodztwaResponse = Connection.getWojewodztwa();
             wojewodztwaResponse
-                .json()
                 .then(res => {
                     res.map((item) => {
                         setWojewodztwa(wojewodztwa => [...wojewodztwa, new PickerItem(item.name, item.slug, 0, 0, 0)]);
@@ -121,9 +117,8 @@ function JadlodajnieScreen({ navigation, route }) {
     }
     //pobieranie miast dla województwa
     async function getMiastaForWojewodztwo(wojewodztwo) {
-        const res = await Connection.getMiastaForWojewodztwo(wojewodztwo);
+        const res = Connection.getMiastaForWojewodztwo(wojewodztwo);
         res
-            .json()
             .then(res => {
                 setMiasta([new PickerItem("Wybierz miasto...", "default", 0, 0, 0)]);
                 res.map((item) => {

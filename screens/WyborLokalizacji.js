@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Platform, Picker, AsyncStorage, Image, TouchableNativeFeedback, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Colors from '../src/themes/colors';
 import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
 import Connection from '../service/Connection';
+import { MaterialIcons } from "react-native-vector-icons";
 import GradientDivider from '../components/GradientDivider';
 import Validation from '../service/Validation';
 import PickerItem from '../models/PickerItem';
 import CustomPicker from '../components/CustomPicker';
-import {CommonActions} from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
+import Axios from 'axios';
+// import * as CacheManager from 'react-native-http-cache';
 
 
 const WyborLokalizacji = props => {
@@ -25,7 +28,8 @@ const WyborLokalizacji = props => {
     const [latitude, setLatitude] = useState();
     const [longitude, setLongitude] = useState();
     const [zoom, setZoom] = useState();
-
+    const [apiError, setApiError] = useState("");
+    const [apiErrorDisplay, setApiErrorDisplay] = useState(false);
 
     let confirmButton;
     if (Platform.OS === "android" && Platform.Version >= 21) {
@@ -98,36 +102,57 @@ const WyborLokalizacji = props => {
 
     async function getWojewodztwa() {
         if (isLoading && wojewodztwa.length == 1) {
-            const res = await Connection.getWojewodztwa();
+            const res = Connection.getWojewodztwa();
             res
-                .json()
                 .then(res => {
                     res.map((item) => {
                         setWojewodztwa(wojewodztwa => [...wojewodztwa, new PickerItem(item.name, item.slug, 0, 0, 0)]);
                     });
-
                     setIsLoading(false);
                 })
-                .catch(err => console.log(err + 'blad'));
+                .catch(err => {
+                    setIsLoading(false);
+                    setApiError(err);
+                    setApiErrorDisplay(true);
+                });
         }
     }
 
     async function getMiastaForWojewodztwo(wojewodztwo) {
-        const res = await Connection.getMiastaForWojewodztwo(wojewodztwo);
-        res
-            .json()
-            .then(res => {
-                setMiasta([new PickerItem("Wybierz miasto...", "default", 0, 0, 0)]);
-                res.map((item) => {
-                    setMiasta(miasta => [...miasta, new PickerItem(item.name, item.slug, item.latitude, item.longitude, item.zoom)]);
+        if (isLoading && wojewodztwa.length > 1) {
+            const res = Connection.getMiastaForWojewodztwo(wojewodztwo);         
+            res
+                .then(res => {
+                    setMiasta([new PickerItem("Wybierz miasto...", "default", 0, 0, 0)]);
+                    res.map((item) => {
+                        setMiasta(miasta => [...miasta, new PickerItem(item.name, item.slug, item.latitude, item.longitude, item.zoom)]);
+                    });
+                    setIsLoading(false);
+                    setWojewodztwoEnabled(true);
+                    setMiastoEnabled(true);
+                })
+                .catch(err => {
+                    setMiasta([new PickerItem("Wybierz miasto...", "default", 0, 0, 0)]);
+                    setWojewodztwoEnabled(true);
+                    setMiastoEnabled(true);
+                    setIsLoading(false);
+                    setApiError(err);
+                    setApiErrorDisplay(true);
                 });
-                setIsLoading(false);
-                setWojewodztwoEnabled(true);
-                setMiastoEnabled(true);
-            })
-            .catch(err => console.log(err + 'blad'));
+        }
     }
-    getWojewodztwa();
+    useEffect(() => {
+        if (isLoading) {
+            setApiErrorDisplay(false);
+            setApiError("");
+            if (wojewodztwa.length <= 1) {
+                getWojewodztwa();
+            }
+            if (wojewodztwa.length > 1) {
+                getMiastaForWojewodztwo(wojewodztwo);
+            }
+        }
+    }, [isLoading])
     return (
         <ImageBackground source={require('../src/images/lokalizacja.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor, alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ textAlign: 'center', fontSize: 22, marginBottom: 15, color: Colors.primary }}>Zanim zaczniemy... {'\n'} wybierz lokalizacje domyślną</Text>
@@ -158,7 +183,20 @@ const WyborLokalizacji = props => {
                     from="right" locationEnd={1} />
             </View>
             <Text style={{ width: "70%", color: 'red', fontSize: 14, opacity: errorMessage.length > 0 ? 1 : 0 }}>{errorMessage}</Text>
-            <ActivityIndicator size="large" color={Colors.primary} animating={isLoading} />
+            <View style={{ alignItems: 'center' }}>
+                <ActivityIndicator size="large" color={Colors.primary} animating={isLoading} />
+                <View style={{ position: 'absolute' }}>
+                    <View style={{ display: apiErrorDisplay ? 'flex' : 'none', alignItems: 'center' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                            <MaterialIcons name="error" color={"red"} size={36} />
+                            <Text style={{ fontSize: 16, color: 'red', marginLeft: 6, maxWidth: 275 }}>{apiError}</Text>
+                        </View>
+                        <IosButton text="Ponów" onClick={() => {
+                            setIsLoading(true);
+                        }} />
+                    </View>
+                </View>
+            </View>
             <View style={{ flexDirection: 'row', marginTop: 50, alignItems: 'center' }}>
                 <GradientDivider startColor={Colors.primary} endColor={Colors.accent}
                     from="left" locationEnd={1} />

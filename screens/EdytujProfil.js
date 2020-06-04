@@ -118,9 +118,8 @@ function EdytujScreen({ navigation, route }) {
 
     async function getWojewodztwa() {
         if (isLoading && wojewodztwa.length ==1 ) {
-                const res = await Connection.getWojewodztwa();
+                const res = Connection.getWojewodztwa();
                 res
-                    .json()
                     .then(res => {
                         res.map((item) => {
                             setWojewodztwa(wojewodztwa =>[...wojewodztwa, new PickerItem(item.name, item.slug,0,0,0)]);
@@ -135,9 +134,8 @@ function EdytujScreen({ navigation, route }) {
     }
 
     async function getMiastaForWojewodztwo(wojewodztwo) {
-                const res = await Connection.getMiastaForWojewodztwo(wojewodztwo);
+                const res = Connection.getMiastaForWojewodztwo(wojewodztwo);
                 res
-                    .json()
                     .then(res => {
                         setMiasta([new PickerItem("Wybierz miasto...", "default",0,0,0)]);
                         res.map((item) => {
