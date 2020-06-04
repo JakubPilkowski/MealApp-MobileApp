@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, FlatList, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid, BackHandler } from 'react-native';
+import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, FlatList, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid, BackHandler, NativeModules, Platform } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
-const HEADER_EXPANDED_HEIGHT = 225;
-const HEADER_COLLAPSED_HEIGHT = 56;
+const {StatusBarManager} = NativeModules;
+const HEADER_EXPANDED_HEIGHT = 225 + StatusBarManager.HEIGHT;
+const HEADER_COLLAPSED_HEIGHT = 56 + StatusBarManager.HEIGHT;
 import { Ionicons, FontAwesome, Feather, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import Connection from '../service/Connection';
 import IconWithAction from '../components/IconWithAction';
@@ -301,7 +302,7 @@ const styles = StyleSheet.create({
     },
     backButtonContainer: {
         flex: 1,
-        top: 0,
+        top: StatusBarManager.HEIGHT,
         position: 'absolute',
         height: 56,
         width: 56,
