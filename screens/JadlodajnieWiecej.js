@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, FlatList, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid, BackHandler } from 'react-native';
+import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, FlatList, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid, BackHandler, NativeModules, Platform } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
-const HEADER_EXPANDED_HEIGHT = 225;
-const HEADER_COLLAPSED_HEIGHT = 56;
+const { StatusBarManager } = NativeModules;
+const HEADER_EXPANDED_HEIGHT = 225 + StatusBarManager.HEIGHT;
+const HEADER_COLLAPSED_HEIGHT = 56 + StatusBarManager.HEIGHT;
 import { Ionicons, FontAwesome, Feather, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import Connection from '../service/Connection';
+import PlaceHolder from "../components/PlaceHolder";
 import IconWithAction from '../components/IconWithAction';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import JadlodajnieLocalizationDetails from '../components/JadlodajnieLocalizationDetails';
@@ -25,12 +27,13 @@ const JadlodajnieWiecej = props => {
     const [favouriteButtonEnabled, setFavouriteButtonEnabled] = useState(true);
     const colors = ['crimson', 'darkgreen', 'darkmagenta', 'darkorange', 'darkturquoise', 'hotpink'];
     const [display, setDisplay] = useState(true);
+    const [error, setError] = useState("");
+    const [errorType, setErrorType] = useState("default");
     async function fetchData() {
-        if (isLoading) {
-            setTimeout(async function () {
-                const res = await Connection.getSzczegolyJadlodajnia(jadlodajniaSlug, wojewodztwo, miasto);
+        // if (isLoading) {
+            // setTimeout(async function () {
+                const res = Connection.getSzczegolyJadlodajnia(jadlodajniaSlug, wojewodztwo, miasto);
                 res
-                    .json()
                     .then(res => {
                         setDataSource(res);
                         const date = new Date().toJSON().slice(0, 10);
@@ -41,18 +44,28 @@ const JadlodajnieWiecej = props => {
                         })
                         setIsLoading(false);
                     })
-                    .catch(err => console.log(err + 'blad'));
-            }, 200);
-        }
+                    .catch(err => {
+                        if (err === "Brak internetu")
+                            setErrorType("network")
+                        else
+                            setErrorType("default")
+                        setError(err);
+                        setIsLoading(false);
+                    });
+            // }, 200);
+        // }
     }
 
     useEffect(() => {
-        fetchData();
+        if (isLoading) {
+            setError("");
+            setErrorType("default");
+            fetchData();
+        }
     }, [isLoading]);
 
     BackHandler.addEventListener('hardwareBackPress', () => {
         setDisplay(false);
-        // props.navigation.goBack();
     })
     let content;
 
@@ -60,207 +73,220 @@ const JadlodajnieWiecej = props => {
         content = <CustomLoadingComponent />
     }
     else {
-        const headerHeight = scrollY.interpolate(
-            {
+
+        if (error != "") {
+            if (errorType === "network") {
+                content =
+                    <PlaceHolder buttonDisplay={true} textContainer={{ borderColor: 'red' }} textStyle={{ color: 'red' }} text={error} src={require("../src/images/network_error.png")} onButtonClick={() => { setIsLoading(true) }} />
+            }
+            else {
+                content =
+                    <PlaceHolder buttonDisplay={true} textContainer={{ borderColor: 'red' }} textStyle={{ color: 'red' }} text={error} src={require("../src/images/error.png")} onButtonClick={() => { setIsLoading(true) }} />
+            }
+        }
+        else {
+            const headerHeight = scrollY.interpolate(
+                {
+                    inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
+                    outputRange: [HEADER_EXPANDED_HEIGHT, HEADER_COLLAPSED_HEIGHT],
+                    extrapolate: 'clamp'
+                })
+            const heroTitleOpacity = scrollY.interpolate({
                 inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
-                outputRange: [HEADER_EXPANDED_HEIGHT, HEADER_COLLAPSED_HEIGHT],
+                outputRange: [1, 0],
                 extrapolate: 'clamp'
+            });
+            const titlePadding = scrollY.interpolate({
+                inputRange: [0, (HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT) / 2, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
+                outputRange: [6, 0, 0]
+            });
+            const titleBackground = scrollY.interpolate({
+                inputRange: [0, (HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT) / 2, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
+                outputRange: [Colors.primary, 'transparent', 'transparent']
             })
-        const heroTitleOpacity = scrollY.interpolate({
-            inputRange: [0, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
-            outputRange: [1, 0],
-            extrapolate: 'clamp'
-        });
-        const titlePadding = scrollY.interpolate({
-            inputRange: [0,(HEADER_EXPANDED_HEIGHT-HEADER_COLLAPSED_HEIGHT)/2, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
-            outputRange: [6,0,0]
-        });
-        const titleBackground = scrollY.interpolate({
-            inputRange: [0,(HEADER_EXPANDED_HEIGHT-HEADER_COLLAPSED_HEIGHT)/2, HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT],
-            outputRange: [Colors.primary, 'transparent', 'transparent']
-        })
-        let staticContent;
-        let staticContentValue = "";
-        let dailyContent;
-        dataSource.menuList.map(menuLista => {
-            menuLista.contentList.map(content => {
-                if (content.type === "STATIC") {
-                    staticContentValue = content.content;
-                }
+            let staticContent;
+            let staticContentValue = "";
+            let dailyContent;
+            dataSource.menuList.map(menuLista => {
+                menuLista.contentList.map(content => {
+                    if (content.type === "STATIC") {
+                        staticContentValue = content.content;
+                    }
+                })
             })
-        })
 
-        if (staticContentValue === "") {
-            staticContent =
-                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                    <MaterialCommunityIcons name="food-off" color={Colors.primary} size={56} />
-                    <Text style={{ fontSize: 16, textAlign: 'center' }}>Ta jadłodajnia nie udostępnia menu głównego</Text>
-                </View>
-        }
-        else {
-            staticContent =
-                <Text style={{ fontSize: 16, textAlign: 'justify' }}>{staticContentValue}</Text>
-        }
-        if (dataSource.menuList.length > 0) {
-            dailyContent =
-                <View style={{ flex: 1, flexDirection: 'row' }}>
-                    <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingRight: 6 }}>
-                        <TouchableOpacity onPress={() => {
-
-                            if (scrollIndex !== 0) {
-                                let index = scrollIndex - 1;
-                                setScrollIndex(index);
-                                scrollRef.current.scrollToIndex({ animated: true, index: index });
-                            }
-                        }}>
-                            <Feather name="arrow-left-circle" color={Colors.primary} size={36}></Feather>
-                        </TouchableOpacity>
+            if (staticContentValue === "") {
+                staticContent =
+                    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                        <MaterialCommunityIcons name="food-off" color={Colors.primary} size={56} />
+                        <Text style={{ fontSize: 16, textAlign: 'center' }}>Ta jadłodajnia nie udostępnia menu głównego</Text>
                     </View>
-                    <FlatList data={dataSource.menuList}
-                        horizontal={true}
-                        scrollEnabled={false}
-                        getItemLayout={(data, index) => (
-                            { length: width - 120, offset: (width - 120) * index, index }
-                        )
-                        }
-                        initialScrollIndex={scrollIndex}
-                        showsHorizontalScrollIndicator={false}
-                        ref={scrollRef}
-                        renderItem={itemData =>
-                            <View style={{ flexDirection: 'column', width: width - 120, }}>
-                                <ZestawsView date={itemData.item.date} contentList={itemData.item.contentList} />
-                            </View>
-                        }
-                        keyExtractor={item => item.id.toString()}
-                    />
-                    <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: "center", paddingStart: 6 }}>
-                        <TouchableOpacity onPress={() => {
-                            if (scrollIndex < dataSource.menuList.length - 1) {
-                                let index = scrollIndex + 1;
-                                setScrollIndex(index);
-                                scrollRef.current.scrollToIndex({ index: index });
-                            }
-                        }}>
-                            <Feather name="arrow-right-circle" color={Colors.primary} size={36}></Feather>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-        }
-        else {
-            dailyContent =
-                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                    <MaterialCommunityIcons name="food-off" color={Colors.primary} size={56} />
-                    <Text style={{ fontSize: 16, textAlign: 'center' }}>Ta jadłodajnia nie udostępnia aktualności</Text>
-                </View>
-        }
-        // if(isFavourite){
-        //     setIconColor("gold");
-        // }
-        // else{
-        //     setIconColor("white");
-        // }
+            }
+            else {
+                staticContent =
+                    <Text style={{ fontSize: 16, textAlign: 'justify' }}>{staticContentValue}</Text>
+            }
+            if (dataSource.menuList.length > 0) {
+                dailyContent =
+                    <View style={{ flex: 1, flexDirection: 'row' }}>
+                        <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingRight: 6 }}>
+                            <TouchableOpacity onPress={() => {
 
-        content =
-            <View>
-                <Animated.View style={[styles.header, { height: headerHeight }]} >
-                    <Animated.View style={styles.headerImageContainer}>
-                        <Animated.Image source={{ uri: dataSource.photoUrl }}
-                            style={[styles.headerImage, {
-                                height: headerHeight,
-                                opacity: heroTitleOpacity,
-                            }]}
-                        ></Animated.Image>
-                        <Animated.Text style={[styles.headerExpanded, { backgroundColor: titleBackground, padding: titlePadding }]}>{dataSource.name}</Animated.Text>
-                    </Animated.View>
-                </Animated.View>
-                <Animated.View style={[styles.backButtonContainer, { left: 0 }]}>
-                    <IconWithAction  containerStyle={{backgroundColor: titleBackground,width:36,height:36,  borderRadius:24}} 
-                    content = {<AntDesign name="arrowleft" size={28} color={Colors.colorTextWhite}></AntDesign>}
-                    onClick={() => {
-                        setDisplay(false);
-                        props.navigation.goBack();
-                    }}
-                    />
-                </Animated.View>
-                <View style={[styles.backButtonContainer, { right: 0 }]}>
-                    <IconWithAction containerStyle={{backgroundColor: titleBackground,width:36,height:36, borderRadius:24}} content={<FontAwesome name="star" color={iconColor} size={24} />} onClick={() => {
-                        if (favouriteButtonEnabled) {
-                            if (isFavourite) {
-                                ToastAndroid.show("Usunięto z ulubionych !!!", ToastAndroid.SHORT);
-                                setFavouriteButtonEnabled(false);
-                                setIsFavourite(!isFavourite);
-                                setIconColor("white");
-                                setTimeout(function () {
-                                    setFavouriteButtonEnabled(true);
-                                }, 2000);
-                            }
-                            else {
-                                ToastAndroid.show("Dodano do ulubionych !!!", ToastAndroid.SHORT);
-                                setFavouriteButtonEnabled(false);
-                                setIsFavourite(!isFavourite);
-                                setIconColor("gold");
-                                setTimeout(function () {
-                                    setFavouriteButtonEnabled(true);
-                                }, 2000);
-                            }
-                        }
-                    }} />
-                </View>
-                <ScrollView
-                    contentContainerStyle={styles.scrollContainer}
-                    onScroll={Animated.event(
-                        [{
-                            nativeEvent: {
-                                contentOffset: {
-                                    y: scrollY
+                                if (scrollIndex !== 0) {
+                                    let index = scrollIndex - 1;
+                                    setScrollIndex(index);
+                                    scrollRef.current.scrollToIndex({ animated: true, index: index });
                                 }
+                            }}>
+                                <Feather name="arrow-left-circle" color={Colors.primary} size={36}></Feather>
+                            </TouchableOpacity>
+                        </View>
+                        <FlatList data={dataSource.menuList}
+                            horizontal={true}
+                            scrollEnabled={false}
+                            getItemLayout={(data, index) => (
+                                { length: width - 120, offset: (width - 120) * index, index }
+                            )
                             }
-                        }])}
-                    scrollEventThrottle={16}
-                >
-                    <View style={{
-                        backgroundColor: Colors.colorTextWhite,
-                        marginHorizontal: 12,
-                        borderRadius: 12,
-                        paddingVertical: 12,
-                        padding: 6,
-                        marginVertical: 24
-                    }}>
-
-                        <Text style={{ fontSize: 20, textAlign: "center", marginBottom: 6 }}>Aktualności</Text>
-                        {dailyContent}
-
-                    </View>
-                    <View style={{ backgroundColor: Colors.colorTextWhite, marginHorizontal: 12, borderRadius: 12, padding: 14, marginBottom: 24 }}>
-                        <Text style={{ textAlign: 'center', fontSize: 20, marginBottom: 6 }}>
-                            Menu główne
-                        </Text>
-                        {staticContent}
-                    </View>
-                    <View style={{ backgroundColor: Colors.colorTextWhite, marginHorizontal: 12, borderRadius: 12, padding: 14, marginBottom: 24 }}>
-                        <Text style={{ textAlign: 'center', fontSize: 20, marginBottom:6}}>
-                            Tagi
-                        </Text>
-                        <View style={{ flexWrap: 'wrap', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                            {dataSource.eatingHouseTagList.map((tag,index) => {
-                                  let colorIndex = Math.floor(Math.random() * (Math.floor(6) - Math.ceil(0))) + Math.ceil(0);
-                                  return (
-                                    <View style={{ height: 40, borderRadius: 20, paddingHorizontal: 18, justifyContent: 'center', paddingVertical: 3, marginBottom: 12, borderColor: colors[colorIndex], borderWidth: 2 }}>
-                                        <Text style={{ textAlign: 'center', color: colors[colorIndex], fontSize: 16 }}>{tag.name}</Text>
-                                    </View>)
-                            })}
+                            initialScrollIndex={scrollIndex}
+                            showsHorizontalScrollIndicator={false}
+                            ref={scrollRef}
+                            renderItem={itemData =>
+                                <View style={{ flexDirection: 'column', width: width - 120, }}>
+                                    <ZestawsView date={itemData.item.date} contentList={itemData.item.contentList} />
+                                </View>
+                            }
+                            keyExtractor={item => item.id.toString()}
+                        />
+                        <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: "center", paddingStart: 6 }}>
+                            <TouchableOpacity onPress={() => {
+                                if (scrollIndex < dataSource.menuList.length - 1) {
+                                    let index = scrollIndex + 1;
+                                    setScrollIndex(index);
+                                    scrollRef.current.scrollToIndex({ index: index });
+                                }
+                            }}>
+                                <Feather name="arrow-right-circle" color={Colors.primary} size={36}></Feather>
+                            </TouchableOpacity>
                         </View>
                     </View>
-                    <View style={{ backgroundColor: Colors.colorTextWhite, marginHorizontal: 12, borderRadius: 12, padding: 14, marginBottom: 24 }}>
-                        <Text style={{ textAlign: 'center', fontSize: 20, }}>
-                            Dostępne Punkty
-                        </Text>
+            }
+            else {
+                dailyContent =
+                    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                        <MaterialCommunityIcons name="food-off" color={Colors.primary} size={56} />
+                        <Text style={{ fontSize: 16, textAlign: 'center' }}>Ta jadłodajnia nie udostępnia aktualności</Text>
                     </View>
-                    <SafeAreaView style={{ display: display ? 'flex' : 'none' }}>
-                        {dataSource.addressList.map(localizationInfo => renderLocalizationInfo(dataSource, localizationInfo))}
-                    </SafeAreaView>
-                </ScrollView>
-            </View>
+            }
+            // if(isFavourite){
+            //     setIconColor("gold");
+            // }
+            // else{
+            //     setIconColor("white");
+            // }
+
+            content =
+                <View>
+                    <Animated.View style={[styles.header, { height: headerHeight }]} >
+                        <Animated.View style={styles.headerImageContainer}>
+                            <Animated.Image source={{ uri: dataSource.photoUrl }}
+                                style={[styles.headerImage, {
+                                    height: headerHeight,
+                                    opacity: heroTitleOpacity,
+                                }]}
+                            ></Animated.Image>
+                            <Animated.Text style={[styles.headerExpanded, { backgroundColor: titleBackground, padding: titlePadding }]}>{dataSource.name}</Animated.Text>
+                        </Animated.View>
+                    </Animated.View>
+                    <Animated.View style={[styles.backButtonContainer, { left: 0 }]}>
+                        <IconWithAction containerStyle={{ backgroundColor: titleBackground, width: 36, height: 36, borderRadius: 24 }}
+                            content={<AntDesign name="arrowleft" size={28} color={Colors.colorTextWhite}></AntDesign>}
+                            onClick={() => {
+                                setDisplay(false);
+                                props.navigation.goBack();
+                            }}
+                        />
+                    </Animated.View>
+                    <View style={[styles.backButtonContainer, { right: 0 }]}>
+                        <IconWithAction containerStyle={{ backgroundColor: titleBackground, width: 36, height: 36, borderRadius: 24 }} content={<FontAwesome name="star" color={iconColor} size={24} />} onClick={() => {
+                            if (favouriteButtonEnabled) {
+                                if (isFavourite) {
+                                    ToastAndroid.show("Usunięto z ulubionych !!!", ToastAndroid.SHORT);
+                                    setFavouriteButtonEnabled(false);
+                                    setIsFavourite(!isFavourite);
+                                    setIconColor("white");
+                                    setTimeout(function () {
+                                        setFavouriteButtonEnabled(true);
+                                    }, 2000);
+                                }
+                                else {
+                                    ToastAndroid.show("Dodano do ulubionych !!!", ToastAndroid.SHORT);
+                                    setFavouriteButtonEnabled(false);
+                                    setIsFavourite(!isFavourite);
+                                    setIconColor("gold");
+                                    setTimeout(function () {
+                                        setFavouriteButtonEnabled(true);
+                                    }, 2000);
+                                }
+                            }
+                        }} />
+                    </View>
+                    <ScrollView
+                        contentContainerStyle={styles.scrollContainer}
+                        onScroll={Animated.event(
+                            [{
+                                nativeEvent: {
+                                    contentOffset: {
+                                        y: scrollY
+                                    }
+                                }
+                            }])}
+                        scrollEventThrottle={16}
+                    >
+                        <View style={{
+                            backgroundColor: Colors.colorTextWhite,
+                            marginHorizontal: 12,
+                            borderRadius: 12,
+                            paddingVertical: 12,
+                            padding: 6,
+                            marginVertical: 24
+                        }}>
+
+                            <Text style={{ fontSize: 20, textAlign: "center", marginBottom: 6 }}>Aktualności</Text>
+                            {dailyContent}
+
+                        </View>
+                        <View style={{ backgroundColor: Colors.colorTextWhite, marginHorizontal: 12, borderRadius: 12, padding: 14, marginBottom: 24 }}>
+                            <Text style={{ textAlign: 'center', fontSize: 20, marginBottom: 6 }}>
+                                Menu główne
+                        </Text>
+                            {staticContent}
+                        </View>
+                        <View style={{ backgroundColor: Colors.colorTextWhite, marginHorizontal: 12, borderRadius: 12, padding: 14, marginBottom: 24 }}>
+                            <Text style={{ textAlign: 'center', fontSize: 20, marginBottom: 6 }}>
+                                Tagi
+                        </Text>
+                            <View style={{ flexWrap: 'wrap', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                                {dataSource.eatingHouseTagList.map((tag, index) => {
+                                    let colorIndex = Math.floor(Math.random() * (Math.floor(6) - Math.ceil(0))) + Math.ceil(0);
+                                    return (
+                                        <View style={{ height: 40, borderRadius: 20, paddingHorizontal: 18, justifyContent: 'center', paddingVertical: 3, marginBottom: 12, borderColor: colors[colorIndex], borderWidth: 2 }}>
+                                            <Text style={{ textAlign: 'center', color: colors[colorIndex], fontSize: 16 }}>{tag.name}</Text>
+                                        </View>)
+                                })}
+                            </View>
+                        </View>
+                        <View style={{ backgroundColor: Colors.colorTextWhite, marginHorizontal: 12, borderRadius: 12, padding: 14, marginBottom: 24 }}>
+                            <Text style={{ textAlign: 'center', fontSize: 20, }}>
+                                Dostępne Punkty
+                        </Text>
+                        </View>
+                        <SafeAreaView style={{ display: display ? 'flex' : 'none' }}>
+                            {dataSource.addressList.map(localizationInfo => renderLocalizationInfo(dataSource, localizationInfo))}
+                        </SafeAreaView>
+                    </ScrollView>
+                </View>
+        }
     }
 
     return (
@@ -302,7 +328,7 @@ const styles = StyleSheet.create({
     },
     backButtonContainer: {
         flex: 1,
-        top: 0,
+        top: StatusBarManager.HEIGHT,
         position: 'absolute',
         height: 56,
         width: 56,

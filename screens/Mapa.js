@@ -10,8 +10,9 @@ import ScreenStyle from "../src/themes/screenStyle";
 import Connection from "../service/Connection";
 import dimensions from '../src/themes/dimensions';
 import Card from "../components/Card";
+import PlaceHolder from "../components/PlaceHolder";
 import CustomPicker from "../components/CustomPicker";
-import { Feather, AntDesign, FontAwesome } from 'react-native-vector-icons';
+import { Feather, AntDesign, FontAwesome, MaterialIcons } from 'react-native-vector-icons';
 import IosButton from "../components/IosButton";
 import MapView, { PROVIDER_GOOGLE, Marker, Callout } from 'react-native-maps';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
@@ -36,7 +37,9 @@ function MapaScreen({ navigation, route }) {
     const [zoom, setZoom] = useState(0);
     const [mapLoaded, setMapLoaded] = useState(false);
     const [expanded, setExpanded] = useState(false);
-
+    const [error, setError] = useState("");
+    const [errorType, setErrorType] = useState("default");
+    const [searchError, setSearchError] = useState("");
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
@@ -51,33 +54,42 @@ function MapaScreen({ navigation, route }) {
                 setLongitude(Number(longitudeValue));
                 setZoom(Number(zoomValue));
                 await Promise.all([
-                    getWojewodztwa(),
-                    getMiastaForWojewodztwo(wojewodztwoValue),
-                    getMapy(wojewodztwoValue, miastoValue),
-                ])
-                setIsLoading(false);
+                    Connection.getWojewodztwa(),
+                    Connection.getMiastaForWojewodztwo(wojewodztwoValue),
+                    Connection.getMapy(wojewodztwoValue, miastoValue)
+                ]).then(res => {
+                    getMapyInfos(res);
+                }).catch(err => {
+                    if (err === "Brak internetu")
+                        setErrorType("network")
+                    else
+                        setErrorType("default")
+                    setError(err);
+                    setIsLoading(false);
+                })
             }, 200);
         }
     }
-    //pobieranie województw
-    async function getWojewodztwa() {
+    async function getMapyInfos(res) {
         if (wojewodztwa.length <= 1) {
-            const wojewodztwaResponse = await Connection.getWojewodztwa();
-            wojewodztwaResponse
-                .json()
-                .then(res => {
-                    res.map((item) => {
-                        setWojewodztwa(wojewodztwa => [...wojewodztwa, new PickerItem(item.name, item.slug, 0, 0, 0)]);
-                    });
-                })
-                .catch(err => console.log(err + 'blad'));
+            res[0].map((item) => {
+                setWojewodztwa(wojewodztwa => [...wojewodztwa, new PickerItem(item.name, item.slug, 0, 0, 0)]);
+            });
         }
+        setMiasta([new PickerItem("Wybierz miasto...", "default", 0, 0, 0)]);
+        res[1].map((item) => {
+            setMiasta(miasta => [...miasta, new PickerItem(item.name, item.slug, item.latitude, item.longitude, item.zoom)]);
+        });
+        setWojewodztwoEnabled(true);
+        setMiastoEnabled(true);
+        setDataSource(res[2]);
+        setIsLoading(false);
     }
     //pobieranie miast dla województwa
     async function getMiastaForWojewodztwo(wojewodztwo) {
-        const res = await Connection.getMiastaForWojewodztwo(wojewodztwo);
+        const res = Connection.getMiastaForWojewodztwo(wojewodztwo);
         res
-            .json()
+
             .then(res => {
                 setMiasta([new PickerItem("Wybierz miasto...", "default", 0, 0, 0)]);
                 res.map((item) => {
@@ -87,18 +99,33 @@ function MapaScreen({ navigation, route }) {
                 setWojewodztwoEnabled(true);
                 setMiastoEnabled(true);
             })
-            .catch(err => console.log(err + 'blad'));
+            .catch(err => {
+                if (err === "Brak internetu")
+                    setErrorType("network")
+                else
+                    setErrorType("default")
+                setError(err);
+                setIsPickerLoading(false);
+                toggleSearchView();
+            });
     }
     //pobieranie punktów na mapie
     async function getMapy(wojewodztwo, miasto) {
-        const mapsResponse = await Connection.getMapy(wojewodztwo, miasto);
+        const mapsResponse = Connection.getMapy(wojewodztwo, miasto);
         mapsResponse
-            .json()
             .then(res => {
                 setDataSource(res);
                 setSearchResultsLoading(false);
             })
-            .catch(err => console.log(err + 'blad'));
+            .catch(err => {
+                console.log("halo");
+                if (err === "Brak internetu")
+                    setErrorType("network")
+                else
+                    setErrorType("default")
+                setError(err);
+                setSearchResultsLoading(false);
+            });
     }
     //widok wyboru nowej lokalizacji
     const toggleSearchView = () => {
@@ -107,9 +134,14 @@ function MapaScreen({ navigation, route }) {
     }
 
     const onSearchClickedHandler = () => {
-        setMapLoaded(false);
-        toggleSearchView();
-        setSearchResultsLoading(true);
+        if (miasto !== "default" && wojewodztwo !== "default") {
+            setSearchError("");
+            setMapLoaded(false);
+            toggleSearchView();
+            setSearchResultsLoading(true);
+        }else{
+            setSearchError("Musisz wybrać województwo i miasto");
+        }
     }
 
     //przycisk wyszukiwania nowej lokalizacji
@@ -150,11 +182,15 @@ function MapaScreen({ navigation, route }) {
 
     //rerender ekranu
     useEffect(() => {
-        if (searchResultsLoading) {
-            getMapy(wojewodztwo, miasto);
-        }
-        else {
-            fetchData();
+        if (isLoading || searchResultsLoading) {
+            setError("");
+            setErrorType("default");
+            if (searchResultsLoading) {
+                getMapy(wojewodztwo, miasto);
+            }
+            else {
+                fetchData();
+            }
         }
     }, [isLoading, searchResultsLoading]);
 
@@ -184,57 +220,81 @@ function MapaScreen({ navigation, route }) {
     drawerNavigation.setOptions({
         gestureEnabled: expanded ? false : true
     });
+    let content;
     //renderowanie ekranu
     if (isLoading || searchResultsLoading) {
-        return (
-            <ImageBackground source={require('../src/images/lokalizacja.jpg')} style={{ flex: 1, backgroundColor: Colors.backgroundColor }} imageStyle={{ opacity: 0.3 }}>
-                <CustomLoadingComponent />
-            </ImageBackground>
-        );
+        content = <CustomLoadingComponent />
     }
     else {
-        setTimeout(async function () {
-            setMapLoaded(true);
-        }, 35);
-        return (
-            <View style={[styles.container, { opacity: mapLoaded ? 1 : 0 }]}>
+        if (error !== "") {
+            if (errorType === "network") {
+                content =
+                    <PlaceHolder buttonDisplay={true} textContainer={{ borderColor: 'red' }} textStyle={{ color: 'red' }} text={error} src={require("../src/images/network_error.png")} onButtonClick={() => { setIsLoading(true) }} />
+            }
+            else {
+                content =
+                    <PlaceHolder buttonDisplay={true} textContainer={{ borderColor: 'red' }} textStyle={{ color: 'red' }} text={error} src={require("../src/images/error.png")} onButtonClick={() => { setIsLoading(true) }} />
 
-                <View style={{
-                    height: expanded ? null : 0,
-                    display: expanded ? 'flex' : 'none', overflow: 'hidden', backgroundColor: Colors.backgroundColor, borderWidth: 2,
-                    paddingVertical: 12,
-                    alignItems: 'center',
-                    borderColor: Colors.primary, borderBottomLeftRadius: 16, borderBottomRightRadius: 16
-                }}>
-                    <CustomPicker
-                        containerStyle={{ opacity: wojewodztwoEnabled ? 1 : 0.5, marginTop: 12 }}
-                        pickerItems={wojewodztwa} selectedValue={wojewodztwo}
-                        enabled={wojewodztwoEnabled}
-                        onPickerChange={(wojewodztwo) => onWojewodztwoChangedHandler(wojewodztwo)}
-                    />
-                    <CustomPicker containerStyle={{ opacity: miastoEnabled ? 1 : 0.5, marginVertical: 12 }}
-                        enabled={miastoEnabled}
-                        pickerItems={miasta} selectedValue={miasto}
-                        onPickerChange={(miasto) => onMiastoChangedHandler(miasto)}
-                    />
-                    <ActivityIndicator size="large" color={Colors.primary} animating={isPickerLoading} />
-                    {searchButton}
-                </View>
-                <MapView provider={PROVIDER_GOOGLE} style={{ flex: 1 }} initialRegion={{
-                    latitude: latitude,
-                    longitude: longitude,
-                    longitudeDelta: zoom,
-                    latitudeDelta: zoom
-                }}  >
-                    {dataSource.map(jadlodajnia =>
-                        jadlodajnia.addressList.map(punkt =>
-                            renderMarker(punkt, navigation, jadlodajnia, wojewodztwo, miasto)
-                        )
-                    )}
-                </MapView>
-            </View>
-        );
+            }
+        }
+        else {
+            content = <MapView provider={PROVIDER_GOOGLE} style={{ flex: 1 }} initialRegion={{
+                latitude: latitude,
+                longitude: longitude,
+                longitudeDelta: zoom,
+                latitudeDelta: zoom
+            }}  >
+                {dataSource.map(jadlodajnia =>
+                    jadlodajnia.addressList.map(punkt =>
+                        renderMarker(punkt, navigation, jadlodajnia, wojewodztwo, miasto)
+                    )
+                )}
+            </MapView>
+        }
     }
+    setTimeout(async function () {
+        setMapLoaded(true);
+    }, 35);
+    return (
+        <View style={[styles.container, { opacity: mapLoaded ? 1 : 0 }]}>
+            <View style={{
+                height: expanded ? null : 0,
+                display: expanded ? 'flex' : 'none', overflow: 'hidden', backgroundColor: Colors.backgroundColor, borderWidth: 2,
+                paddingVertical: 12,
+                alignItems: 'center',
+                borderColor: Colors.primary, borderBottomLeftRadius: 16, borderBottomRightRadius: 16
+            }}>
+                <CustomPicker
+                    containerStyle={{ opacity: wojewodztwoEnabled ? 1 : 0.5, marginTop: 12 }}
+                    pickerItems={wojewodztwa} selectedValue={wojewodztwo}
+                    enabled={wojewodztwoEnabled}
+                    onPickerChange={(wojewodztwo) => onWojewodztwoChangedHandler(wojewodztwo)}
+                />
+                <CustomPicker containerStyle={{ opacity: miastoEnabled ? 1 : 0.5, marginVertical: 12 }}
+                    enabled={miastoEnabled}
+                    pickerItems={miasta} selectedValue={miasto}
+                    onPickerChange={(miasto) => onMiastoChangedHandler(miasto)}
+                />
+                <View style={{ alignItems: 'center' }}>
+                    <ActivityIndicator size="large" color={Colors.primary} animating={isPickerLoading} />
+                    <View style={{ position: 'absolute', marginBottom: 24 }}>
+                        <View style={{ display: error !== "" ? 'flex' : 'none', alignItems: 'center' }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                                <MaterialIcons name="error" color={"red"} size={36} />
+                                <Text style={{ fontSize: 16, color: 'red', marginLeft: 6, maxWidth: 275 }}>{error}</Text>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+                {searchButton}
+                <Text style={{textAlign:'center', fontSize:14, color:'red', opacity: searchError !== "" ? 1:0}}>{searchError}</Text>
+            </View>
+            <ImageBackground source={require('../src/images/lokalizacja.jpg')} style={{ flex: 1, backgroundColor: Colors.backgroundColor }} imageStyle={{ opacity: 0.3 }}>
+                {content}
+            </ImageBackground>
+        </View>
+    );
+
 }
 
 function renderMarker(point, navigation, jadlodajnia, wojewodztwo, miasto) {
