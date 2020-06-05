@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, AsyncStorage, ImageBackground, TextInput, Dimensions, ScrollView, Platform, TouchableNativeFeedback, TouchableOpacity, TouchableHighlight, ActivityIndicator, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, AsyncStorage, ImageBackground, TextInput, Dimensions, Platform, TouchableOpacity, ActivityIndicator, SafeAreaView } from 'react-native';
 import colors from '../src/themes/colors';
 import { createStackNavigator } from '@react-navigation/stack';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Rejestracja from "./Rejestracja";
-import strings from "../src/themes/strings";
 import ScreenStyle from "../src/themes/screenStyle";
 import {
     FontAwesome,
-    Ionicons
+    Ionicons,
+    MaterialIcons
 } from "react-native-vector-icons";
 import {
     CommonActions,
@@ -21,7 +21,6 @@ import Validation from '../service/Validation';
 import * as Google from "expo-google-app-auth";
 import * as Facebook from "expo-facebook";
 
-const { width, height } = Dimensions.get("screen");
 function LogowanieScreen({ navigation }) {
 
 
@@ -34,6 +33,7 @@ function LogowanieScreen({ navigation }) {
     const [firstInputFocus, setFirstInputFocus] = useState(false);
     const [buttonEnabled, setButtonEnabled] = useState(true);
     const [secondInputFocus, setSecondInputFocus] = useState(false);
+    const [error, setError] = useState("");
     let loginButton;
     let registerButton;
 
@@ -49,7 +49,9 @@ function LogowanieScreen({ navigation }) {
             </View>
         )
     });
-
+    navigation.addListener("focus", () => {
+        setButtonEnabled(true);
+    })
     if (Platform.OS === "android" && Platform.Version >= 21) {
         loginButton =
             <AndroidButton text="Zaloguj się" containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9 }}
@@ -117,11 +119,16 @@ function LogowanieScreen({ navigation }) {
                 }
                 if (errors.length === 0) {
                     setIsLoading(false);
-                    // navigation.navigate("Jadlodajnie");
-                    // navigator.reset();  
-                    setTimeout(function () {
-                        setButtonEnabled(true);
-                    }, 100);
+                    // await AsyncStorage.setItem('login', loginField);
+                    // await AsyncStorage.setItem('email', );
+                    // navigation.dispatch({
+                    //     ...CommonActions.reset({
+                    //         index: 1,
+                    //         routes: [
+                    //             { name: "Home" },
+                    //         ]
+                    //     }),
+                    // });
                 }
                 setVerifyLoginError(errors);
             }
@@ -238,6 +245,17 @@ function LogowanieScreen({ navigation }) {
                         </View>
                     </View>
                     {loginButton}
+                    <View style={{ alignItems: 'center' }}>
+                        <ActivityIndicator size="large" color={colors.primary} animating={isLoading} />
+                        <View style={{ position: 'absolute', marginBottom: 24 }}>
+                            <View style={{ display: error !== "" ? 'flex' : 'none', alignItems: 'center' }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                                    <MaterialIcons name="error" color={"red"} size={36} />
+                                    <Text style={{ fontSize: 16, color: 'red', marginLeft: 6, maxWidth: 275 }}>{error}</Text>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
                     <Text style={{ fontSize: 14, color: 'red', width: "75%" }}>{verifyLoginError}</Text>
                     <Text style={{ color: colors.colorTextDark, fontSize: 16, marginVertical: dimensions.defaultSmallMargin }}>Nie masz konta? {'\n'} Zarejestruj się</Text>
                     {registerButton}
@@ -247,7 +265,6 @@ function LogowanieScreen({ navigation }) {
                             <Text style={{ textAlign: 'center', color: colors.colorTextDark, fontSize: 16, textDecorationLine: 'underline' }}>Kliknij tutaj</Text>
                         </TouchableOpacity>
                     </View>
-                    <ActivityIndicator size="large" color={colors.primary} animating={isLoading} />
                 </KeyboardAwareScrollView>
             </ImageBackground>
         </SafeAreaView>

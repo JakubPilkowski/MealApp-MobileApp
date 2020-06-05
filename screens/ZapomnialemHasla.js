@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Text, View, StyleSheet, ImageBackground, TextInput, Platform, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet, ImageBackground, NativeModules, TextInput, Platform, ActivityIndicator, TouchableOpacity } from 'react-native';
 import colors from '../src/themes/colors';
 import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
+const { StatusBarManager } = NativeModules;
 import Validation from '../service/Validation';
-import { Ionicons } from 'react-native-vector-icons';
+import { Ionicons, MaterialIcons } from 'react-native-vector-icons';
 
 const ZapomnialemHasla = props => {
 
@@ -14,17 +15,18 @@ const ZapomnialemHasla = props => {
     const [isLoading, setIsLoading] = useState(false);
     const [forgetPasswordError, setForgetPasswordError] = useState('');
     const [buttonEnabled, setButtonEnabled] = useState(true);
+    const [error, setError] = useState("");
     let sendNewPasswordButton;
 
     if (Platform.OS === "android" && Platform.Version >= 21) {
         sendNewPasswordButton =
             <AndroidButton text="Przejdź dalej" onClick={() => sendNewPasswordHandler()}
-                enabled={buttonEnabled}    
-            containerStyle={{ width: '60%' }}
+                enabled={buttonEnabled}
+                containerStyle={{ width: '60%' }}
                 buttonStyle={{ paddingVertical: 9 }}
             />
     }
-    if (Platform.OS === "ios" || (Platform.OS==="android" && Platform.Version < 21)) {
+    if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21)) {
         sendNewPasswordButton =
             <IosButton tex="Przejdź dalej" onClick={
                 () => sendNewPasswordHandler()}
@@ -43,7 +45,7 @@ const ZapomnialemHasla = props => {
             setIsLoading(true);
             verifyEmail();
         }
-        else{
+        else {
             setButtonEnabled(true);
         }
         setEmailErrorMessage(errorMessage);
@@ -61,7 +63,7 @@ const ZapomnialemHasla = props => {
     }
     return (
         <View style={styles.container}>
-            <View style={{ height: 56, backgroundColor: colors.primary, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
+            <View style={{ height: 56 + StatusBarManager.HEIGHT, backgroundColor: colors.primary, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
                 <View style={[styles.backButtonContainer, { left: 0 }]}>
                     <TouchableOpacity
                         onPress={() => {
@@ -70,7 +72,7 @@ const ZapomnialemHasla = props => {
                         <Ionicons name="ios-arrow-round-back" size={36} color={colors.colorTextWhite}></Ionicons>
                     </TouchableOpacity>
                 </View>
-                <Text style={{ color: colors.colorTextWhite, fontSize: 20, fontWeight: 'bold' }}>Zapomniałem Hasła</Text>
+                <Text style={{ color: colors.colorTextWhite, fontSize: 20, fontWeight: 'bold', position: 'absolute', bottom: 15 }}>Zapomniałem Hasła</Text>
             </View>
             <ImageBackground source={require('../src/images/cutlery.jpg')} style={styles.imageBackground} imageStyle={styles.imageStyle}>
                 <Text style={[styles.title, { marginTop: dimensions.defaultHugeMargin }]}>Email</Text>
@@ -83,7 +85,17 @@ const ZapomnialemHasla = props => {
                 <Text style={{ fontSize: 16, marginBottom: 50, textAlign: 'center' }}>Podaj email na który wyślemy wygenerowane hasło</Text>
                 {sendNewPasswordButton}
                 <Text style={{ width: "75%", color: 'red', fontSize: 14 }}>{forgetPasswordError}</Text>
-                <ActivityIndicator size="large" color={colors.primary} animating={isLoading} />
+                <View style={{ alignItems: 'center' }}>
+                    <ActivityIndicator size="large" color={colors.primary} animating={isLoading} />
+                    <View style={{ position: 'absolute', marginBottom: 24 }}>
+                        <View style={{ display: error !== "" ? 'flex' : 'none', alignItems: 'center' }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                                <MaterialIcons name="error" color={"red"} size={36} />
+                                <Text style={{ fontSize: 16, color: 'red', marginLeft: 6, maxWidth: 275 }}>{error}</Text>
+                            </View>
+                        </View>
+                    </View>
+                </View>
             </ImageBackground>
         </View>
     );
@@ -105,7 +117,7 @@ const styles = StyleSheet.create({
     },
     backButtonContainer: {
         left: 0,
-        top: 0,
+        top: 0 + StatusBarManager.HEIGHT,
         position: 'absolute',
         height: 56,
         width: 56,
