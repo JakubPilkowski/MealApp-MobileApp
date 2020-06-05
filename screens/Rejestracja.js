@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ImageBackground, Text, TextInput, TouchableOpacity, Dimensions, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ImageBackground, Text, TextInput, NativeModules, TouchableOpacity, Dimensions, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import colors from '../src/themes/colors';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
+const { StatusBarManager } = NativeModules;
+import {MaterialIcons} from "react-native-vector-icons";
 import dimensions from '../src/themes/dimensions';
 import Validation from '../service/Validation';
 import Hashing from '../service/Hashing';
 import { Ionicons } from 'react-native-vector-icons';
-
-
-const { width, height } = Dimensions.get("screen");
 const Rejestracja = props => {
     const [loginField, setLoginField] = useState('');
     const [emailField, setEmailField] = useState('');
@@ -23,6 +22,7 @@ const Rejestracja = props => {
     const [isLoading, setIsLoading] = useState(false);
     const [registerError, setRegisterError] = useState('');
     const [buttonEnabled, setButtonEnabled] = useState(true);
+    const [error, setError] = useState("");
     const onFirstInputFocus = () => {
         setSecondInputFocus(false);
         setThirdInputFocus(false);
@@ -104,7 +104,7 @@ const Rejestracja = props => {
         <KeyboardAvoidingView style={styles.container}
             behavior="height">
             <ImageBackground source={require('../src/images/cutlery.jpg')} style={styles.imageBackground} imageStyle={styles.imageStyle}>
-                <View style={{ height: 56, backgroundColor: colors.primary, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
+                <View style={{ height: 56 + StatusBarManager.HEIGHT, backgroundColor: colors.primary, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', }}>
                     <View style={[styles.backButtonContainer, { left: 0 }]}>
                         <TouchableOpacity
                             onPress={() => {
@@ -113,7 +113,7 @@ const Rejestracja = props => {
                             <Ionicons name="ios-arrow-round-back" size={36} color={colors.colorTextWhite}></Ionicons>
                         </TouchableOpacity>
                     </View>
-                    <Text style={{ color: colors.colorTextWhite, fontSize: 20, fontWeight: 'bold' }}>Rejestracja</Text>
+                    <Text style={{ color: colors.colorTextWhite, fontSize: 20, fontWeight: 'bold', position: 'absolute', bottom: 15 }}>Rejestracja</Text>
                 </View>
 
 
@@ -158,10 +158,20 @@ const Rejestracja = props => {
                         }
                     }}
                 />
-                <Text style={{ fontSize: 14, marginBottom: 100, color: 'red', width: "75%" }}>{passwordError}</Text>
+                <Text style={{ fontSize: 14, marginBottom: dimensions.defaultHugeMargin, color: 'red', width: "75%" }}>{passwordError}</Text>
                 {registerButton}
                 <Text style={{ fontSize: 14, color: 'red', width: "75%" }}>{registerError}</Text>
-                <ActivityIndicator size="large" color={colors.primary} animating={isLoading} />
+                <View style={{ alignItems: 'center' }}>
+                    <ActivityIndicator size="large" color={colors.primary} animating={isLoading} />
+                    <View style={{ position: 'absolute', marginBottom: 24 }}>
+                        <View style={{ display: error !== "" ? 'flex' : 'none', alignItems: 'center' }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                                <MaterialIcons name="error" color={"red"} size={36} />
+                                <Text style={{ fontSize: 16, color: 'red', marginLeft: 6, maxWidth: 275 }}>{error}</Text>
+                            </View>
+                        </View>
+                    </View>
+                </View>
             </ImageBackground>
         </KeyboardAvoidingView>
     );
@@ -183,7 +193,7 @@ const styles = StyleSheet.create({
     },
     backButtonContainer: {
         left: 0,
-        top: 0,
+        top: 0 + StatusBarManager.HEIGHT,
         position: 'absolute',
         height: 56,
         width: 56,
