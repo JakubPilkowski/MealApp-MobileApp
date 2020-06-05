@@ -53,9 +53,9 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: Colors.colorTextWhite,
         padding: Dimensions.defaultPadding,
-        borderRadius: Dimensions.defaultSmallBorderRadius,
-        borderColor: Colors.accent,
-        borderWidth: Dimensions.defaultBorderWidth,
+        borderRadius: 12,
+        // borderColor: Colors.accent,
+        // borderWidth: Dimensions.defaultBorderWidth,
     }
 });
 

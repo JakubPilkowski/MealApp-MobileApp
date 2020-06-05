@@ -70,9 +70,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         backgroundColor: Colors.colorTextWhite,
-        borderColor: Colors.accent,
-        borderWidth: Dimensions.defaultBorderWidth,
-        borderRadius: Dimensions.defaultSmallBorderRadius,
+        borderRadius: 12,
         padding: Dimensions.defaultPadding,
         marginTop: Dimensions.defaultMarginBetweenItems,
         marginHorizontal: Dimensions.defaultSmallMargin
