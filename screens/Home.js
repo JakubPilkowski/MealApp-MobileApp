@@ -58,7 +58,7 @@ const Home = props => {
                     //     })
                     //     .catch(err => console.log(err));
                 }
-            }, 1000);
+            }, 200);
         }
     }
     useEffect(() => {
@@ -90,6 +90,7 @@ const Home = props => {
                         {
                             drawerIcon: ({ color }) => <MaterialCommunityIcons name="food-fork-drink" size={24} color={color} />,
                             cardStyleInterpolator: forFade
+                            
                         }
                     }
                 />

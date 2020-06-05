@@ -11,6 +11,7 @@ import CustomPicker from '../components/CustomPicker';
 import {
     AntDesign,
     Feather, Ionicons,
+    MaterialIcons
 } from 'react-native-vector-icons';
 import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
@@ -22,6 +23,7 @@ import { SearchBar } from 'react-native-elements';
 import CustomMultiSelect from '../components/CustomMultiSelect';
 const { width, height } = Dimensions.get("screen");
 import PickerItem from '../models/PickerItem';
+import { useNavigationState } from '@react-navigation/native';
 
 
 function JadlodajnieScreen({ navigation, route }) {
@@ -30,7 +32,6 @@ function JadlodajnieScreen({ navigation, route }) {
     const [searchResultsLoading, setSearchResultsLoading] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [searchViewValue, setSearchViewValue] = useState('');
-    const [isLoaded, setIsLoaded] = useState(false);
     const [names, setNames] = useState([]);
     const [tags, setTags] = useState([]);
     const [chosenItems, setChosenItems] = useState([]);
@@ -47,26 +48,60 @@ function JadlodajnieScreen({ navigation, route }) {
     const [mode, setMode] = useState('default');
     const [defaultWojewodztwo, setDefaultWojewodztwo] = useState();
     const [defaultMiasto, setDefaultMiasto] = useState();
+    const [error, setError] = useState("");
+    const [errorType, setErrorType] = useState("default");
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
                 const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
                 const miastoValue = await AsyncStorage.getItem("miasto");
+                setNames([]);
+                setTags([]);
                 setWojewodztwo(wojewodztwoValue);
                 setMiasto(miastoValue);
                 setDefaultWojewodztwo(wojewodztwoValue);
                 setDefaultMiasto(miastoValue);
                 await Promise.all([
-                    getWojewodztwa(),
-                    getMiastaForWojewodztwo(wojewodztwoValue),
-                    getEatingHousesNames(),
-                    getTagi(),
-                    getJadlodajnie(wojewodztwoValue, miastoValue)
-                ]);
-                setIsLoading(false);
+                    Connection.getWojewodztwa(),
+                    Connection.getMiastaForWojewodztwo(wojewodztwoValue),
+                    Connection.getEatingHousesNames(),
+                    Connection.getTags(),
+                    Connection.getJadlodajnie(wojewodztwoValue, miastoValue),
+                ]).then(res => {
+                    getJadlodajnieInfos(res);
+                }).catch(err => {
+                    if (err === "Brak internetu")
+                        setErrorType("network")
+                    else
+                        setErrorType("default")
+                    setError(err);
+                    setIsLoading(false);
+                });
             }, 200)
         }
     }
+
+    async function getJadlodajnieInfos(res) {
+        if (wojewodztwa.length <= 1) {
+            res[0].map((item) => {
+                setWojewodztwa(wojewodztwa => [...wojewodztwa, new PickerItem(item.name, item.slug, 0, 0, 0)]);
+            });
+        }
+        setMiasta([new PickerItem("Wybierz miasto...", "default", 0, 0, 0)]);
+        res[1].map((item) => {
+            setMiasta(miasta => [...miasta, new PickerItem(item.name, item.slug, item.latitude, item.longitude, item.zoom)]);
+        });
+        setNames(res[2]);
+        setWojewodztwoEnabled(true);
+        setMiastoEnabled(true);
+        res[3].map((tag) => {
+            setTags(tags => [...tags, { id: tag.id, name: tag.name, selected: false, color: 'black' }]);
+        })
+        setMode("restart");
+        setJadlodajnie(res[4]);
+        setIsLoading(false);
+    }
+
     async function getJadlodajnie(wojewodztwo, miasto) {
         const res = Connection.getJadlodajnie(wojewodztwo, miasto);
         res
@@ -78,42 +113,15 @@ function JadlodajnieScreen({ navigation, route }) {
                     setJadlodajnie(res);
                 }
             })
-            .catch(err => console.log(err + 'blad'));
-    }
-    async function getEatingHousesNames() {
-        setNames([]);
-        const res = Connection.getEatingHousesNames();
-        res
-            .then(res => {
-                setNames(res);
-            })
-            .catch(err => console.log(err + 'blad'));
-    }
-    async function getTagi() {
-        setTags([]);
-        const res = Connection.getTags();
-        res
-            .then(res => {
-                res.map((tag) => {
-                    setTags(tags => [...tags, { id: tag.id, name: tag.name, selected: false, color: 'black' }]);
-                })
-            })
-            .catch(err => console.log(err + 'blad'));
-        setMode('restart');
-    }
-
-    //pobieranie województw
-    async function getWojewodztwa() {
-        if (wojewodztwa.length <= 1) {
-            const wojewodztwaResponse = Connection.getWojewodztwa();
-            wojewodztwaResponse
-                .then(res => {
-                    res.map((item) => {
-                        setWojewodztwa(wojewodztwa => [...wojewodztwa, new PickerItem(item.name, item.slug, 0, 0, 0)]);
-                    });
-                })
-                .catch(err => console.log(err + 'blad'));
-        }
+            .catch(err => {
+                if (err === "Brak internetu")
+                    setErrorType("network")
+                else
+                    setErrorType("default")
+                setError(err);
+                setSearchResultsLoading(false);
+                setIsLoading(false);
+            });
     }
     //pobieranie miast dla województwa
     async function getMiastaForWojewodztwo(wojewodztwo) {
@@ -128,7 +136,15 @@ function JadlodajnieScreen({ navigation, route }) {
                 setWojewodztwoEnabled(true);
                 setMiastoEnabled(true);
             })
-            .catch(err => console.log(err + 'blad'));
+            .catch(err => {
+                if (err === "Brak internetu")
+                    setErrorType("network")
+                else
+                    setErrorType("default")
+                setError(err);
+                setIsPickerLoading(false);
+                toggleSearchView();
+            });
     }
 
     const onWojewodztwoChangedHandler = (wojewodztwo) => {
@@ -149,14 +165,19 @@ function JadlodajnieScreen({ navigation, route }) {
     const onMiastoChangedHandler = (miasto) => {
         setMiasto(miasto.value);
     }
-    navigation.addListener("focus" , ()=>{
+
+    navigation.addListener("focus", () => {
             setIsLoading(true);
     })
     useEffect(() => {
-        if (isLoading)
-            fetchData();
-        else if (searchResultsLoading)
-            getJadlodajnie(wojewodztwo, miasto);
+        if (isLoading || searchResultsLoading) {
+            setError("");
+            setErrorType("default");
+            if (isLoading)
+                fetchData();
+            else if (searchResultsLoading)
+                getJadlodajnie(wojewodztwo, miasto);
+        }
     }, [isLoading, searchResultsLoading]);
 
     const HomeButtonHandler = () => {
@@ -240,20 +261,32 @@ function JadlodajnieScreen({ navigation, route }) {
         content = <CustomLoadingComponent />
     }
     else {
-        if (jadlodajnie.length > 0) {
-            content =
-                <FlatList
-                    scrollEnabled={expanded ? false : true}
-                    data={jadlodajnie} renderItem={({ item, index }) =>
-                        <Jadlodajnia containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} onMoreClick={() => {
-                            navigation.navigate('JadlodajnieWiecej', { jadlodajniaSlug: item.slug, wojewodztwo: wojewodztwo, miasto: miasto });
-                        }}
-                            jadlodajnia={item} ></Jadlodajnia>}
-                    keyExtractor={item => item.id.toString()}
-                />
+        if (error !== "") {
+            if (errorType === "network") {
+                content =
+                    <PlaceHolder buttonDisplay={true} textContainer={{ borderColor: 'red' }} textStyle={{ color: 'red' }} text={error} src={require("../src/images/network_error.png")} onButtonClick={() => { setIsLoading(true) }} />
+            }
+            else {
+                content =
+                    <PlaceHolder buttonDisplay={true} textContainer={{ borderColor: 'red' }} textStyle={{ color: 'red' }} text={error} src={require("../src/images/error.png")} onButtonClick={() => { setIsLoading(true) }} />
+            }
         }
         else {
-            content = <PlaceHolder text={"Ups, nie ma \ntakich restauracji"} src={require('../src/images/plate_v2.png')} containerStyle={{ opacity: detailedSearchExpanded ? 0 : 1 }} />
+            if (jadlodajnie.length > 0) {
+                content =
+                    <FlatList
+                        scrollEnabled={expanded ? false : true}
+                        data={jadlodajnie} renderItem={({ item, index }) =>
+                            <Jadlodajnia containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} onMoreClick={() => {
+                                navigation.navigate('JadlodajnieWiecej', { jadlodajniaSlug: item.slug, wojewodztwo: wojewodztwo, miasto: miasto });
+                            }}
+                                jadlodajnia={item} ></Jadlodajnia>}
+                        keyExtractor={item => item.id.toString()}
+                    />
+            }
+            else {
+                content = <PlaceHolder text={"Ups, nie ma \ntakich restauracji"} src={require('../src/images/plate_v2.png')} containerStyle={{ opacity: detailedSearchExpanded ? 0 : 1 }} />
+            }
         }
     }
     function applyFilter(text) {
@@ -354,7 +387,17 @@ function JadlodajnieScreen({ navigation, route }) {
                             pickerItems={miasta} selectedValue={miasto}
                             onPickerChange={(miasto) => onMiastoChangedHandler(miasto)}
                         />
-                        <ActivityIndicator size="large" color={Colors.primary} animating={isPickerLoading} style={{}} />
+                        <View style={{ alignItems: 'center' }}>
+                            <ActivityIndicator size="large" color={Colors.primary} animating={isPickerLoading} />
+                            <View style={{ position: 'absolute', marginBottom: 24 }}>
+                                <View style={{ display: error !== "" ? 'flex' : 'none', alignItems: 'center' }}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                                        <MaterialIcons name="error" color={"red"} size={36} />
+                                        <Text style={{ fontSize: 16, color: 'red', marginLeft: 6, maxWidth: 275 }}>{error}</Text>
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
                         <Text style={styles.title}>Tagi</Text>
                         <CustomMultiSelect placeHolder="Wybierz tagi (max 3)" items={tags} chosenItems={chosenItems} mode={mode}
                             onAddItem={(item) => {

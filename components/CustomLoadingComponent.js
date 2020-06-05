@@ -4,13 +4,12 @@ import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
 
 
-const CustomLoadingComponent = props => {
+const CustomLoadingComponent = React.memo(function CustomLoadingComponent(props) {
     const spinValue = new Animated.Value(0);
     const bounceValue = new Animated.Value(0);
     const dotOneValue = new Animated.Value(0);
     const dotTwoValue = new Animated.Value(0);
     const dotThreeValue = new Animated.Value(0);
-    const [blockNextAnimations , setBlockNextAnimations] = useState(true);
     function loaderImageAnim() {
         spinValue.setValue(0);
         bounceValue.setValue(0);
@@ -65,10 +64,8 @@ const CustomLoadingComponent = props => {
             ]
         ).start(() => loadTextAnim())
     }
-    useEffect(()=>{
         loaderImageAnim();
         loadTextAnim();
-    }, [blockNextAnimations])
     const spin = spinValue.interpolate({
         inputRange: [0, 0.5, 1],
         outputRange: ['0deg', '360deg', '720deg']
@@ -119,7 +116,7 @@ const CustomLoadingComponent = props => {
         </Modal>);
 
 
-}
+})
 
 
 

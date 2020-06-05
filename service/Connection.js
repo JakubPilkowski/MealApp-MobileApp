@@ -15,15 +15,14 @@ export default class Connection {
                     }
                 }
                 else if (err.request) {
-                    console.log(err.request);
-                    throw new Error("Brak internetu")
+                    throw new Error("Brak internetu");
                 }
                 else {
                     throw new Error("Coś innego się stało");
                 }
 
             }),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Za długi czas oczekiwania, sprawdź swoje połączenie internetowe')), 5000))
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Za długi czas oczekiwania, sprawdź swoje połączenie internetowe')), 10000))
         ]).catch(err => err);
         return new Promise((resolve, reject) => {
             result.then(result => {

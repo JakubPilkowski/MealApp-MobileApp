@@ -39,7 +39,7 @@ function PowiadomieniaScreen({ navigation }) {
                 setButtonOpacity(authToken !== null ? 1 : 0);
                 setIsLoading(false);
          
-            }, 500);
+            }, 200);
         }
     }
 

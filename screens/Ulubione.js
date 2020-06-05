@@ -36,8 +36,8 @@ function UlubioneScreen({ navigation, route }) {
                         setUlubioneJadlodajnie(res.ulubione);
                         setIsLoading(false);
                     })
-                    .catch(err => console.log(err + 'blad'));
-            }, 500);
+                    .catch(err => {});
+            }, 200);
         }
     }
 
