@@ -50,6 +50,7 @@ function JadlodajnieScreen({ navigation, route }) {
     const [defaultMiasto, setDefaultMiasto] = useState();
     const [error, setError] = useState("");
     const [errorType, setErrorType] = useState("default");
+    const [localizationError, setLocalizationError] = useState("");
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
@@ -194,8 +195,15 @@ function JadlodajnieScreen({ navigation, route }) {
     }
 
     const onSearchClicked = () => {
-        toggleSearchView();
-        setSearchResultsLoading(true);
+        if(wojewodztwo !=="default" && miasto !=="default"){
+            console.log(wojewodztwo);
+            console.log(miasto);
+            toggleSearchView();
+            setSearchResultsLoading(true);
+            setLocalizationError("");
+        }else{
+            setLocalizationError("Musisz wybrać województwo i miasto")
+        }
     }
 
     const getSearchResults = (jadlodajnie) => {
@@ -411,6 +419,7 @@ function JadlodajnieScreen({ navigation, route }) {
                         />
                     </View>
                     {searchButton}
+                    <Text style={{textAlign:'center', fontSize:14, color:'red', opacity: localizationError !== "" ? 1:0}}>{localizationError}</Text>
                     <TouchableOpacity onPress={() => {
                         setSearchViewValue("");
                         setChosenItems([]);

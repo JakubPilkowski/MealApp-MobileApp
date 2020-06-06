@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
     },
     textStyle: {
-        fontSize: dimensions.hugeFontSize,
+        fontSize: 20,
         color: Colors.primary,
         textAlign: 'center'
     }
