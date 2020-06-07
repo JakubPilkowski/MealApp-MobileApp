@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button, ImageBackground, Image, ToastAndroid, FlatList, Platform, TouchableOpacity, TouchableNativeFeedback, AsyncStorage, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Image, ToastAndroid, FlatList, Platform, AsyncStorage } from 'react-native';
 import JadlodajnieWiecej from './JadlodajnieWiecej';
 import { createStackNavigator } from '@react-navigation/stack';
 import Colors from "../src/themes/colors";
@@ -16,9 +16,6 @@ import strings from '../src/themes/strings';
 import { Feather } from 'react-native-vector-icons';
 import PlaceHolder from '../components/PlaceHolder';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
-
-
-const { width, height } = Dimensions.get("screen");
 let id = 0;
 
 function PowiadomieniaScreen({ navigation }) {
@@ -38,7 +35,7 @@ function PowiadomieniaScreen({ navigation }) {
                 setIsLoggedIn(authToken !== null ? true : false);
                 setButtonOpacity(authToken !== null ? 1 : 0);
                 setIsLoading(false);
-         
+
             }, 200);
         }
     }
@@ -53,7 +50,6 @@ function PowiadomieniaScreen({ navigation }) {
                 content = <FlatList
                     containerStyle={{ flex: 1 }}
                     data={powiadomienia}
-
                     renderItem={({ item, index }) =>
                         <Card
                             pressEnabled={true}
@@ -84,15 +80,17 @@ function PowiadomieniaScreen({ navigation }) {
     }
 
     navigation.addListener("focus", () => {
-       reloadScreen();
+        reloadScreen();
     })
+
     async function reloadScreen() {
         const refresh = await AsyncStorage.getItem("refresh");
-            if (refresh === "true")
-                setIsLoading(true)
-            if (refresh === "false")
-                AsyncStorage.setItem('refresh', "true");
+        if (refresh === "true")
+            setIsLoading(true)
+        if (refresh === "false")
+            AsyncStorage.setItem('refresh', "true");
     }
+
     useEffect(() => {
         fetchData();
     }, [powiadomienia.length, isLoading]);
@@ -146,7 +144,7 @@ function PowiadomieniaScreen({ navigation }) {
             <IconWithAction content={<Feather name="menu" size={26} color={Colors.colorTextWhite} />} onClick={HomeButtonHandler} />
         )
     });
-    
+
     return (
         <View style={styles.container}>
             <ImageBackground source={require('../src/images/sosy.jpg')} style={{ flex: 1, backgroundColor: Colors.backgroundColor }} imageStyle={{ opacity: 0.3 }}>
@@ -216,6 +214,5 @@ const styles = StyleSheet.create({
 
     },
 });
-
 
 export default Powiadomienia;

@@ -4,13 +4,14 @@ import Colors from "../src/themes/colors";
 import Dimensions from "../src/themes/dimensions";
 const Toolbar = props => {
 
-    let homeButton = <TouchableOpacity onPress={props.onHomeClick}>
-        <Image style={styles.button} source={props.homeButton}></Image>
-    </TouchableOpacity>;
-    let rightCornerButton = 
-    <TouchableOpacity onPress={props.onRightCornerClick}>
-        <Image style={styles.button} source={props.rightCornerButton}></Image>
-    </TouchableOpacity>;
+    let homeButton =
+        <TouchableOpacity onPress={props.onHomeClick}>
+            <Image style={styles.button} source={props.homeButton}></Image>
+        </TouchableOpacity>;
+    let rightCornerButton =
+        <TouchableOpacity onPress={props.onRightCornerClick}>
+            <Image style={styles.button} source={props.rightCornerButton}></Image>
+        </TouchableOpacity>;
     if (props.homeButton == null) {
         homeButton = null;
     }
@@ -30,8 +31,6 @@ const Toolbar = props => {
     );
 }
 
-
-
 const styles = StyleSheet.create({
     container: {
         width: "100%",
@@ -50,7 +49,7 @@ const styles = StyleSheet.create({
     buttonContainer: {
         width: 48,
         height: 48,
-        alignItems:"center",
+        alignItems: "center",
         justifyContent: 'center',
     },
     button: {

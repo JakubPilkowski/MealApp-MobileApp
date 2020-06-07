@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, FlatList, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid, BackHandler, NativeModules, Platform, AsyncStorage } from 'react-native';
+import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, FlatList, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid, BackHandler, NativeModules, AsyncStorage } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
-const { StatusBarManager } = NativeModules;
-const HEADER_EXPANDED_HEIGHT = 225 + StatusBarManager.HEIGHT;
-const HEADER_COLLAPSED_HEIGHT = 56 + StatusBarManager.HEIGHT;
-import {FontAwesome, Feather, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
+import { FontAwesome, Feather, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import Connection from '../service/Connection';
 import PlaceHolder from "../components/PlaceHolder";
 import IconWithAction from '../components/IconWithAction';
@@ -13,6 +10,9 @@ import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import JadlodajnieLocalizationDetails from '../components/JadlodajnieLocalizationDetails';
 import ZestawsView from '../components/ZestawsView';
 const { width } = Dimensions.get('window');
+const { StatusBarManager } = NativeModules;
+const HEADER_EXPANDED_HEIGHT = 225 + StatusBarManager.HEIGHT;
+const HEADER_COLLAPSED_HEIGHT = 56 + StatusBarManager.HEIGHT;
 
 const JadlodajnieWiecej = props => {
 
@@ -51,12 +51,10 @@ const JadlodajnieWiecej = props => {
                 setError(err);
                 setIsLoading(false);
             });
-           
     }
     props.navigation.dangerouslyGetParent().setOptions({
         gestureEnabled: false
     })
-
     useEffect(() => {
         if (isLoading) {
             setError("");
@@ -236,8 +234,7 @@ const JadlodajnieWiecej = props => {
                                     }
                                 }
                             }])}
-                        scrollEventThrottle={16}
-                    >
+                        scrollEventThrottle={16}>
                         <View style={{
                             backgroundColor: Colors.colorTextWhite,
                             marginHorizontal: 12,
@@ -246,10 +243,8 @@ const JadlodajnieWiecej = props => {
                             padding: 6,
                             marginVertical: 24
                         }}>
-
                             <Text style={{ fontSize: 20, textAlign: "center", marginBottom: 6 }}>Aktualności</Text>
                             {dailyContent}
-
                         </View>
                         <View style={{ backgroundColor: Colors.colorTextWhite, marginHorizontal: 12, borderRadius: 12, padding: 14, marginBottom: 24 }}>
                             <Text style={{ textAlign: 'center', fontSize: 20, marginBottom: 6 }}>
@@ -277,13 +272,12 @@ const JadlodajnieWiecej = props => {
                         </Text>
                         </View>
                         <SafeAreaView style={{ display: display ? 'flex' : 'none' }}>
-                            {dataSource.addressList.map(localizationInfo => renderLocalizationInfo(dataSource, localizationInfo))}
+                            {dataSource.addressList.map(localizationInfo => renderLocalizationInfo(localizationInfo))}
                         </SafeAreaView>
                     </ScrollView>
                 </View>
         }
     }
-
     return (
         <View style={styles.container}>
             <ImageBackground source={require('../src/images/zupka.jpg')} imageStyle={{ opacity: 0.3 }} style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>
@@ -292,12 +286,12 @@ const JadlodajnieWiecej = props => {
         </View >)
 }
 
-
-function renderLocalizationInfo(informacje, lokalizacja) {
+function renderLocalizationInfo(lokalizacja, miasto) {
     return (
-        <JadlodajnieLocalizationDetails informacje={lokalizacja} />
+        <JadlodajnieLocalizationDetails informacje={lokalizacja}/>
     );
 }
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -356,7 +350,6 @@ const styles = StyleSheet.create({
         borderColor: Colors.accent,
         borderRadius: dimensions.defaultHugeBorderRadius
     },
-
     centerAlignText: {
         textAlign: 'center',
         fontSize: dimensions.hugeFontSize,

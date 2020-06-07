@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Modal, TouchableNativeFeedback, Platform } from 'react-native';
+import React from 'react';
+import { StyleSheet, View, Text, Modal, Platform } from 'react-native';
 import colors from '../src/themes/colors';
 import dimensions from '../src/themes/dimensions';
 import IosButton from './IosButton';
 import AndroidButton from './AndroidButton';
-
-
 
 const CustomAlert = props => {
     let cancelButton;
@@ -16,7 +14,7 @@ const CustomAlert = props => {
         okButton =
             <IosButton containerStyle={{ flex: 1 }} onClick={props.onPositiveClick} text="Tak" />
     }
-    if (Platform.OS === "android" && Platform.Version >=21) {
+    if (Platform.OS === "android" && Platform.Version >= 21) {
         cancelButton =
             <AndroidButton onClick={props.onNegativeClick} text="Nie" />
         okButton =
@@ -26,8 +24,7 @@ const CustomAlert = props => {
         <Modal
             visible={props.visibility}
             transparent={true}
-            animationType={"fade"}
-        >
+            animationType={"fade"}>
             <View style={styles.mainOuterComponent}>
                 <View style={styles.container}>
                     <Text style={styles.title}>{props.title}</Text>

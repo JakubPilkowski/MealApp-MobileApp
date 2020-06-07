@@ -6,7 +6,6 @@ import Powiadomienia from '../screens/Powiadomienia';
 import Mapa from '../screens/Mapa';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import CustomDrawer from '../components/CustomDrawer';
-import Connection from '../service/Connection';
 import Colors from '../src/themes/colors';
 import { Ionicons, Foundation, MaterialCommunityIcons } from '@expo/vector-icons';
 import Logowanie from '../screens/Logowanie';
@@ -22,12 +21,11 @@ const Home = props => {
             opacity: current.progress,
         },
     });
-    let uzytkownicy = [];
-    let pobranyUzytkownik;
 
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
+                AsyncStorage.removeItem("firstUse");
                 const token = await AsyncStorage.getItem("authToken");
                 if (token !== null) {
                     const login = await AsyncStorage.getItem("login");
@@ -39,23 +37,6 @@ const Home = props => {
                 else {
                     setDataSource({ login: "", email: "", avatar: "", loginStatus: false });
                     setIsLoading(false);
-                    // const res = await Connection.getUserOptions();
-                    // res
-                    //     .json()
-                    //     .then(res => {
-                    //         res.uzytkownicy.map((uzytkownik) => {
-                    //             uzytkownicy.push(uzytkownik);
-                    //         });
-                    //         uzytkownicy.map((uzytkownik, index) => {
-                    //             if (index === 0) {
-                    //                 pobranyUzytkownik = uzytkownik;
-                    //             }
-                    //         });
-
-                    //         setDataSource(pobranyUzytkownik);
-                    //         setIsLoading(false);
-                    //     })
-                    //     .catch(err => console.log(err));
                 }
             }, 200);
         }
@@ -119,23 +100,20 @@ const Home = props => {
                             title: "Logowanie",
                             gestureEnabled: false,
                             cardStyleInterpolator: forFade
-                            
                         }
-                        
-                    } 
-                    
-                    />
-                <Drawer.Screen name="EdytujProfil" component={EdytujProfil} options={
-                    {
-                        title: "EdytujProfil",
-                        gestureEnabled: false,
-                        cardStyleInterpolator: forFade
                     }
-                } />
+                />
+                <Drawer.Screen name="EdytujProfil" component={EdytujProfil}
+                    options={
+                        {
+                            title: "EdytujProfil",
+                            gestureEnabled: false,
+                            cardStyleInterpolator: forFade
+                        }
+                    } />
             </Drawer.Navigator>
         );
     }
-
 }
 export default Home;
 

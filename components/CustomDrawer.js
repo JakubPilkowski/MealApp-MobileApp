@@ -1,24 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Text, Platform, TouchableNativeFeedback, Image, AsyncStorage, ActivityIndicator } from 'react-native';
-import { Divider, Avatar } from 'react-native-elements';
+import { Divider } from 'react-native-elements';
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  DrawerContentScrollView,
-  DrawerItem
-} from '@react-navigation/drawer';
-import {
-  CommonActions,
-  DrawerActions,
-} from '@react-navigation/native';
+import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
+import { CommonActions, DrawerActions } from '@react-navigation/native';
 import Colors from '../src/themes/colors';
 import Dimensions from '../src/themes/dimensions';
 import AndroidButton from './AndroidButton';
 import IosButton from './IosButton';
 import dimensions from "../src/themes/dimensions";
-
-import {
-  MaterialIcons
-} from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const CustomDrawer = props => {
   let loginButton;
@@ -49,8 +40,8 @@ const CustomDrawer = props => {
   }
   if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21)) {
     loginButton = <IosButton text={isLoggedIn ? "Wyloguj się" : "Zaloguj się"} buttonStyle={{ color: Colors.colorTextWhite }}
-    enabled={loginButtonEnabled}
-    onClick={() => loginClick()}/>
+      enabled={loginButtonEnabled}
+      onClick={() => loginClick()} />
   }
 
   useEffect(() => {
@@ -65,7 +56,6 @@ const CustomDrawer = props => {
       await AsyncStorage.setItem("email", "");
       await AsyncStorage.setItem("avatar", "");
       const facebookId = await AsyncStorage.getItem("facebookId");
-      console.log(facebookId);
       const authToken = await AsyncStorage.getItem("authToken");
       if (facebookId !== "") {
         const token = `access_token=${authToken}`;
@@ -113,7 +103,7 @@ const CustomDrawer = props => {
         </View>
         <View style={styles.drawerLoginContainer} >
           <View style={{ flexDirection: 'row' }} >
-            <View style={{position:'absolute', width:'100%' }}>
+            <View style={{ position: 'absolute', width: '100%' }}>
               <ActivityIndicator size="large" color={Colors.colorTextWhite} animating={isLoading} />
             </View>
             {loginButton}

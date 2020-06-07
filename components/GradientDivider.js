@@ -1,8 +1,7 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import dimensions from '../src/themes/dimensions';
-
 
 const GradientDivider = props => {
     let locationEnd;
@@ -14,11 +13,10 @@ const GradientDivider = props => {
         return (
             <LinearGradient style={[styles.divider, props.dividerStyle]}
                 colors={[props.endColor, props.startColor]}
-                locations={[0,1]}>
+                locations={[0, 1]}>
             </LinearGradient>
         )
     }
-
     if (props.from === "left") {
         return (
             <LinearGradient style={[styles.divider, props.dividerStyle]}
@@ -37,10 +35,8 @@ const GradientDivider = props => {
             </LinearGradient>
         )
     }
-
 }
 const styles = StyleSheet.create({
-
     divider: {
         flex: 1,
         height: dimensions.defaultBorderWidth,

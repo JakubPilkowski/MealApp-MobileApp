@@ -3,7 +3,6 @@ const API_URL = "http://u2f38n4o.ddns.net:22222/";
 const http = Axios.create({
     baseURL: API_URL,
 });
-
 export default class Connection {
 
     static async fetchWithTimeout(url, options = {}) {
@@ -20,7 +19,6 @@ export default class Connection {
                 else {
                     throw new Error("Coś innego się stało");
                 }
-
             }),
             new Promise((_, reject) => setTimeout(() => reject(new Error('Za długi czas oczekiwania, sprawdź swoje połączenie internetowe')), 10000))
         ]).catch(err => err);
@@ -33,7 +31,6 @@ export default class Connection {
                     resolve(result);
                 }
             })
-
         })
     }
     static getWojewodztwa() {
@@ -62,17 +59,5 @@ export default class Connection {
     }
     static getUserOptions() {
         return fetch('http://www.mocky.io/v2/5e820a472f00000d002fb833' + '?random_number=' + new Date().getTime());
-    }
-
-    static logIn() {
-
-    }
-
-    static register() {
-
-    }
-
-    static forgotPassword() {
-
     }
 }

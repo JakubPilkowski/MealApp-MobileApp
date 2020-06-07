@@ -1,12 +1,12 @@
 export default class Validation {
 
-
     static emailVerification(text) {
         const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
         return !reg.test(text.trim()) ?
             "Niepoprawny email \n" :
             "";
     }
+
     static passwordVerification(text) {
         const reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,24}$/;
         return !reg.test(text.trim()) ?
@@ -20,6 +20,7 @@ export default class Validation {
             "Login musi zawierać co najmniej 4 znaki\n" :
             "";
     }
+
     static wojewodztwoVerification(text) {
         return text === "default" || text.length === 0 ?
             "Województwo nie może być puste lub być wartością domyślną \n" :

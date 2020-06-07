@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, FlatList, Platform, TouchableNativeFeedback, TouchableOpacity, Modal, Dimensions } from 'react-native';
+import { View, StyleSheet, Text, FlatList, Platform,ScrollView, TouchableNativeFeedback, TouchableOpacity, Modal, Dimensions } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
 import { Entypo, MaterialIcons, MaterialCommunityIcons, AntDesign } from "react-native-vector-icons";
@@ -68,17 +68,16 @@ const CustomMultiSelect = (props) => {
             visible={visibility}
             transparent={true}
             animationType={"fade"}>
-            <View style={{ margin: 0, marginVertical: 0, width: width, height: height, backgroundColor: 'rgba(0,0,0,0.5)', padding: 24, }}>
-                <View style={{ backgroundColor: Colors.colorTextWhite, padding: 12, borderColor: Colors.primary, borderWidth: 2, borderRadius: 3 }}>
-                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between',alignItems:'center',paddingBottom:24}}>
-                        <Text style={{ textAlign: 'center', fontSize: 16, color: 'red',fontWeight:'bold', opacity: errorEnabled ? 1 : 0,}}>Dodałeś już 3 tagi!!!</Text>
-                        <IconWithAction containerStyle={{width:26,height:26}}
+            <View style={{ margin: 0, marginVertical: 0, width: width, flex:1, backgroundColor: 'rgba(0,0,0,0.5)', padding: 24, }}>
+                <View style={{ backgroundColor: Colors.colorTextWhite, padding: 12,marginBottom:48, borderColor: Colors.primary, borderWidth: 2, borderRadius: 3 }}>
+                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 24 }}>
+                        <Text style={{ textAlign: 'center', fontSize: 16, color: 'red', fontWeight: 'bold', opacity: errorEnabled ? 1 : 0, }}>Dodałeś już 3 tagi!!!</Text>
+                        <IconWithAction containerStyle={{ width: 26, height: 26 }}
                             content={<AntDesign name="close" size={26} color={Colors.primary} />}
-                            onClick={()=>{setVisisbility(false)}} />
+                            onClick={() => { setVisisbility(false) }} />
                     </View>
-                    <KeyboardAwareFlatList
-                        data={searchResults} renderItem={({ item, index }) => {
-
+                    <ScrollView >
+                        {searchResults.map((item, index ) => {
                             return (
                                 <View>
                                     <TouchableNativeFeedback onPress={() => {
@@ -101,9 +100,8 @@ const CustomMultiSelect = (props) => {
                                     </View>
                                 </View>
                             )
-                        }}
-                    />
-
+                        })}
+                    </ScrollView>
                 </View>
             </View>
         </Modal>;
@@ -111,6 +109,7 @@ const CustomMultiSelect = (props) => {
         <View style={{ marginTop: 6, height: props.chosenItems.length < 3 ? props.chosenItems.length * 46 : 138 }}>
             <FlatList
                 data={props.chosenItems}
+                scrollEnabled={true}
                 renderItem={({ item, index }) => {
                     if (item.color === 'black') {
                         let colorIndex = Math.floor(Math.random() * (Math.floor(7) - Math.ceil(0))) + Math.ceil(0);

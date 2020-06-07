@@ -117,20 +117,20 @@ function LogowanieScreen({ navigation }) {
     async function verifyLogin() {
         setTimeout(async function () {
             {
-                    setIsLoading(false);
-                    setButtonEnabled(true);
-                    setLoginField("");
-                    setPasswordField("");
-                    // await AsyncStorage.setItem('login', loginField);
-                    // await AsyncStorage.setItem('email', );
-                    // navigation.dispatch({
-                    //     ...CommonActions.reset({
-                    //         index: 1,
-                    //         routes: [
-                    //             { name: "Home" },
-                    //         ]
-                    //     }),
-                    // });
+                setIsLoading(false);
+                setButtonEnabled(true);
+                setLoginField("");
+                setPasswordField("");
+                // await AsyncStorage.setItem('login', loginField);
+                // await AsyncStorage.setItem('email', );
+                // navigation.dispatch({
+                //     ...CommonActions.reset({
+                //         index: 1,
+                //         routes: [
+                //             { name: "Home" },
+                //         ]
+                //     }),
+                // });
             }
         }, 1000);
     }
@@ -270,7 +270,6 @@ function LogowanieScreen({ navigation }) {
             </ImageBackground>
         </SafeAreaView>
     );
-
 }
 
 
@@ -299,12 +298,10 @@ const Logowanie = props => {
                     },
                     cardStyleInterpolator: forFade
                 }}
-
             />
         </Stack.Navigator>
     );
 }
-
 
 const styles = StyleSheet.create({
     container: {
