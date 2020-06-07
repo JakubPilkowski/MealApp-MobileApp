@@ -80,6 +80,7 @@ const WyborLokalizacji = props => {
 
     async function saveFields() {
         try {
+            await AsyncStorage.setItem('refresh', 'true');
             await AsyncStorage.setItem('firstUse', 'false');
             await AsyncStorage.setItem('wojewodztwo', wojewodztwo);
             await AsyncStorage.setItem('miasto', miasto);

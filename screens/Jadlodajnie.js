@@ -23,7 +23,6 @@ import { SearchBar } from 'react-native-elements';
 import CustomMultiSelect from '../components/CustomMultiSelect';
 const { width, height } = Dimensions.get("screen");
 import PickerItem from '../models/PickerItem';
-import { useNavigationState } from '@react-navigation/native';
 
 
 function JadlodajnieScreen({ navigation, route }) {
@@ -37,8 +36,8 @@ function JadlodajnieScreen({ navigation, route }) {
     const [chosenItems, setChosenItems] = useState([]);
     const [wojewodztwa, setWojewodztwa] = useState([new PickerItem('Wybierz województwo...', 'default', 0, 0, 0)]);
     const [miasta, setMiasta] = useState([new PickerItem('Wybierz miasto...', 'default', 0, 0, 0)]);
-    const [wojewodztwo, setWojewodztwo] = useState();
-    const [miasto, setMiasto] = useState();
+    const [wojewodztwo, setWojewodztwo] = useState('');
+    const [miasto, setMiasto] = useState('');
     const { drawerNavigation } = route.params;
     const [isLoading, setIsLoading] = useState(true);
     const [wojewodztwoEnabled, setWojewodztwoEnabled] = useState(true);
@@ -51,6 +50,7 @@ function JadlodajnieScreen({ navigation, route }) {
     const [error, setError] = useState("");
     const [errorType, setErrorType] = useState("default");
     const [localizationError, setLocalizationError] = useState("");
+    const [searchBarFocus, setSearchBarFocus] = useState(false);
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
@@ -166,10 +166,18 @@ function JadlodajnieScreen({ navigation, route }) {
     const onMiastoChangedHandler = (miasto) => {
         setMiasto(miasto.value);
     }
-
     navigation.addListener("focus", () => {
-            setIsLoading(true);
+        reloadScreen();
     })
+
+    async function reloadScreen() {
+        const refresh = await AsyncStorage.getItem("refresh");
+            if (refresh === "true")
+                setIsLoading(true)
+            if (refresh === "false")
+                AsyncStorage.setItem('refresh', "true");
+    }
+
     useEffect(() => {
         if (isLoading || searchResultsLoading) {
             setError("");
@@ -195,13 +203,11 @@ function JadlodajnieScreen({ navigation, route }) {
     }
 
     const onSearchClicked = () => {
-        if(wojewodztwo !=="default" && miasto !=="default"){
-            console.log(wojewodztwo);
-            console.log(miasto);
+        if (wojewodztwo !== "default" && miasto !== "default") {
             toggleSearchView();
             setSearchResultsLoading(true);
             setLocalizationError("");
-        }else{
+        } else {
             setLocalizationError("Musisz wybrać województwo i miasto")
         }
     }
@@ -263,7 +269,6 @@ function JadlodajnieScreen({ navigation, route }) {
     drawerNavigation.setOptions({
         gestureEnabled: expanded ? false : true
     });
-
     let content;
     if (isLoading || searchResultsLoading) {
         content = <CustomLoadingComponent />
@@ -286,7 +291,9 @@ function JadlodajnieScreen({ navigation, route }) {
                         scrollEnabled={expanded ? false : true}
                         data={jadlodajnie} renderItem={({ item, index }) =>
                             <Jadlodajnia containerStyle={{ marginBottom: index + 1 === jadlodajnie.length ? dimensions.defaultMarginBetweenItems : 0 }} onMoreClick={() => {
-                                navigation.navigate('JadlodajnieWiecej', { jadlodajniaSlug: item.slug, wojewodztwo: wojewodztwo, miasto: miasto });
+                                navigation.navigate('JadlodajnieWiecej', {
+                                    jadlodajniaSlug: item.slug, wojewodztwo: wojewodztwo, miasto: miasto
+                                });
                             }}
                                 jadlodajnia={item} ></Jadlodajnia>}
                         keyExtractor={item => item.id.toString()}
@@ -308,7 +315,7 @@ function JadlodajnieScreen({ navigation, route }) {
             setSearchResults(filterResults);
         }
         else {
-            setSearchResults([]);
+            setSearchResults(names);
         }
     }
 
@@ -339,12 +346,19 @@ function JadlodajnieScreen({ navigation, route }) {
                     <Text style={{ fontSize: 16, marginTop: 6, marginBottom: 6 }}>Nazwa Jadłodajnii</Text>
                     <View style={{ width: '85%', alignItems: 'center' }}>
                         <SearchBar
-                            onCancel={() => { setSearchResults([]); }}
+                            onCancel={() => { setSearchResults([]); 
+                                setSearchBarFocus(false);
+                            }}
                             placeholder="Wyszukaj jadłodajnie..."
                             platform="android"
                             inputStyle={{ fontSize: 16 }}
-                            onFocus={() => { applyFilter(searchViewValue) }}
-                            onSubmitEditing={() => { setSearchResults([]) }}
+                            onFocus={() => { 
+                                applyFilter(searchViewValue) 
+                                setSearchBarFocus(true);
+                            }}
+                            onSubmitEditing={() => { setSearchResults([]) 
+                                setSearchBarFocus(false);
+                            }}
                             containerStyle={{ borderRadius: dimensions.defaultBorderRadius }}
                             onChangeText={(text) => applyFilter(text)}
                             value={searchViewValue}
@@ -354,7 +368,7 @@ function JadlodajnieScreen({ navigation, route }) {
                             style={{
                                 height: searchResults.length * 40 <= 160 ? searchResults.length * 40 : 160,
                             }}
-                            data={searchResults} renderItem={({ item, index }) => {
+                            data={searchBarFocus ? searchResults : null} renderItem={({ item, index }) => {
                                 return (
                                     <TouchableNativeFeedback onPress={() => {
                                         setSearchViewValue(item.name)
@@ -419,7 +433,7 @@ function JadlodajnieScreen({ navigation, route }) {
                         />
                     </View>
                     {searchButton}
-                    <Text style={{textAlign:'center', fontSize:14, color:'red', opacity: localizationError !== "" ? 1:0}}>{localizationError}</Text>
+                    <Text style={{ textAlign: 'center', fontSize: 14, color: 'red', opacity: localizationError !== "" ? 1 : 0 }}>{localizationError}</Text>
                     <TouchableOpacity onPress={() => {
                         setSearchViewValue("");
                         setChosenItems([]);
@@ -452,18 +466,20 @@ const Jadlodajnie = props => {
             opacity: current.progress,
         },
     });
-
     const Stack = createStackNavigator();
     return (
         <Stack.Navigator initialRouteName="Jadlodajnie" screenOptions={ScreenStyle}>
-            <Stack.Screen name="Jadlodajnie" component={JadlodajnieScreen} initialParams={{ drawerNavigation: props.navigation }} />
+            <Stack.Screen name="Jadlodajnie" component={JadlodajnieScreen} initialParams={{ drawerNavigation: props.navigation }}
+
+            />
             <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
                 options={{
                     headerStyle: {
                         opacity: 0, height: 0
                     },
-                    cardStyleInterpolator: forFade
+                    cardStyleInterpolator: forFade,
                 }}
+
             />
         </Stack.Navigator>
     );

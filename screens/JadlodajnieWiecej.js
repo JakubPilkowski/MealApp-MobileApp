@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, FlatList, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid, BackHandler, NativeModules, Platform } from 'react-native';
+import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, FlatList, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid, BackHandler, NativeModules, Platform, AsyncStorage } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
 const { StatusBarManager } = NativeModules;
@@ -18,7 +18,7 @@ const JadlodajnieWiecej = props => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [dataSource, setDataSource] = useState([]);
-    const { jadlodajniaSlug, wojewodztwo, miasto } = props.route.params;
+    const { jadlodajniaSlug, wojewodztwo, miasto, } = props.route.params;
     const [scrollY, setScrollY] = useState(new Animated.Value(0));
     const scrollRef = useRef(null);
     const [iconColor, setIconColor] = useState("white");
@@ -30,31 +30,31 @@ const JadlodajnieWiecej = props => {
     const [error, setError] = useState("");
     const [errorType, setErrorType] = useState("default");
     async function fetchData() {
-        // if (isLoading) {
-            // setTimeout(async function () {
-                const res = Connection.getSzczegolyJadlodajnia(jadlodajniaSlug, wojewodztwo, miasto);
-                res
-                    .then(res => {
-                        setDataSource(res);
-                        const date = new Date().toJSON().slice(0, 10);
-                        res.menuList.map((data, dataIndex) => {
-                            const splitedDate = data.date.split("T");
-                            if (splitedDate[0] == date)
-                                setScrollIndex(dataIndex);
-                        })
-                        setIsLoading(false);
-                    })
-                    .catch(err => {
-                        if (err === "Brak internetu")
-                            setErrorType("network")
-                        else
-                            setErrorType("default")
-                        setError(err);
-                        setIsLoading(false);
-                    });
-            // }, 200);
-        // }
+        AsyncStorage.setItem("refresh", "false");
+        const res = Connection.getSzczegolyJadlodajnia(jadlodajniaSlug, wojewodztwo, miasto);
+        res
+            .then(res => {
+                setDataSource(res);
+                const date = new Date().toJSON().slice(0, 10);
+                res.menuList.map((data, dataIndex) => {
+                    const splitedDate = data.date.split("T");
+                    if (splitedDate[0] == date)
+                        setScrollIndex(dataIndex);
+                })
+                setIsLoading(false);
+            })
+            .catch(err => {
+                if (err === "Brak internetu")
+                    setErrorType("network")
+                else
+                    setErrorType("default")
+                setError(err);
+                setIsLoading(false);
+            });
     }
+    props.navigation.dangerouslyGetParent().setOptions({
+        gestureEnabled: false
+    })
 
     useEffect(() => {
         if (isLoading) {
@@ -178,12 +178,6 @@ const JadlodajnieWiecej = props => {
                         <Text style={{ fontSize: 16, textAlign: 'center' }}>Ta jadłodajnia nie udostępnia aktualności</Text>
                     </View>
             }
-            // if(isFavourite){
-            //     setIconColor("gold");
-            // }
-            // else{
-            //     setIconColor("white");
-            // }
 
             content =
                 <View>
@@ -203,6 +197,7 @@ const JadlodajnieWiecej = props => {
                             content={<AntDesign name="arrowleft" size={28} color={Colors.colorTextWhite}></AntDesign>}
                             onClick={() => {
                                 setDisplay(false);
+                                // onGoBack();
                                 props.navigation.goBack();
                             }}
                         />

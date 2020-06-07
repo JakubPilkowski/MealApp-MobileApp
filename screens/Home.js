@@ -28,7 +28,6 @@ const Home = props => {
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
-                await AsyncStorage.removeItem("firstUse");
                 const token = await AsyncStorage.getItem("authToken");
                 if (token !== null) {
                     const login = await AsyncStorage.getItem("login");
@@ -89,8 +88,7 @@ const Home = props => {
                     options={
                         {
                             drawerIcon: ({ color }) => <MaterialCommunityIcons name="food-fork-drink" size={24} color={color} />,
-                            cardStyleInterpolator: forFade
-                            
+                            cardStyleInterpolator: forFade,
                         }
                     }
                 />
@@ -121,8 +119,12 @@ const Home = props => {
                             title: "Logowanie",
                             gestureEnabled: false,
                             cardStyleInterpolator: forFade
+                            
                         }
-                    } />
+                        
+                    } 
+                    
+                    />
                 <Drawer.Screen name="EdytujProfil" component={EdytujProfil} options={
                     {
                         title: "EdytujProfil",

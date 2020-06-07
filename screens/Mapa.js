@@ -118,7 +118,6 @@ function MapaScreen({ navigation, route }) {
                 setSearchResultsLoading(false);
             })
             .catch(err => {
-                console.log("halo");
                 if (err === "Brak internetu")
                     setErrorType("network")
                 else
@@ -177,9 +176,15 @@ function MapaScreen({ navigation, route }) {
 
     //reload aplikacji po wejściu do zakładki mapy
     navigation.addListener("focus", () => {
-        setIsLoading(true);
+        reloadScreen();
     })
-
+    async function reloadScreen() {
+        const refresh = await AsyncStorage.getItem("refresh");
+            if (refresh === "true")
+                setIsLoading(true)
+            if (refresh === "false")
+                AsyncStorage.setItem('refresh', "true");
+    }
     //rerender ekranu
     useEffect(() => {
         if (isLoading || searchResultsLoading) {
@@ -243,7 +248,13 @@ function MapaScreen({ navigation, route }) {
                 longitude: longitude,
                 longitudeDelta: zoom,
                 latitudeDelta: zoom
-            }}  >
+            }} 
+            scrollEnabled={!expanded}
+            rotateEnabled={!expanded}
+            pitchEnabled={!expanded}
+            zoomEnabled={!expanded}
+            
+            >
                 {dataSource.map(jadlodajnia =>
                     jadlodajnia.addressList.map(punkt =>
                         renderMarker(punkt, navigation, jadlodajnia, wojewodztwo, miasto)
