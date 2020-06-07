@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { View, StyleSheet, Picker } from 'react-native';
 import Colors from "../src/themes/colors";
 import Dimensions from "../src/themes/dimensions";

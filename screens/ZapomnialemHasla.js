@@ -4,10 +4,10 @@ import colors from '../src/themes/colors';
 import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
-const { StatusBarManager } = NativeModules;
 import Validation from '../service/Validation';
 import { Ionicons, MaterialIcons } from 'react-native-vector-icons';
 
+const { StatusBarManager } = NativeModules;
 const ZapomnialemHasla = props => {
 
     const [emailField, setEmailField] = useState('');
@@ -100,7 +100,6 @@ const ZapomnialemHasla = props => {
         </View>
     );
 }
-
 
 const styles = StyleSheet.create({
     container: {

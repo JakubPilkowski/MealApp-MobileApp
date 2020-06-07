@@ -4,10 +4,6 @@ import Dimensions from '../src/themes/dimensions';
 import Colors from '../src/themes/colors';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 
-
-
-
-
 const Card = props => {
     const cardView =
         <View style={[styles.container, props.containerStyle]}>
@@ -15,7 +11,7 @@ const Card = props => {
         </View>;
     let touchableView;
     if (props.pressEnabled) {
-        if (Platform.OS === "ios" || (Platform.OS==="android" && Platform.Version < 21)) {
+        if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21)) {
             touchableView =
                 <TouchableOpacity onPress={props.onCardPress} onLongPress={props.onLongCardPress}>
                     {cardView}
@@ -29,8 +25,8 @@ const Card = props => {
                 </TouchableNativeFeedback>
         }
     }
-    else{
-        touchableView=cardView;
+    else {
+        touchableView = cardView;
     }
     return (
         <View>
@@ -54,8 +50,6 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.colorTextWhite,
         padding: Dimensions.defaultPadding,
         borderRadius: 12,
-        // borderColor: Colors.accent,
-        // borderWidth: Dimensions.defaultBorderWidth,
     }
 });
 

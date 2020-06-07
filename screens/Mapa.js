@@ -138,7 +138,7 @@ function MapaScreen({ navigation, route }) {
             setMapLoaded(false);
             toggleSearchView();
             setSearchResultsLoading(true);
-        }else{
+        } else {
             setSearchError("Musisz wybrać województwo i miasto");
         }
     }
@@ -180,10 +180,10 @@ function MapaScreen({ navigation, route }) {
     })
     async function reloadScreen() {
         const refresh = await AsyncStorage.getItem("refresh");
-            if (refresh === "true")
-                setIsLoading(true)
-            if (refresh === "false")
-                AsyncStorage.setItem('refresh', "true");
+        if (refresh === "true")
+            setIsLoading(true)
+        if (refresh === "false")
+            AsyncStorage.setItem('refresh', "true");
     }
     //rerender ekranu
     useEffect(() => {
@@ -248,12 +248,12 @@ function MapaScreen({ navigation, route }) {
                 longitude: longitude,
                 longitudeDelta: zoom,
                 latitudeDelta: zoom
-            }} 
-            scrollEnabled={!expanded}
-            rotateEnabled={!expanded}
-            pitchEnabled={!expanded}
-            zoomEnabled={!expanded}
-            
+            }}
+                scrollEnabled={!expanded}
+                rotateEnabled={!expanded}
+                pitchEnabled={!expanded}
+                zoomEnabled={!expanded}
+
             >
                 {dataSource.map(jadlodajnia =>
                     jadlodajnia.addressList.map(punkt =>
@@ -298,7 +298,7 @@ function MapaScreen({ navigation, route }) {
                     </View>
                 </View>
                 {searchButton}
-                <Text style={{textAlign:'center', fontSize:14, color:'red', opacity: searchError !== "" ? 1:0}}>{searchError}</Text>
+                <Text style={{ textAlign: 'center', fontSize: 14, color: 'red', opacity: searchError !== "" ? 1 : 0 }}>{searchError}</Text>
             </View>
             <ImageBackground source={require('../src/images/lokalizacja.jpg')} style={{ flex: 1, backgroundColor: Colors.backgroundColor }} imageStyle={{ opacity: 0.3 }}>
                 {content}
@@ -355,9 +355,11 @@ const Mapa = props => {
 
     return (
         <Stack.Navigator initialRouteName="Mapa" screenOptions={ScreenStyle}>
-            <Stack.Screen name="Mapa" component={MapaScreen} options={{
-                headerTitle: Strings.mapa,
-            }} initialParams={{ drawerNavigation: props.navigation }} />
+            <Stack.Screen name="Mapa" component={MapaScreen}
+                options={{
+                    headerTitle: Strings.mapa,
+                }}
+                initialParams={{ drawerNavigation: props.navigation }} />
             <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
                 options={{
                     headerStyle: {
@@ -369,13 +371,10 @@ const Mapa = props => {
         </Stack.Navigator>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
     }
 })
-
-
 
 export default Mapa;

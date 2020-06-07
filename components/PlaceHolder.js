@@ -10,7 +10,7 @@ const PlaceHolder = props => {
             <Image style={styles.imageStyle} source={props.src} />
             <View style={[styles.textContainer, props.textContainer]}>
                 <Text style={[styles.textStyle, props.textStyle]}>{props.text}</Text>
-                <IosButton enabled={true} containerStyle={{display: props.buttonDisplay ? 'flex': 'none'}} text="Spróbuj ponownie" onClick={()=>{props.onButtonClick()}}/>
+                <IosButton enabled={true} containerStyle={{ display: props.buttonDisplay ? 'flex' : 'none' }} text="Spróbuj ponownie" onClick={() => { props.onButtonClick() }} />
             </View>
         </View>
     )
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
         width: 170,
         height: 170
     },
-    textContainer:{
+    textContainer: {
         marginTop: dimensions.defaultMarginBetweenItems,
         backgroundColor: Colors.colorTextWhite,
         borderWidth: dimensions.defaultBorderWidth,

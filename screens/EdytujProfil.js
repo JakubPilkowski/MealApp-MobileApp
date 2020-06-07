@@ -16,7 +16,7 @@ import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import Validation from '../service/Validation';
 import CustomPicker from '../components/CustomPicker';
 import PickerItem from '../models/PickerItem';
-function EdytujScreen({ navigation, route }) {
+function EdytujScreen({ navigation }) {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState("");
     const [loginField, setLoginField] = useState("");
@@ -184,14 +184,14 @@ function EdytujScreen({ navigation, route }) {
         }
     }
     async function verifyFields() {
-            await AsyncStorage.setItem('refresh', "true");
-            await AsyncStorage.setItem('wojewodztwo', wojewodztwoField);
-            await AsyncStorage.setItem('miasto', miastoField);
-            await AsyncStorage.setItem('latitude', latitude.toString());
-            await AsyncStorage.setItem('longitude', longitude.toString());
-            await AsyncStorage.setItem('zoom', zoom.toString());
-            setIsFieldLoading(false);
-            navigation.goBack();
+        await AsyncStorage.setItem('refresh', "true");
+        await AsyncStorage.setItem('wojewodztwo', wojewodztwoField);
+        await AsyncStorage.setItem('miasto', miastoField);
+        await AsyncStorage.setItem('latitude', latitude.toString());
+        await AsyncStorage.setItem('longitude', longitude.toString());
+        await AsyncStorage.setItem('zoom', zoom.toString());
+        setIsFieldLoading(false);
+        navigation.goBack();
     }
     let addImageButton;
     let saveSettingsButton;
@@ -315,7 +315,6 @@ function EdytujScreen({ navigation, route }) {
                         pickerItems={wojewodztwa}
                         onPickerChange={(wojewodztwo) => onWojewodztwoChangedHandler(wojewodztwo.value)}
                     />
-
                     <Text style={styles.title}>Miasto</Text>
                     <CustomPicker containerStyle={{ opacity: miastoEnabled ? 1 : 0.5 }}
                         enabled={miastoEnabled}
@@ -369,7 +368,6 @@ function EdytujScreen({ navigation, route }) {
 
 
 const EdytujProfil = props => {
-
     const Stack = createStackNavigator();
     return (
         <Stack.Navigator initialRouteName="EdytujProfil" screenOptions={ScreenStyle}>
@@ -378,12 +376,10 @@ const EdytujProfil = props => {
                     title: "Edytuj profil"
                 }
             } />
-
         </Stack.Navigator>
     );
 }
 const styles = StyleSheet.create({
-
     container: {
         flex: 1,
     },

@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableNativeFeedback } from 'react-native';
 import colors from '../src/themes/colors';
 import dimensions from '../src/themes/dimensions';
 
-
 const AndroidButton = props => {
 
     return (

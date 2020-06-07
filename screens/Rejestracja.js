@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ImageBackground, Text, TextInput, NativeModules, TouchableOpacity, Dimensions, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, ImageBackground, Text, TextInput, NativeModules, TouchableOpacity, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import colors from '../src/themes/colors';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
-const { StatusBarManager } = NativeModules;
-import {MaterialIcons} from "react-native-vector-icons";
+import { MaterialIcons } from "react-native-vector-icons";
 import dimensions from '../src/themes/dimensions';
 import Validation from '../service/Validation';
 import Hashing from '../service/Hashing';
 import { Ionicons } from 'react-native-vector-icons';
+const { StatusBarManager } = NativeModules;
 const Rejestracja = props => {
     const [loginField, setLoginField] = useState('');
     const [emailField, setEmailField] = useState('');
@@ -95,10 +95,6 @@ const Rejestracja = props => {
                 containerStyle={{ width: "60%", borderColor: colors.primary, borderWidth: 2, borderRadius: 6, backgroundColor: colors.colorTextWhite }}
                 buttonStyle={{ fontSize: 24 }} onClick={() => registerButtonHandler()} />
     }
-
-    // useEffect(() => {
-    //     hashPassword(passwordField);
-    // }, { isLoading });
 
     return (
         <KeyboardAvoidingView style={styles.container}

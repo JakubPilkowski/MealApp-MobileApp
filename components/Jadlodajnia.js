@@ -1,10 +1,9 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet, Image, Platform } from 'react-native';
-import { Divider, Avatar } from 'react-native-elements';
+import { View, Text, StyleSheet, Image, Platform } from 'react-native';
+import { Divider } from 'react-native-elements';
 import Strings from '../src/themes/strings';
 import Colors from '../src/themes/colors';
 import Dimensions from '../src/themes/dimensions';
-import { FlatList, TouchableOpacity, TouchableNativeFeedback } from 'react-native-gesture-handler';
 import IosButton from './IosButton';
 import AndroidButton from './AndroidButton';
 import GradientDivider from './GradientDivider';
@@ -12,7 +11,6 @@ import Zestaw from './Zestaw';
 
 const Jadlodajnia = props => {
     const jadlodajnia = props.jadlodajnia;
-    let counter = 0;
     let moreButton;
     if (Platform.OS === "ios" || (Platform.OS === "android" && Platform.Version < 21)) {
         moreButton =
@@ -30,12 +28,12 @@ const Jadlodajnia = props => {
     if (jadlodajnia.menuList.length > 0) {
         dailyContent =
             jadlodajnia.menuList.map(menuListItem =>
-                menuListItem.contentList.map(zestaw => renderZestaw(zestaw))
+                menuListItem.contentList.map(zestaw => renderZestaw(zestaw, menuListItem.contentList.length))
             )
     }
     else {
         dailyContent =
-            <Text style={{fontSize: 16, textAlign:'center'}}>Ta jadłodajnia nie udostępnia zestawów na dzisiaj</Text>
+            <Text style={{ fontSize: 16, textAlign: 'center' }}>Ta jadłodajnia nie udostępnia zestawów</Text>
     }
 
     return (
@@ -43,10 +41,10 @@ const Jadlodajnia = props => {
             <View style={styles.avatarContainer}>
                 <Image style={styles.image} source={jadlodajnia.logoUrl !== "notImplemented" ? { uri: jadlodajnia.logoUrl } : require("../src/images/ikonka_v3.png")} ></Image>
                 <View style={{ flexDirection: 'column', flex: 1, justifyContent: "center" }}>
-                    <Text style={[styles.avatarName, {fontSize: jadlodajnia.name.length > 15 ? 20 : 24}]}>{jadlodajnia.name}</Text>
+                    <Text style={[styles.avatarName, { fontSize: jadlodajnia.name.length > 15 ? 20 : 24 }]}>{jadlodajnia.name}</Text>
                     <GradientDivider startColor={Colors.primary} endColor={Colors.accent}
                         from="left" locationEnd={0.7} dividerStyle={{ flex: 0 }} />
-                    <Text style={[styles.avatarName, {fontSize: jadlodajnia.name.length > 15 ? 20 : 24}]}></Text>
+                    <Text style={[styles.avatarName, { fontSize: jadlodajnia.name.length > 15 ? 20 : 24 }]}></Text>
                 </View>
             </View>
             <View style={{ marginBottom: 20 }}>
@@ -59,10 +57,10 @@ const Jadlodajnia = props => {
     );
 }
 
-function renderZestaw(zestaw) {
+function renderZestaw(zestaw, length) {
     if (zestaw.type === "DAILY")
         return (
-            <Zestaw id={zestaw.id} content={zestaw.content} danieStyle={{fontSize:16}}/>
+            <Zestaw id={zestaw.id} content={zestaw.content} danieStyle={{ fontSize: 16 }} />
         );
 }
 const styles = StyleSheet.create({

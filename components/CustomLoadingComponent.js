@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Animated, Easing, Modal } from 'react-native';
+import React from "react";
+import { View, Text, Animated, Easing, Modal } from 'react-native';
 import Colors from "../src/themes/colors";
-import dimensions from '../src/themes/dimensions';
-
 
 const CustomLoadingComponent = React.memo(function CustomLoadingComponent(props) {
     const spinValue = new Animated.Value(0);
@@ -64,8 +62,8 @@ const CustomLoadingComponent = React.memo(function CustomLoadingComponent(props)
             ]
         ).start(() => loadTextAnim())
     }
-        loaderImageAnim();
-        loadTextAnim();
+    loaderImageAnim();
+    loadTextAnim();
     const spin = spinValue.interpolate({
         inputRange: [0, 0.5, 1],
         outputRange: ['0deg', '360deg', '720deg']
@@ -105,7 +103,7 @@ const CustomLoadingComponent = React.memo(function CustomLoadingComponent(props)
                         style={{ transform: [{ rotate: spin }], width: 70, height: 70, bottom: bounce }}
                         source={require("../src/images/ikonka_v3.png")}
                     />
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop:40}}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 40 }}>
                         <Text style={{ color: Colors.primary, fontSize: 28 }}>Ładowanie</Text>
                         <Animated.Text style={{ color: Colors.primary, marginLeft: 3, fontSize: 28, opacity: opacity1 }}>.</Animated.Text>
                         <Animated.Text style={{ color: Colors.primary, marginLeft: 3, fontSize: 28, opacity: opacity2 }}>.</Animated.Text>
@@ -114,8 +112,6 @@ const CustomLoadingComponent = React.memo(function CustomLoadingComponent(props)
                 </View>
             </View>
         </Modal>);
-
-
 })
 
 

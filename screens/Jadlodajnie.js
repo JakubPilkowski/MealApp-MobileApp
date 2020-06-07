@@ -8,11 +8,7 @@ import ScreenStyle from "../src/themes/screenStyle";
 import Jadlodajnia from "../components/Jadlodajnia";
 import Connection from '../service/Connection';
 import CustomPicker from '../components/CustomPicker';
-import {
-    AntDesign,
-    Feather, Ionicons,
-    MaterialIcons
-} from 'react-native-vector-icons';
+import { AntDesign, Feather, Ionicons, MaterialIcons } from 'react-native-vector-icons';
 import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
 import IosButton from '../components/IosButton';
@@ -21,7 +17,7 @@ import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import PlaceHolder from '../components/PlaceHolder';
 import { SearchBar } from 'react-native-elements';
 import CustomMultiSelect from '../components/CustomMultiSelect';
-const { width, height } = Dimensions.get("screen");
+const { width } = Dimensions.get("screen");
 import PickerItem from '../models/PickerItem';
 
 
@@ -51,6 +47,7 @@ function JadlodajnieScreen({ navigation, route }) {
     const [errorType, setErrorType] = useState("default");
     const [localizationError, setLocalizationError] = useState("");
     const [searchBarFocus, setSearchBarFocus] = useState(false);
+    const [searchViewScrollEnabled, setSearchViewScrollEnabled] = useState(true);
     async function fetchData() {
         if (isLoading) {
             setTimeout(async function () {
@@ -129,7 +126,7 @@ function JadlodajnieScreen({ navigation, route }) {
         const res = Connection.getMiastaForWojewodztwo(wojewodztwo);
         res
             .then(res => {
-                setMiasta([new PickerItem("Wybierz miasto...", "default", 0, 0, 0)]);
+                setMiasta([new PickerItem("Wybierz miasto...", "default", 0, 0, 0)]);            
                 res.map((item) => {
                     setMiasta(miasta => [...miasta, new PickerItem(item.name, item.slug, item.latitude, item.longitude, item.zoom)]);
                 });
@@ -172,10 +169,10 @@ function JadlodajnieScreen({ navigation, route }) {
 
     async function reloadScreen() {
         const refresh = await AsyncStorage.getItem("refresh");
-            if (refresh === "true")
-                setIsLoading(true)
-            if (refresh === "false")
-                AsyncStorage.setItem('refresh', "true");
+        if (refresh === "true")
+            setIsLoading(true)
+        if (refresh === "false")
+            AsyncStorage.setItem('refresh', "true");
     }
 
     useEffect(() => {
@@ -338,6 +335,7 @@ function JadlodajnieScreen({ navigation, route }) {
                 <ScrollView style={{
                     width: '100%',
                 }}
+                    scrollEnabled={searchViewScrollEnabled}
                     contentContainerStyle={{
                         alignItems: 'center'
                     }}
@@ -346,17 +344,22 @@ function JadlodajnieScreen({ navigation, route }) {
                     <Text style={{ fontSize: 16, marginTop: 6, marginBottom: 6 }}>Nazwa Jadłodajnii</Text>
                     <View style={{ width: '85%', alignItems: 'center' }}>
                         <SearchBar
-                            onCancel={() => { setSearchResults([]); 
+                            onCancel={() => {
+                                setSearchViewScrollEnabled(true);
+                                setSearchResults([]);
                                 setSearchBarFocus(false);
                             }}
                             placeholder="Wyszukaj jadłodajnie..."
                             platform="android"
                             inputStyle={{ fontSize: 16 }}
-                            onFocus={() => { 
-                                applyFilter(searchViewValue) 
+                            onFocus={() => {
+                                setSearchViewScrollEnabled(false);
+                                applyFilter(searchViewValue)
                                 setSearchBarFocus(true);
                             }}
-                            onSubmitEditing={() => { setSearchResults([]) 
+                            onSubmitEditing={() => {
+                                setSearchViewScrollEnabled(true);
+                                setSearchResults([])
                                 setSearchBarFocus(false);
                             }}
                             containerStyle={{ borderRadius: dimensions.defaultBorderRadius }}
@@ -368,11 +371,13 @@ function JadlodajnieScreen({ navigation, route }) {
                             style={{
                                 height: searchResults.length * 40 <= 160 ? searchResults.length * 40 : 160,
                             }}
+                            
                             data={searchBarFocus ? searchResults : null} renderItem={({ item, index }) => {
                                 return (
                                     <TouchableNativeFeedback onPress={() => {
                                         setSearchViewValue(item.name)
                                         setSearchResults([]);
+                                        setSearchViewScrollEnabled(true);
                                         Keyboard.dismiss();
                                     }}
                                     >
@@ -469,9 +474,7 @@ const Jadlodajnie = props => {
     const Stack = createStackNavigator();
     return (
         <Stack.Navigator initialRouteName="Jadlodajnie" screenOptions={ScreenStyle}>
-            <Stack.Screen name="Jadlodajnie" component={JadlodajnieScreen} initialParams={{ drawerNavigation: props.navigation }}
-
-            />
+            <Stack.Screen name="Jadlodajnie" component={JadlodajnieScreen} initialParams={{ drawerNavigation: props.navigation }} />
             <Stack.Screen name="JadlodajnieWiecej" component={JadlodajnieWiecej}
                 options={{
                     headerStyle: {
@@ -479,7 +482,6 @@ const Jadlodajnie = props => {
                     },
                     cardStyleInterpolator: forFade,
                 }}
-
             />
         </Stack.Navigator>
     );
@@ -504,7 +506,6 @@ const styles = StyleSheet.create({
         fontSize: 16
     }
 });
-
 
 export default Jadlodajnie;
 

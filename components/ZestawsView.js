@@ -5,7 +5,7 @@ import dimensions from '../src/themes/dimensions';
 import Colors from '../src/themes/colors';
 import Zestaw from './Zestaw';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const ZestawsView = (props) => {
     const date = props.date.split('T');

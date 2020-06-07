@@ -7,15 +7,13 @@ import { FontAwesome, Feather } from 'react-native-vector-icons';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 
 const JadlodajnieLocalizationDetails = props => {
-
     const informacje = props.informacje;
-
     let adres;
     let kontakt;
     let godzinyOtwarcia;
 
     if (informacje.address !== "") {
-        adres = informacje.address;
+        adres = informacje.address + ", " + informacje.city;
     }
     else {
         adres = "Ta jadłodajnia nie udostępnia adresu";
@@ -28,8 +26,6 @@ const JadlodajnieLocalizationDetails = props => {
     else {
         kontakt = "Ta jadłodajnia nie udostępnia kontaktu";
     }
-
-
 
     if (informacje.openHoursList.length > 0) {
         godzinyOtwarcia = informacje.openHoursList.map((openHour) => renderGodzinyOtwarcia(openHour));
@@ -82,13 +78,13 @@ const JadlodajnieLocalizationDetails = props => {
             <View style={styles.infoBackground}>
 
                 <Text style={[styles.centerAlignText, { marginBottom: 6 }]}>Mapa</Text>
-                <View style={{borderWidth:1, borderColor: 'white'}}>
+                <View style={{ borderWidth: 1, borderColor: 'white' }}>
                     <MapView provider={PROVIDER_GOOGLE}
                         scrollEnabled={false}
                         rotateEnabled={false}
                         pitchEnabled={false}
                         zoomEnabled={false}
-                        style={{ height: 200}} initialRegion={{
+                        style={{ height: 200 }} initialRegion={{
                             latitude: informacje.latitude,
                             longitude: informacje.longitude,
                             longitudeDelta: 0.003,
@@ -115,7 +111,6 @@ function renderGodzinyOtwarcia(openHour) {
 }
 
 const styles = StyleSheet.create({
-
     infoBackground: {
         backgroundColor: Colors.colorTextWhite,
         marginHorizontal: 12,
@@ -137,7 +132,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 20,
     },
-
 });
 
 

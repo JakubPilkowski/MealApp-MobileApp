@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Platform, Picker, AsyncStorage, Image, TouchableNativeFeedback, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ImageBackground, Platform, AsyncStorage, Image, ActivityIndicator } from 'react-native';
 import Colors from '../src/themes/colors';
 import dimensions from '../src/themes/dimensions';
 import AndroidButton from '../components/AndroidButton';
@@ -11,8 +11,6 @@ import Validation from '../service/Validation';
 import PickerItem from '../models/PickerItem';
 import CustomPicker from '../components/CustomPicker';
 import { CommonActions } from '@react-navigation/native';
-import Axios from 'axios';
-// import * as CacheManager from 'react-native-http-cache';
 
 
 const WyborLokalizacji = props => {
@@ -121,7 +119,7 @@ const WyborLokalizacji = props => {
 
     async function getMiastaForWojewodztwo(wojewodztwo) {
         if (isLoading && wojewodztwa.length > 1) {
-            const res = Connection.getMiastaForWojewodztwo(wojewodztwo);         
+            const res = Connection.getMiastaForWojewodztwo(wojewodztwo);
             res
                 .then(res => {
                     setMiasta([new PickerItem("Wybierz miasto...", "default", 0, 0, 0)]);
@@ -207,7 +205,6 @@ const WyborLokalizacji = props => {
             </View>
         </ImageBackground>
     );
-
 }
 
 export default WyborLokalizacji;
