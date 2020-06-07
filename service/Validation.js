@@ -8,16 +8,16 @@ export default class Validation {
             "";
     }
     static passwordVerification(text) {
-        const reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+        const reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,24}$/;
         return !reg.test(text.trim()) ?
             "Hasło musi zawierać co najmniej 8 znaków, małą i dużą literę oraz cyfrę \n" :
             "";
     }
 
     static loginVerification(text) {
-        const reg = /^[a-zA-Z0-9_]{8,}$/
+        const reg = /^.{4,20}$/
         return !reg.test(text.trim()) ?
-            "Login musi zawierać co najmniej 8 znaków i nie może zawierać znaków specjalnych \n" :
+            "Login musi zawierać co najmniej 4 znaki\n" :
             "";
     }
     static wojewodztwoVerification(text) {

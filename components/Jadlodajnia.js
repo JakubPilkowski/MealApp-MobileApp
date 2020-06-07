@@ -35,7 +35,7 @@ const Jadlodajnia = props => {
     }
     else {
         dailyContent =
-            <Text style={{fontSize: 16, textAlign:'center'}}>Ta jadłodajnia nie udostępnia dzisiejszych zestawów</Text>
+            <Text style={{fontSize: 16, textAlign:'center'}}>Ta jadłodajnia nie udostępnia zestawów na dzisiaj</Text>
     }
 
     return (

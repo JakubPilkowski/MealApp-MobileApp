@@ -46,6 +46,7 @@ function EdytujScreen({ navigation, route }) {
         }
     }, [isLoading]);
     async function fetchStorage() {
+        AsyncStorage.setItem("refresh", "false");
         const wojewodztwoValue = await AsyncStorage.getItem("wojewodztwo");
         const miastoValue = await AsyncStorage.getItem("miasto");
         const selectedImage = await AsyncStorage.getItem("avatar");
@@ -183,7 +184,7 @@ function EdytujScreen({ navigation, route }) {
         }
     }
     async function verifyFields() {
-        setTimeout(async function () {
+            await AsyncStorage.setItem('refresh', "true");
             await AsyncStorage.setItem('wojewodztwo', wojewodztwoField);
             await AsyncStorage.setItem('miasto', miastoField);
             await AsyncStorage.setItem('latitude', latitude.toString());
@@ -191,7 +192,6 @@ function EdytujScreen({ navigation, route }) {
             await AsyncStorage.setItem('zoom', zoom.toString());
             setIsFieldLoading(false);
             navigation.goBack();
-        }, 1000);
     }
     let addImageButton;
     let saveSettingsButton;

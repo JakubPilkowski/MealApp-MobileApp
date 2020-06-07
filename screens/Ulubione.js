@@ -42,9 +42,15 @@ function UlubioneScreen({ navigation, route }) {
     }
 
     navigation.addListener("focus", ()=>{
-        setIsLoading(true);      
+        reloadScreen();      
     });
-
+    async function reloadScreen() {
+        const refresh = await AsyncStorage.getItem("refresh");
+            if (refresh === "true")
+                setIsLoading(true)
+            if (refresh === "false")
+                AsyncStorage.setItem('refresh', "true");
+    }
     useEffect(() => {
         fetchData();
     }, [isLoading, ulubioneJadlodajnie.length]);

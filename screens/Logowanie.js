@@ -50,8 +50,12 @@ function LogowanieScreen({ navigation }) {
         )
     });
     navigation.addListener("focus", () => {
+        reloadScreen();
         setButtonEnabled(true);
     })
+    async function reloadScreen() {
+        AsyncStorage.setItem("refresh", "false");
+    }
     if (Platform.OS === "android" && Platform.Version >= 21) {
         loginButton =
             <AndroidButton text="Zaloguj się" containerStyle={{ width: "60%" }} buttonStyle={{ paddingVertical: 9 }}
@@ -113,12 +117,10 @@ function LogowanieScreen({ navigation }) {
     async function verifyLogin() {
         setTimeout(async function () {
             {
-                let errors = "";
-                if (loginField === "PelnyGar") {
-                    errors = errors + "Taki login już istnieje \n";
-                }
-                if (errors.length === 0) {
                     setIsLoading(false);
+                    setButtonEnabled(true);
+                    setLoginField("");
+                    setPasswordField("");
                     // await AsyncStorage.setItem('login', loginField);
                     // await AsyncStorage.setItem('email', );
                     // navigation.dispatch({
@@ -129,8 +131,6 @@ function LogowanieScreen({ navigation }) {
                     //         ]
                     //     }),
                     // });
-                }
-                setVerifyLoginError(errors);
             }
         }, 1000);
     }
@@ -213,6 +213,7 @@ function LogowanieScreen({ navigation }) {
                         onFocus={onFirstInputFocus}
                         onSubmitEditing={handleFirstInputSubmit}
                         blurOnSubmit={false}
+                        value={loginField}
                     />
                     <Text style={{ fontSize: 14, color: 'red', width: "75%" }}>{loginError}</Text>
                     <Text style={styles.title}>Hasło</Text>
@@ -228,6 +229,7 @@ function LogowanieScreen({ navigation }) {
                                 }
                             }
                         }}
+                        value={passwordField}
                         onSubmitEditing={handleSecondInputSubmit}
                     />
                     <Text style={{ fontSize: 14, color: 'red', width: "75%" }}>{passwordError}</Text>
@@ -256,10 +258,9 @@ function LogowanieScreen({ navigation }) {
                             </View>
                         </View>
                     </View>
-                    <Text style={{ fontSize: 14, color: 'red', width: "75%" }}>{verifyLoginError}</Text>
                     <Text style={{ color: colors.colorTextDark, fontSize: 16, marginVertical: dimensions.defaultSmallMargin }}>Nie masz konta? {'\n'} Zarejestruj się</Text>
                     {registerButton}
-                    <View style={{ flexDirection: 'row', marginVertical: dimensions.defaultSmallMargin }}>
+                    <View style={{ flexDirection: 'row', marginVertical: dimensions.defaultHugeMargin }}>
                         <Text style={{ textAlign: 'center', color: colors.colorTextDark, fontSize: 16 }}>Zapomniałeś hasła?</Text>
                         <TouchableOpacity onPress={() => { navigation.navigate("ZapomnialemHasla") }}>
                             <Text style={{ textAlign: 'center', color: colors.colorTextDark, fontSize: 16, textDecorationLine: 'underline' }}>Kliknij tutaj</Text>

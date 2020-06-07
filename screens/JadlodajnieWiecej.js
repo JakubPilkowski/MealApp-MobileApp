@@ -1,60 +1,61 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, FlatList, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid, BackHandler, NativeModules, Platform } from 'react-native';
+import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, FlatList, TouchableOpacity, Dimensions, ImageBackground, ToastAndroid, BackHandler, NativeModules, Platform, AsyncStorage } from 'react-native';
 import Colors from "../src/themes/colors";
 import dimensions from '../src/themes/dimensions';
 const { StatusBarManager } = NativeModules;
 const HEADER_EXPANDED_HEIGHT = 225 + StatusBarManager.HEIGHT;
 const HEADER_COLLAPSED_HEIGHT = 56 + StatusBarManager.HEIGHT;
-import { Ionicons, FontAwesome, Feather, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
+import {FontAwesome, Feather, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import Connection from '../service/Connection';
 import PlaceHolder from "../components/PlaceHolder";
 import IconWithAction from '../components/IconWithAction';
 import CustomLoadingComponent from '../components/CustomLoadingComponent';
 import JadlodajnieLocalizationDetails from '../components/JadlodajnieLocalizationDetails';
 import ZestawsView from '../components/ZestawsView';
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const JadlodajnieWiecej = props => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [dataSource, setDataSource] = useState([]);
-    const { jadlodajniaSlug, wojewodztwo, miasto } = props.route.params;
+    const { jadlodajniaSlug, wojewodztwo, miasto, } = props.route.params;
     const [scrollY, setScrollY] = useState(new Animated.Value(0));
     const scrollRef = useRef(null);
     const [iconColor, setIconColor] = useState("white");
     const [isFavourite, setIsFavourite] = useState(false);
-    const [scrollIndex, setScrollIndex] = useState();
+    const [scrollIndex, setScrollIndex] = useState(0);
     const [favouriteButtonEnabled, setFavouriteButtonEnabled] = useState(true);
     const colors = ['crimson', 'darkgreen', 'darkmagenta', 'darkorange', 'darkturquoise', 'hotpink'];
     const [display, setDisplay] = useState(true);
     const [error, setError] = useState("");
     const [errorType, setErrorType] = useState("default");
     async function fetchData() {
-        // if (isLoading) {
-            // setTimeout(async function () {
-                const res = Connection.getSzczegolyJadlodajnia(jadlodajniaSlug, wojewodztwo, miasto);
-                res
-                    .then(res => {
-                        setDataSource(res);
-                        const date = new Date().toJSON().slice(0, 10);
-                        res.menuList.map((data, dataIndex) => {
-                            const splitedDate = data.date.split("T");
-                            if (splitedDate[0] == date)
-                                setScrollIndex(dataIndex);
-                        })
-                        setIsLoading(false);
-                    })
-                    .catch(err => {
-                        if (err === "Brak internetu")
-                            setErrorType("network")
-                        else
-                            setErrorType("default")
-                        setError(err);
-                        setIsLoading(false);
-                    });
-            // }, 200);
-        // }
+        AsyncStorage.setItem("refresh", "false");
+        const res = Connection.getSzczegolyJadlodajnia(jadlodajniaSlug, wojewodztwo, miasto);
+        res
+            .then(res => {
+                setDataSource(res);
+                const date = new Date().toJSON().slice(0, 10);
+                res.menuList.map((data, dataIndex) => {
+                    const splitedDate = data.date.split("T");
+                    if (splitedDate[0] == date)
+                        setScrollIndex(dataIndex);
+                })
+                setIsLoading(false);
+            })
+            .catch(err => {
+                if (err === "Brak internetu")
+                    setErrorType("network")
+                else
+                    setErrorType("default")
+                setError(err);
+                setIsLoading(false);
+            });
+           
     }
+    props.navigation.dangerouslyGetParent().setOptions({
+        gestureEnabled: false
+    })
 
     useEffect(() => {
         if (isLoading) {
@@ -119,7 +120,7 @@ const JadlodajnieWiecej = props => {
                 staticContent =
                     <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                         <MaterialCommunityIcons name="food-off" color={Colors.primary} size={56} />
-                        <Text style={{ fontSize: 16, textAlign: 'center' }}>Ta jadłodajnia nie udostępnia menu głównego</Text>
+                        <Text style={{ fontSize: 16, textAlign: 'center' }}>Ta jadłodajnia nie udostępnia menu głównego na dzisiaj</Text>
                     </View>
             }
             else {
@@ -131,7 +132,6 @@ const JadlodajnieWiecej = props => {
                     <View style={{ flex: 1, flexDirection: 'row' }}>
                         <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingRight: 6 }}>
                             <TouchableOpacity onPress={() => {
-
                                 if (scrollIndex !== 0) {
                                     let index = scrollIndex - 1;
                                     setScrollIndex(index);
@@ -175,15 +175,9 @@ const JadlodajnieWiecej = props => {
                 dailyContent =
                     <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                         <MaterialCommunityIcons name="food-off" color={Colors.primary} size={56} />
-                        <Text style={{ fontSize: 16, textAlign: 'center' }}>Ta jadłodajnia nie udostępnia aktualności</Text>
+                        <Text style={{ fontSize: 16, textAlign: 'center' }}>Ta jadłodajnia nie udostępnia aktualności na dzisiaj</Text>
                     </View>
             }
-            // if(isFavourite){
-            //     setIconColor("gold");
-            // }
-            // else{
-            //     setIconColor("white");
-            // }
 
             content =
                 <View>
@@ -203,6 +197,7 @@ const JadlodajnieWiecej = props => {
                             content={<AntDesign name="arrowleft" size={28} color={Colors.colorTextWhite}></AntDesign>}
                             onClick={() => {
                                 setDisplay(false);
+                                // onGoBack();
                                 props.navigation.goBack();
                             }}
                         />
